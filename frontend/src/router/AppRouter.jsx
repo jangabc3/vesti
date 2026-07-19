@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from '@/layouts/AppLayout'
 import ClothesCreatePage from '@/pages/clothes/ClothesCreatePage'
+import ClothesDetailPage from '@/pages/clothes/ClothesDetailPage'
 import ClothesEditPage from '@/pages/clothes/ClothesEditPage'
 import ClosetPage from '@/pages/closet/ClosetPage'
 import HistoryCreatePage from '@/pages/history/HistoryCreatePage'
@@ -21,6 +22,7 @@ function AppRouter() {
         <Route path="/closet" element={<ClosetPage />} />
         <Route path="/clothes/new" element={<ClothesCreatePage />} />
         <Route path="/clothes/:clothesId/edit" element={<ClothesEditPage />} />
+        <Route path="/clothes/:clothesId" element={<ClothesDetailPage />} />
         <Route path="/outfits" element={<OutfitPage />} />
         <Route path="/outfits/new" element={<OutfitCreatePage />} />
         <Route path="/outfits/:outfitId/edit" element={<OutfitEditPage />} />
