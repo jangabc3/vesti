@@ -1,27 +1,14 @@
-body {
-  background: #f3f4f6;
-}
-
-#root {
-  width: 100%;
-  max-width: none;
-  min-height: 100vh;
-  margin: 0;
-  border: 0;
-  text-align: initial;
-}
-
 .app-layout {
   width: 100%;
-  max-width: 430px;
+  max-width: var(--app-max-width);
   min-height: 100vh;
   margin: 0 auto;
-  box-sizing: border-box;
-  background: #fff;
+  background: var(--color-surface);
 }
 
 .app-layout__content {
   min-height: 100vh;
-  padding-bottom: calc(64px + env(safe-area-inset-bottom));
-  box-sizing: border-box;
+  padding-bottom: calc(
+    var(--bottom-nav-height) + env(safe-area-inset-bottom)
+  );
 }
