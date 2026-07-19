@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+import ToastMessage from '@/components/common/ToastMessage'
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
 import { todayData } from '@/mocks/today'
@@ -78,10 +79,14 @@ function OutfitPreview({ outfit }) {
 
 function TodayPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { weather } = todayData
   const initialRecommendation = getRecommendedOutfit(weather.temperature)
   const [recommendedOutfitId, setRecommendedOutfitId] = useState(
     initialRecommendation?.id ?? null,
+  )
+  const [notification, setNotification] = useState(
+    location.state?.message ?? '',
   )
 
   const currentDate = new Date()
@@ -124,6 +129,10 @@ function TodayPage() {
 
   return (
     <div className="today-page">
+      <ToastMessage
+        message={notification}
+        onClose={() => setNotification('')}
+      />
       <header className="today-page__header">
         <p className="today-page__date">{formatDate(currentDate, true)}</p>
         <h1>좋은 아침이에요</h1>

@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import FilterChip from '@/components/common/FilterChip'
+import EmptyState from '@/components/common/EmptyState'
+import PageHeader from '@/components/common/PageHeader'
+import { CLOTHES_CATEGORIES as categories } from '@/constants/clothesOptions'
+import { OUTFIT_OCCASIONS as occasions, OUTFIT_SEASONS as seasons } from '@/constants/outfitOptions'
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
 import './OutfitEditPage.css'
-
-const occasions = ['일상', '출근', '학교', '데이트', '운동', '여행', '모임']
-const seasons = ['봄', '여름', '가을', '겨울']
-const categories = ['상의', '하의', '아우터', '신발', '가방', '액세서리']
 
 function OutfitEditPage() {
   const navigate = useNavigate()
@@ -88,49 +89,33 @@ function OutfitEditPage() {
 
   if (!outfit) {
     return (
-      <div className="outfit-edit-empty">
-        <div>
-          <h1>수정할 코디를 찾을 수 없습니다.</h1>
-          <p>삭제되었거나 존재하지 않는 코디입니다.</p>
-          <button type="button" onClick={() => navigate('/outfits')}>
-            코디 목록으로 돌아가기
-          </button>
-        </div>
-      </div>
+      <EmptyState
+        className="outfit-edit-empty"
+        title="수정할 코디를 찾을 수 없습니다."
+        description="삭제되었거나 존재하지 않는 코디입니다."
+        buttonText="코디 목록으로 돌아가기"
+        onButtonClick={() => navigate('/outfits')}
+      />
     )
   }
 
   return (
     <div className="outfit-edit">
-      <header className="outfit-edit__header">
-        <button
-          type="button"
-          className="outfit-edit__back-button"
-          onClick={handleBack}
-          aria-label="뒤로가기"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+      <PageHeader
+        className="outfit-edit__header"
+        title="코디 수정"
+        onBack={handleBack}
+        action={
+          <button
+            type="submit"
+            form="outfit-edit-form"
+            className="outfit-edit__save-button"
+            disabled={isSaveDisabled}
           >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <h1>코디 수정</h1>
-        <button
-          type="submit"
-          form="outfit-edit-form"
-          className="outfit-edit__save-button"
-          disabled={isSaveDisabled}
-        >
-          {isSaving ? '저장 중' : '저장'}
-        </button>
-      </header>
+            {isSaving ? '저장 중' : '저장'}
+          </button>
+        }
+      />
 
       <form
         id="outfit-edit-form"
@@ -154,15 +139,13 @@ function OutfitEditPage() {
           <legend>상황 <span aria-hidden="true">*</span></legend>
           <div className="outfit-edit__chips">
             {occasions.map((item) => (
-              <button
+              <FilterChip
                 key={item}
-                type="button"
                 className={`outfit-edit__chip${occasion === item ? ' outfit-edit__chip--selected' : ''}`}
+                label={item}
+                selected={occasion === item}
                 onClick={() => setOccasion(item)}
-                aria-pressed={occasion === item}
-              >
-                {item}
-              </button>
+              />
             ))}
           </div>
         </fieldset>
@@ -171,15 +154,13 @@ function OutfitEditPage() {
           <legend>계절 <span aria-hidden="true">*</span></legend>
           <div className="outfit-edit__chips">
             {seasons.map((item) => (
-              <button
+              <FilterChip
                 key={item}
-                type="button"
                 className={`outfit-edit__chip${season === item ? ' outfit-edit__chip--selected' : ''}`}
+                label={item}
+                selected={season === item}
                 onClick={() => setSeason(item)}
-                aria-pressed={season === item}
-              >
-                {item}
-              </button>
+              />
             ))}
           </div>
         </fieldset>

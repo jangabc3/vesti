@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import EmptyState from '@/components/common/EmptyState'
+import ToastMessage from '@/components/common/ToastMessage'
 import { clothes } from '@/mocks/clothes'
 import { histories } from '@/mocks/history'
 import { outfits } from '@/mocks/outfits'
@@ -81,13 +83,6 @@ function HistoryPage() {
     location.state?.message ?? '',
   )
 
-  useEffect(() => {
-    if (!notification) return undefined
-
-    const timer = window.setTimeout(() => setNotification(''), 2000)
-    return () => window.clearTimeout(timer)
-  }, [notification])
-
   const year = currentMonth.getFullYear()
   const month = currentMonth.getMonth()
   const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`
@@ -160,11 +155,11 @@ function HistoryPage() {
 
   return (
     <div className="history-page">
-      {notification && (
-        <div className="history-page__notification" role="status">
-          {notification}
-        </div>
-      )}
+      <ToastMessage
+        className="history-page__notification"
+        message={notification}
+        onClose={() => setNotification('')}
+      />
 
       <header className="history-page__header">
         <div>
@@ -177,13 +172,13 @@ function HistoryPage() {
       </header>
 
       {histories.length === 0 ? (
-        <div className="history-page__empty history-page__empty--all">
-          <h2>아직 착용 기록이 없습니다</h2>
-          <p>오늘 입은 코디를 기록해보세요.</p>
-          <button type="button" onClick={() => navigate('/history/new')}>
-            첫 기록 추가하기
-          </button>
-        </div>
+        <EmptyState
+          className="history-page__empty history-page__empty--all"
+          title="아직 착용 기록이 없습니다"
+          description="오늘 입은 코디를 기록해보세요."
+          buttonText="첫 기록 추가하기"
+          onButtonClick={() => navigate('/history/new')}
+        />
       ) : (
         <>
           <section className="history-calendar" aria-label="착용 기록 달력">

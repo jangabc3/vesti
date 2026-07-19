@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import EmptyState from '@/components/common/EmptyState'
+import FavoriteButton from '@/components/common/FavoriteButton'
+import PageHeader from '@/components/common/PageHeader'
+import ToastMessage from '@/components/common/ToastMessage'
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
 import './OutfitDetailPage.css'
@@ -15,6 +19,7 @@ const formatDate = (date) =>
 
 function OutfitDetailPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { outfitId } = useParams()
   const menuRef = useRef(null)
   const outfit = outfits.find((item) => String(item.id) === outfitId)
@@ -25,6 +30,9 @@ function OutfitDetailPage() {
     : []
   const [isFavorite, setIsFavorite] = useState(outfit?.favorite ?? false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [notification, setNotification] = useState(
+    location.state?.message ?? '',
+  )
 
   useEffect(() => {
     if (!isMenuOpen) return undefined
@@ -60,15 +68,13 @@ function OutfitDetailPage() {
 
   if (!outfit) {
     return (
-      <div className="outfit-detail-empty">
-        <div>
-          <h1>코디를 찾을 수 없습니다</h1>
-          <p>삭제되었거나 존재하지 않는 코디입니다.</p>
-          <button type="button" onClick={() => navigate('/outfits')}>
-            코디 목록으로 돌아가기
-          </button>
-        </div>
-      </div>
+      <EmptyState
+        className="outfit-detail-empty"
+        title="코디를 찾을 수 없습니다"
+        description="삭제되었거나 존재하지 않는 코디입니다."
+        buttonText="코디 목록으로 돌아가기"
+        onButtonClick={() => navigate('/outfits')}
+      />
     )
   }
 
@@ -76,27 +82,16 @@ function OutfitDetailPage() {
 
   return (
     <div className="outfit-detail">
-      <header className="outfit-detail__header">
-        <button
-          type="button"
-          className="outfit-detail__icon-button"
-          onClick={() => navigate(-1)}
-          aria-label="뒤로가기"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <h1>코디 정보</h1>
-        <div className="outfit-detail__menu-wrap" ref={menuRef}>
+      <ToastMessage
+        message={notification}
+        onClose={() => setNotification('')}
+      />
+      <PageHeader
+        className="outfit-detail__header"
+        title="코디 정보"
+        onBack={() => navigate(-1)}
+        action={
+          <div className="outfit-detail__menu-wrap" ref={menuRef}>
           <button
             type="button"
             className="outfit-detail__icon-button"
@@ -134,8 +129,9 @@ function OutfitDetailPage() {
               </button>
             </div>
           )}
-        </div>
-      </header>
+          </div>
+        }
+      />
 
       <main className="outfit-detail__content">
         <section className="outfit-detail__hero">
@@ -169,25 +165,12 @@ function OutfitDetailPage() {
               <span>코디 이미지가 없습니다.</span>
             </div>
           )}
-          <button
-            type="button"
+          <FavoriteButton
             className={`outfit-detail__favorite${isFavorite ? ' outfit-detail__favorite--active' : ''}`}
+            active={isFavorite}
             onClick={() => setIsFavorite((current) => !current)}
-            aria-label={`즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
-            aria-pressed={isFavorite}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill={isFavorite ? 'currentColor' : 'none'}
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z" />
-            </svg>
-          </button>
+            ariaLabel={`즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
+          />
         </section>
 
         <section className="outfit-detail__summary">

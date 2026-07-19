@@ -1,9 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FavoriteButton from '@/components/common/FavoriteButton'
+import FilterChip from '@/components/common/FilterChip'
+import SearchBar from '@/components/common/SearchBar'
+import { CLOTHES_CATEGORIES } from '@/constants/clothesOptions'
 import { clothes } from '@/mocks/clothes'
 import './ClosetPage.css'
 
-const categories = ['전체', '상의', '하의', '아우터', '신발', '가방', '액세서리']
+const categories = ['전체', ...CLOTHES_CATEGORIES]
 
 function ClosetPage() {
   const navigate = useNavigate()
@@ -56,38 +60,23 @@ function ClosetPage() {
         </button>
       </header>
 
-      <div className="closet-page__search">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <circle cx="11" cy="11" r="7" />
-          <path d="m20 20-4-4" />
-        </svg>
-        <input
-          type="search"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="옷 이름이나 브랜드 검색"
-          aria-label="옷 검색"
-        />
-      </div>
+      <SearchBar
+        className="closet-page__search"
+        value={searchTerm}
+        onChange={(event) => setSearchTerm(event.target.value)}
+        placeholder="옷 이름이나 브랜드 검색"
+        ariaLabel="옷 검색"
+      />
 
       <div className="closet-page__filters" aria-label="카테고리 필터">
         {categories.map((category) => (
-          <button
+          <FilterChip
             key={category}
-            type="button"
             className={`closet-page__filter${selectedCategory === category ? ' closet-page__filter--active' : ''}`}
+            label={category}
+            selected={selectedCategory === category}
             onClick={() => setSelectedCategory(category)}
-            aria-pressed={selectedCategory === category}
-          >
-            {category}
-          </button>
+          />
         ))}
       </div>
 
@@ -109,28 +98,13 @@ function ClosetPage() {
               >
                 <div className="closet-card__image-wrap">
                   <img src={item.image} alt={`${item.name} 이미지`} />
-                  <button
-                    type="button"
+                  <FavoriteButton
                     className={`closet-card__favorite${isFavorite ? ' closet-card__favorite--active' : ''}`}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      toggleFavorite(item.id)
-                    }}
-                    aria-label={`${item.name} 즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
-                    aria-pressed={isFavorite}
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill={isFavorite ? 'currentColor' : 'none'}
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.7-7.5 1.1-1.1a5.5 5.5 0 0 0 0-7.8Z" />
-                    </svg>
-                  </button>
+                    active={isFavorite}
+                    onClick={() => toggleFavorite(item.id)}
+                    ariaLabel={`${item.name} 즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
+                    stopPropagation
+                  />
                 </div>
                 <div className="closet-card__content">
                   <h2>{item.name}</h2>

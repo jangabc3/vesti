@@ -1,11 +1,21 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import EmptyState from '@/components/common/EmptyState'
+import FavoriteButton from '@/components/common/FavoriteButton'
+import FilterChip from '@/components/common/FilterChip'
+import SearchBar from '@/components/common/SearchBar'
+import ToastMessage from '@/components/common/ToastMessage'
+import {
+  OUTFIT_OCCASIONS,
+  OUTFIT_SEASONS,
+  OUTFIT_SORT_OPTIONS,
+} from '@/constants/outfitOptions'
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
 import './OutfitPage.css'
 
-const occasions = ['전체', '일상', '출근', '학교', '데이트', '운동', '여행', '모임']
-const seasons = ['전체', '봄', '여름', '가을', '겨울']
+const occasions = ['전체', ...OUTFIT_OCCASIONS]
+const seasons = ['전체', ...OUTFIT_SEASONS]
 
 const getTime = (date) => (date ? new Date(date).getTime() : 0)
 
@@ -60,13 +70,6 @@ function OutfitPage() {
   const [notification, setNotification] = useState(
     location.state?.message ?? '',
   )
-
-  useEffect(() => {
-    if (!notification) return undefined
-
-    const timer = window.setTimeout(() => setNotification(''), 2000)
-    return () => window.clearTimeout(timer)
-  }, [notification])
 
   const normalizedSearch = searchTerm.trim().toLocaleLowerCase()
   const filteredOutfits = outfits
@@ -125,11 +128,11 @@ function OutfitPage() {
 
   return (
     <div className="outfit-page">
-      {notification && (
-        <div className="outfit-page__notification" role="status">
-          {notification}
-        </div>
-      )}
+      <ToastMessage
+        className="outfit-page__notification"
+        message={notification}
+        onClose={() => setNotification('')}
+      />
 
       <header className="outfit-page__header">
         <div>
@@ -156,49 +159,34 @@ function OutfitPage() {
       </header>
 
       {outfits.length === 0 ? (
-        <div className="outfit-page__empty">
-          <h2>아직 등록된 코디가 없습니다</h2>
-          <p>첫 번째 코디를 만들어보세요.</p>
-          <button type="button" onClick={() => navigate('/outfits/new')}>
-            코디 만들기
-          </button>
-        </div>
+        <EmptyState
+          className="outfit-page__empty"
+          title="아직 등록된 코디가 없습니다"
+          description="첫 번째 코디를 만들어보세요."
+          buttonText="코디 만들기"
+          onButtonClick={() => navigate('/outfits/new')}
+        />
       ) : (
         <>
-          <div className="outfit-page__search">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-4-4" />
-            </svg>
-            <input
-              type="search"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="코디 이름 검색"
-              aria-label="코디 검색"
-            />
-          </div>
+          <SearchBar
+            className="outfit-page__search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="코디 이름 검색"
+            ariaLabel="코디 검색"
+          />
 
           <section className="outfit-page__filter-section">
             <h2>상황</h2>
             <div className="outfit-page__chips">
               {occasions.map((item) => (
-                <button
+                <FilterChip
                   key={item}
-                  type="button"
                   className={`outfit-page__chip${occasionFilter === item ? ' outfit-page__chip--active' : ''}`}
+                  label={item}
+                  selected={occasionFilter === item}
                   onClick={() => setOccasionFilter(item)}
-                  aria-pressed={occasionFilter === item}
-                >
-                  {item}
-                </button>
+                />
               ))}
             </div>
           </section>
@@ -207,15 +195,13 @@ function OutfitPage() {
             <h2>계절</h2>
             <div className="outfit-page__chips">
               {seasons.map((item) => (
-                <button
+                <FilterChip
                   key={item}
-                  type="button"
                   className={`outfit-page__chip${seasonFilter === item ? ' outfit-page__chip--active' : ''}`}
+                  label={item}
+                  selected={seasonFilter === item}
                   onClick={() => setSeasonFilter(item)}
-                  aria-pressed={seasonFilter === item}
-                >
-                  {item}
-                </button>
+                />
               ))}
             </div>
           </section>
@@ -235,10 +221,11 @@ function OutfitPage() {
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value)}
               >
-                <option value="latest">최신순</option>
-                <option value="worn">최근 착용순</option>
-                <option value="name">이름순</option>
-                <option value="favorite">즐겨찾기 우선</option>
+                {OUTFIT_SORT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </label>
           </div>
@@ -266,28 +253,13 @@ function OutfitPage() {
                         clothesIds={outfit.clothesIds}
                         name={outfit.name}
                       />
-                      <button
-                        type="button"
+                      <FavoriteButton
                         className={`outfit-card__favorite${isFavorite ? ' outfit-card__favorite--active' : ''}`}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          toggleFavorite(outfit.id)
-                        }}
-                        aria-label={`${outfit.name} 즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
-                        aria-pressed={isFavorite}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill={isFavorite ? 'currentColor' : 'none'}
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z" />
-                        </svg>
-                      </button>
+                        active={isFavorite}
+                        onClick={() => toggleFavorite(outfit.id)}
+                        ariaLabel={`${outfit.name} 즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
+                        stopPropagation
+                      />
                     </div>
                     <div className="outfit-card__content">
                       <h2>{outfit.name}</h2>
@@ -299,13 +271,13 @@ function OutfitPage() {
               })}
             </div>
           ) : (
-            <div className="outfit-page__empty">
-              <h2>조건에 맞는 코디가 없습니다</h2>
-              <p>검색어나 필터를 변경해보세요.</p>
-              <button type="button" onClick={resetConditions}>
-                조건 초기화
-              </button>
-            </div>
+            <EmptyState
+              className="outfit-page__empty"
+              title="조건에 맞는 코디가 없습니다"
+              description="검색어나 필터를 변경해보세요."
+              buttonText="조건 초기화"
+              onButtonClick={resetConditions}
+            />
           )}
         </>
       )}

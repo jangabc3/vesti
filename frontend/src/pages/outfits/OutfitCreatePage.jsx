@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import FilterChip from '@/components/common/FilterChip'
+import PageHeader from '@/components/common/PageHeader'
+import { CLOTHES_CATEGORIES as categories } from '@/constants/clothesOptions'
+import { OUTFIT_OCCASIONS as occasions, OUTFIT_SEASONS as seasons } from '@/constants/outfitOptions'
 import { clothes } from '@/mocks/clothes'
 import './OutfitCreatePage.css'
-
-const occasions = ['일상', '출근', '학교', '데이트', '운동', '여행', '모임']
-const seasons = ['봄', '여름', '가을', '겨울']
-const categories = ['상의', '하의', '아우터', '신발', '가방', '액세서리']
 
 function OutfitCreatePage() {
   const navigate = useNavigate()
@@ -75,35 +75,21 @@ function OutfitCreatePage() {
 
   return (
     <div className="outfit-create">
-      <header className="outfit-create__header">
-        <button
-          type="button"
-          className="outfit-create__back-button"
-          onClick={handleBack}
-          aria-label="뒤로가기"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+      <PageHeader
+        className="outfit-create__header"
+        title="코디 만들기"
+        onBack={handleBack}
+        action={
+          <button
+            type="submit"
+            form="outfit-create-form"
+            className="outfit-create__save-button"
+            disabled={isSaveDisabled}
           >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <h1>코디 만들기</h1>
-        <button
-          type="submit"
-          form="outfit-create-form"
-          className="outfit-create__save-button"
-          disabled={isSaveDisabled}
-        >
-          {isSaving ? '저장 중' : '저장'}
-        </button>
-      </header>
+            {isSaving ? '저장 중' : '저장'}
+          </button>
+        }
+      />
 
       <form
         id="outfit-create-form"
@@ -127,15 +113,13 @@ function OutfitCreatePage() {
           <legend>상황 <span aria-hidden="true">*</span></legend>
           <div className="outfit-create__chips">
             {occasions.map((item) => (
-              <button
+              <FilterChip
                 key={item}
-                type="button"
                 className={`outfit-create__chip${occasion === item ? ' outfit-create__chip--selected' : ''}`}
+                label={item}
+                selected={occasion === item}
                 onClick={() => setOccasion(item)}
-                aria-pressed={occasion === item}
-              >
-                {item}
-              </button>
+              />
             ))}
           </div>
         </fieldset>
@@ -144,15 +128,13 @@ function OutfitCreatePage() {
           <legend>계절 <span aria-hidden="true">*</span></legend>
           <div className="outfit-create__chips">
             {seasons.map((item) => (
-              <button
+              <FilterChip
                 key={item}
-                type="button"
                 className={`outfit-create__chip${season === item ? ' outfit-create__chip--selected' : ''}`}
+                label={item}
+                selected={season === item}
                 onClick={() => setSeason(item)}
-                aria-pressed={season === item}
-              >
-                {item}
-              </button>
+              />
             ))}
           </div>
         </fieldset>

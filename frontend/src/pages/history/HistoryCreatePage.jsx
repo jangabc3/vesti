@@ -1,11 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import EmptyState from '@/components/common/EmptyState'
+import FilterChip from '@/components/common/FilterChip'
+import PageHeader from '@/components/common/PageHeader'
+import SearchBar from '@/components/common/SearchBar'
+import { OUTFIT_OCCASIONS, OUTFIT_SEASONS } from '@/constants/outfitOptions'
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
 import './HistoryCreatePage.css'
 
-const occasions = ['전체', '일상', '출근', '학교', '데이트', '운동', '여행', '모임']
-const seasons = ['전체', '봄', '여름', '가을', '겨울']
+const occasions = ['전체', ...OUTFIT_OCCASIONS]
+const seasons = ['전체', ...OUTFIT_SEASONS]
 const weatherConditions = ['맑음', '흐림', '비', '눈', '바람', '기타']
 
 const toDateInputValue = (date) => {
@@ -120,35 +125,21 @@ function HistoryCreatePage() {
 
   return (
     <div className="history-create">
-      <header className="history-create__header">
-        <button
-          type="button"
-          className="history-create__back-button"
-          onClick={handleBack}
-          aria-label="뒤로가기"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+      <PageHeader
+        className="history-create__header"
+        title="기록 추가"
+        onBack={handleBack}
+        action={
+          <button
+            type="submit"
+            form="history-create-form"
+            className="history-create__save-button"
+            disabled={isSaveDisabled}
           >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <h1>기록 추가</h1>
-        <button
-          type="submit"
-          form="history-create-form"
-          className="history-create__save-button"
-          disabled={isSaveDisabled}
-        >
-          {isSaving ? '저장 중' : '저장'}
-        </button>
-      </header>
+            {isSaving ? '저장 중' : '저장'}
+          </button>
+        }
+      />
 
       <form
         id="history-create-form"
@@ -195,49 +186,34 @@ function HistoryCreatePage() {
           </div>
 
           {outfits.length === 0 ? (
-            <div className="history-create__empty">
-              <h3>등록된 코디가 없습니다</h3>
-              <p>먼저 코디를 만들어주세요.</p>
-              <button type="button" onClick={() => navigate('/outfits/new')}>
-                코디 만들기
-              </button>
-            </div>
+            <EmptyState
+              className="history-create__empty"
+              title="등록된 코디가 없습니다"
+              description="먼저 코디를 만들어주세요."
+              buttonText="코디 만들기"
+              onButtonClick={() => navigate('/outfits/new')}
+            />
           ) : (
             <>
-              <div className="history-create__search">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="11" cy="11" r="7" />
-                  <path d="m20 20-4-4" />
-                </svg>
-                <input
-                  type="search"
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                  placeholder="코디 이름 검색"
-                  aria-label="코디 검색"
-                />
-              </div>
+              <SearchBar
+                className="history-create__search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="코디 이름 검색"
+                ariaLabel="코디 검색"
+              />
 
               <div className="history-create__filter-group">
                 <span>상황</span>
                 <div className="history-create__chips">
                   {occasions.map((item) => (
-                    <button
+                    <FilterChip
                       key={item}
-                      type="button"
                       className={`history-create__chip${occasionFilter === item ? ' history-create__chip--active' : ''}`}
+                      label={item}
+                      selected={occasionFilter === item}
                       onClick={() => setOccasionFilter(item)}
-                      aria-pressed={occasionFilter === item}
-                    >
-                      {item}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -246,15 +222,13 @@ function HistoryCreatePage() {
                 <span>계절</span>
                 <div className="history-create__chips">
                   {seasons.map((item) => (
-                    <button
+                    <FilterChip
                       key={item}
-                      type="button"
                       className={`history-create__chip${seasonFilter === item ? ' history-create__chip--active' : ''}`}
+                      label={item}
+                      selected={seasonFilter === item}
                       onClick={() => setSeasonFilter(item)}
-                      aria-pressed={seasonFilter === item}
-                    >
-                      {item}
-                    </button>
+                    />
                   ))}
                 </div>
               </div>
@@ -307,13 +281,13 @@ function HistoryCreatePage() {
                   })}
                 </div>
               ) : (
-                <div className="history-create__empty">
-                  <h3>조건에 맞는 코디가 없습니다</h3>
-                  <p>검색어나 필터를 변경해보세요.</p>
-                  <button type="button" onClick={resetConditions}>
-                    조건 초기화
-                  </button>
-                </div>
+                <EmptyState
+                  className="history-create__empty"
+                  title="조건에 맞는 코디가 없습니다"
+                  description="검색어나 필터를 변경해보세요."
+                  buttonText="조건 초기화"
+                  onButtonClick={resetConditions}
+                />
               )}
             </>
           )}

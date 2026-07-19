@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import FilterChip from '@/components/common/FilterChip'
+import EmptyState from '@/components/common/EmptyState'
+import PageHeader from '@/components/common/PageHeader'
+import { CLOTHES_CATEGORIES as categories, CLOTHES_SEASONS as seasons } from '@/constants/clothesOptions'
 import { clothes } from '@/mocks/clothes'
 import './ClothesEditPage.css'
-
-const categories = ['상의', '하의', '아우터', '신발', '가방', '액세서리']
-const seasons = ['봄', '여름', '가을', '겨울']
 
 function ClothesEditPage() {
   const navigate = useNavigate()
@@ -94,49 +95,33 @@ function ClothesEditPage() {
 
   if (!selectedClothes) {
     return (
-      <div className="clothes-edit-empty">
-        <div>
-          <h1>수정할 옷을 찾을 수 없습니다</h1>
-          <p>삭제되었거나 존재하지 않는 옷입니다.</p>
-          <button type="button" onClick={() => navigate('/closet')}>
-            옷장으로 돌아가기
-          </button>
-        </div>
-      </div>
+      <EmptyState
+        className="clothes-edit-empty"
+        title="수정할 옷을 찾을 수 없습니다"
+        description="삭제되었거나 존재하지 않는 옷입니다."
+        buttonText="옷장으로 돌아가기"
+        onButtonClick={() => navigate('/closet')}
+      />
     )
   }
 
   return (
     <div className="clothes-edit">
-      <header className="clothes-edit__header">
-        <button
-          type="button"
-          className="clothes-edit__back-button"
-          onClick={handleBack}
-          aria-label="뒤로가기"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+      <PageHeader
+        className="clothes-edit__header"
+        title="옷 수정"
+        onBack={handleBack}
+        action={
+          <button
+            type="submit"
+            form="clothes-edit-form"
+            className="clothes-edit__save-button"
+            disabled={isSaveDisabled}
           >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <h1>옷 수정</h1>
-        <button
-          type="submit"
-          form="clothes-edit-form"
-          className="clothes-edit__save-button"
-          disabled={isSaveDisabled}
-        >
-          {isSaving ? '저장 중' : '저장'}
-        </button>
-      </header>
+            {isSaving ? '저장 중' : '저장'}
+          </button>
+        }
+      />
 
       <form
         id="clothes-edit-form"
@@ -238,15 +223,13 @@ function ClothesEditPage() {
               const isSelected = selectedSeasons.includes(season)
 
               return (
-                <button
+                <FilterChip
                   key={season}
-                  type="button"
                   className={`clothes-edit__chip${isSelected ? ' clothes-edit__chip--selected' : ''}`}
+                  label={season}
+                  selected={isSelected}
                   onClick={() => toggleSeason(season)}
-                  aria-pressed={isSelected}
-                >
-                  {season}
-                </button>
+                />
               )
             })}
           </div>

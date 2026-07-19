@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import FilterChip from '@/components/common/FilterChip'
+import PageHeader from '@/components/common/PageHeader'
+import { CLOTHES_CATEGORIES as categories, CLOTHES_SEASONS as seasons } from '@/constants/clothesOptions'
 import './ClothesCreatePage.css'
-
-const categories = ['상의', '하의', '아우터', '신발', '가방', '액세서리']
-const seasons = ['봄', '여름', '가을', '겨울']
 
 function ClothesCreatePage() {
   const navigate = useNavigate()
@@ -42,28 +42,11 @@ function ClothesCreatePage() {
 
   return (
     <div className="clothes-create">
-      <header className="clothes-create__header">
-        <button
-          type="button"
-          className="clothes-create__back-button"
-          onClick={() => navigate(-1)}
-          aria-label="뒤로가기"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
-        <h1 className="clothes-create__title">옷 등록</h1>
-        <span className="clothes-create__header-spacer" aria-hidden="true" />
-      </header>
+      <PageHeader
+        className="clothes-create__header"
+        title="옷 등록"
+        onBack={() => navigate(-1)}
+      />
 
       <form className="clothes-create__form" onSubmit={handleSubmit}>
         <section className="clothes-create__section">
@@ -158,15 +141,13 @@ function ClothesCreatePage() {
               const isSelected = selectedSeasons.includes(season)
 
               return (
-                <button
+                <FilterChip
                   key={season}
-                  type="button"
                   className={`clothes-create__chip${isSelected ? ' clothes-create__chip--selected' : ''}`}
+                  label={season}
+                  selected={isSelected}
                   onClick={() => toggleSeason(season)}
-                  aria-pressed={isSelected}
-                >
-                  {season}
-                </button>
+                />
               )
             })}
           </div>
