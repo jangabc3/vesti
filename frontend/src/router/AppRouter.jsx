@@ -7,6 +7,7 @@ import HistoryPage from '@/pages/history/HistoryPage'
 import MyPage from '@/pages/my/MyPage'
 import OutfitCreatePage from '@/pages/outfits/OutfitCreatePage'
 import OutfitDetailPage from '@/pages/outfits/OutfitDetailPage'
+import OutfitEditPage from '@/pages/outfits/OutfitEditPage'
 import OutfitPage from '@/pages/outfits/OutfitPage'
 import TodayPage from '@/pages/today/TodayPage'
 
@@ -21,6 +22,7 @@ function AppRouter() {
         <Route path="/clothes/:clothesId/edit" element={<ClothesEditPage />} />
         <Route path="/outfits" element={<OutfitPage />} />
         <Route path="/outfits/new" element={<OutfitCreatePage />} />
+        <Route path="/outfits/:outfitId/edit" element={<OutfitEditPage />} />
         <Route path="/outfits/:outfitId" element={<OutfitDetailPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/my" element={<MyPage />} />
