@@ -1,0 +1,239 @@
+.clothes-edit {
+  min-height: 100vh;
+  background: var(--color-surface);
+}
+
+.clothes-edit__header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  display: grid;
+  grid-template-columns: 64px 1fr 64px;
+  align-items: center;
+  min-height: 56px;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.clothes-edit__header h1 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+}
+
+.clothes-edit__back-button {
+  display: grid;
+  width: var(--space-10);
+  height: var(--space-10);
+  place-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.clothes-edit__back-button svg {
+  width: var(--space-6);
+  height: var(--space-6);
+}
+
+.clothes-edit__save-button {
+  justify-self: end;
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.clothes-edit__save-button:disabled {
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.clothes-edit__form {
+  padding: var(--space-6) var(--space-5) var(--space-4);
+}
+
+.clothes-edit__section {
+  margin: 0 0 var(--space-8);
+}
+
+.clothes-edit__image-field {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.clothes-edit__file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.clothes-edit__preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.clothes-edit__image-change {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: rgb(36 33 31 / 78%);
+  color: var(--color-surface);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+.clothes-edit__image-placeholder {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.clothes-edit__image-placeholder svg {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+.clothes-edit__fields {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.clothes-edit__field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.clothes-edit__field input,
+.clothes-edit__field select,
+.clothes-edit__field textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+}
+
+.clothes-edit__field input,
+.clothes-edit__field select {
+  height: 48px;
+  padding: 0 var(--space-3);
+}
+
+.clothes-edit__field textarea {
+  min-height: 120px;
+  padding: var(--space-3);
+  resize: vertical;
+}
+
+.clothes-edit__field input::placeholder,
+.clothes-edit__field textarea::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.clothes-edit__fieldset {
+  padding: 0;
+  border: 0;
+}
+
+.clothes-edit__fieldset legend {
+  margin-bottom: var(--space-3);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.clothes-edit__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.clothes-edit__chip {
+  min-width: 64px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.clothes-edit__chip--selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+.clothes-edit__memo-count {
+  align-self: flex-end;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-regular);
+}
+
+.clothes-edit-empty {
+  display: grid;
+  min-height: calc(100vh - var(--bottom-nav-height));
+  padding: var(--space-8) var(--space-5);
+  place-items: center;
+  text-align: center;
+}
+
+.clothes-edit-empty h1 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+.clothes-edit-empty p {
+  margin: 0 0 var(--space-6);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.clothes-edit-empty button {
+  height: 48px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}

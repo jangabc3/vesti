@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import AppLayout from '@/layouts/AppLayout'
 import ClothesCreatePage from '@/pages/clothes/ClothesCreatePage'
+import ClothesEditPage from '@/pages/clothes/ClothesEditPage'
 import ClosetPage from '@/pages/closet/ClosetPage'
 import HistoryPage from '@/pages/history/HistoryPage'
 import MyPage from '@/pages/my/MyPage'
@@ -15,6 +16,7 @@ function AppRouter() {
         <Route path="/today" element={<TodayPage />} />
         <Route path="/closet" element={<ClosetPage />} />
         <Route path="/clothes/new" element={<ClothesCreatePage />} />
+        <Route path="/clothes/:clothesId/edit" element={<ClothesEditPage />} />
         <Route path="/outfits" element={<OutfitPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/my" element={<MyPage />} />
