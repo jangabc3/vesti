@@ -10,46 +10,13 @@ function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/today" replace />} />
-      <Route
-        path="/today"
-        element={
-          <AppLayout>
-            <TodayPage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/closet"
-        element={
-          <AppLayout>
-            <ClosetPage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/outfits"
-        element={
-          <AppLayout>
-            <OutfitPage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/history"
-        element={
-          <AppLayout>
-            <HistoryPage />
-          </AppLayout>
-        }
-      />
-      <Route
-        path="/my"
-        element={
-          <AppLayout>
-            <MyPage />
-          </AppLayout>
-        }
-      />
+      <Route element={<AppLayout />}>
+        <Route path="/today" element={<TodayPage />} />
+        <Route path="/closet" element={<ClosetPage />} />
+        <Route path="/outfits" element={<OutfitPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+        <Route path="/my" element={<MyPage />} />
+      </Route>
     </Routes>
   )
 }
