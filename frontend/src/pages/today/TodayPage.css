@@ -1,0 +1,360 @@
+.today-page {
+  min-height: 100vh;
+  padding: 0 var(--space-5)
+    calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-10));
+  background: var(--color-surface);
+}
+
+.today-page__header {
+  padding: var(--space-8) 0 var(--space-7);
+}
+
+.today-page__date {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.today-page__header h1 {
+  margin: 0;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.today-page__subtitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.today-page__weather {
+  margin-bottom: var(--space-9);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-muted);
+}
+
+.today-page__section {
+  margin-bottom: var(--space-9);
+}
+
+.today-page__section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.today-page__section-heading h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.today-page__section-heading > span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.today-weather__main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.today-weather__main > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.today-weather__main strong {
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.04em;
+}
+
+.today-weather__main > div span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.today-weather__main dl {
+  margin: 0;
+}
+
+.today-weather__main dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
+.today-weather__main dl > div + div {
+  margin-top: var(--space-1);
+}
+
+.today-weather__main dt {
+  color: var(--color-text-tertiary);
+}
+
+.today-weather__main dd {
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.today-weather__message {
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.today-outfit {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+
+.today-outfit__preview {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  gap: 1px;
+  background: var(--color-border);
+}
+
+.today-outfit__preview--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.today-outfit__preview--3,
+.today-outfit__preview--4 {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+}
+
+.today-outfit__preview img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+}
+
+.today-outfit__preview--empty {
+  place-items: center;
+  align-content: center;
+  gap: var(--space-2);
+  background: var(--color-surface-muted);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.today-outfit__preview--empty svg {
+  width: var(--space-8);
+  height: var(--space-8);
+}
+
+.today-outfit__content {
+  padding: var(--space-4);
+}
+
+.today-outfit__content > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.today-outfit__content h3 {
+  overflow: hidden;
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-outfit__content svg {
+  width: var(--space-5);
+  height: var(--space-5);
+  flex: none;
+  color: var(--color-accent);
+}
+
+.today-outfit__content p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.today-outfit__content > span {
+  display: block;
+  margin-top: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.today-outfit__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.today-outfit__actions button {
+  height: 46px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-accent);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+
+.today-outfit__actions button:last-child {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-surface);
+}
+
+.today-clothes__list {
+  display: flex;
+  overflow-x: auto;
+  gap: var(--space-3);
+  margin: 0 calc(var(--space-5) * -1);
+  padding: 0 var(--space-5) var(--space-1);
+  scrollbar-width: none;
+}
+
+.today-clothes__list::-webkit-scrollbar {
+  display: none;
+}
+
+.today-clothes__card {
+  width: 116px;
+  flex: 0 0 116px;
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.today-clothes__card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  object-fit: cover;
+}
+
+.today-clothes__card strong,
+.today-clothes__card span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-clothes__card strong {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+}
+
+.today-clothes__card span {
+  margin-top: 2px;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.today-recent-outfits {
+  border-top: 1px solid var(--color-border);
+}
+
+.today-recent-outfits button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.today-recent-outfits button > span {
+  min-width: 0;
+}
+
+.today-recent-outfits strong,
+.today-recent-outfits small {
+  display: block;
+}
+
+.today-recent-outfits strong {
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-recent-outfits small {
+  margin-top: var(--space-1);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+}
+
+.today-recent-outfits time {
+  flex: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.today-page__empty {
+  margin: 0;
+  padding: var(--space-7) var(--space-4);
+  background: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.today-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.today-quick-actions button {
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.today-quick-actions button span {
+  display: grid;
+  width: var(--space-8);
+  height: var(--space-8);
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--font-size-lg);
+}
