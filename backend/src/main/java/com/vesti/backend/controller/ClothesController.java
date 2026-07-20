@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.vesti.backend.dto.request.ClothesCreateRequest;
 import com.vesti.backend.dto.request.ClothesUpdateRequest;
 import com.vesti.backend.dto.response.ClothesResponse;
@@ -22,6 +24,12 @@ public class ClothesController {
     @GetMapping
     public List<ClothesResponse> getAllClothes() {
         return clothesService.getAllClothes();
+    }
+
+    @GetMapping("/page")
+    public Page<ClothesResponse> getClothesPage(Pageable pageable) {
+
+        return clothesService.getClothesPage(pageable);
     }
 
     @GetMapping("/search")

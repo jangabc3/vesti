@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.vesti.backend.dto.request.ClothesCreateRequest;
 import com.vesti.backend.dto.request.ClothesUpdateRequest;
 import com.vesti.backend.dto.response.ClothesResponse;
@@ -39,6 +41,13 @@ public class ClothesService {
         return clothesList.stream()
                 .map(ClothesResponse::new)
                 .toList();
+    }
+
+    public Page<ClothesResponse> getClothesPage(Pageable pageable) {
+
+        Page<Clothes> clothesPage = clothesRepository.findAll(pageable);
+
+        return clothesPage.map(ClothesResponse::new);
     }
 
     public List<ClothesResponse> searchByCategory(String category) {
@@ -80,20 +89,19 @@ public class ClothesService {
     }
 
     public List<ClothesResponse> searchByCategoryAndSeasonAndColor(
-        String category,
-        String season,
-        String color) {
+            String category,
+            String season,
+            String color) {
 
-    List<Clothes> clothesList =
-            clothesRepository.findByCategoryAndSeasonAndColor(
-                    category,
-                    season,
-                    color);
+        List<Clothes> clothesList = clothesRepository.findByCategoryAndSeasonAndColor(
+                category,
+                season,
+                color);
 
-    return clothesList.stream()
-            .map(ClothesResponse::new)
-            .toList();
-}
+        return clothesList.stream()
+                .map(ClothesResponse::new)
+                .toList();
+    }
 
     public ClothesResponse getClothesById(Long id) {
 
