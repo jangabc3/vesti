@@ -50,6 +50,15 @@ public class ClothesService {
                 .toList();
     }
 
+    public List<ClothesResponse> searchBySeason(String season) {
+
+        List<Clothes> clothesList = clothesRepository.findBySeason(season);
+
+        return clothesList.stream()
+                .map(ClothesResponse::new)
+                .toList();
+    }
+
     public ClothesResponse getClothesById(Long id) {
 
         Clothes clothes = clothesRepository.findById(id)
