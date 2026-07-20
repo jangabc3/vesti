@@ -38,6 +38,13 @@ public class ClothesController {
         return clothesService.searchBySeason(season);
     }
 
+    @GetMapping("/search/color")
+    public List<ClothesResponse> searchByColor(
+            @RequestParam(name = "color") String color) {
+
+        return clothesService.searchByColor(color);
+    }
+
     @GetMapping("/{id}")
     public ClothesResponse getClothesById(
             @PathVariable Long id) {

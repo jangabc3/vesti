@@ -59,6 +59,15 @@ public class ClothesService {
                 .toList();
     }
 
+    public List<ClothesResponse> searchByColor(String color) {
+
+        List<Clothes> clothesList = clothesRepository.findByColor(color);
+
+        return clothesList.stream()
+                .map(ClothesResponse::new)
+                .toList();
+    }
+
     public ClothesResponse getClothesById(Long id) {
 
         Clothes clothes = clothesRepository.findById(id)
