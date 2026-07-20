@@ -13,4 +13,13 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     List<Clothes> findBySeason(String season);
 
     List<Clothes> findByColor(String color);
+
+    List<Clothes> findByCategoryAndSeason(
+            String category,
+            String season);
+
+    List<Clothes> findByCategoryAndSeasonAndColor(
+            String category,
+            String season,
+            String color);
 }

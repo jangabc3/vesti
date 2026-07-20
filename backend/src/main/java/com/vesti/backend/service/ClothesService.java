@@ -68,6 +68,33 @@ public class ClothesService {
                 .toList();
     }
 
+    public List<ClothesResponse> searchByCategoryAndSeason(
+            String category,
+            String season) {
+
+        List<Clothes> clothesList = clothesRepository.findByCategoryAndSeason(category, season);
+
+        return clothesList.stream()
+                .map(ClothesResponse::new)
+                .toList();
+    }
+
+    public List<ClothesResponse> searchByCategoryAndSeasonAndColor(
+        String category,
+        String season,
+        String color) {
+
+    List<Clothes> clothesList =
+            clothesRepository.findByCategoryAndSeasonAndColor(
+                    category,
+                    season,
+                    color);
+
+    return clothesList.stream()
+            .map(ClothesResponse::new)
+            .toList();
+}
+
     public ClothesResponse getClothesById(Long id) {
 
         Clothes clothes = clothesRepository.findById(id)

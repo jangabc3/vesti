@@ -45,6 +45,26 @@ public class ClothesController {
         return clothesService.searchByColor(color);
     }
 
+    @GetMapping("/search/category-season")
+    public List<ClothesResponse> searchByCategoryAndSeason(
+            @RequestParam String category,
+            @RequestParam String season) {
+
+        return clothesService.searchByCategoryAndSeason(category, season);
+    }
+
+    @GetMapping("/search/all")
+    public List<ClothesResponse> searchByCategoryAndSeasonAndColor(
+            @RequestParam String category,
+            @RequestParam String season,
+            @RequestParam String color) {
+
+        return clothesService.searchByCategoryAndSeasonAndColor(
+                category,
+                season,
+                color);
+    }
+
     @GetMapping("/{id}")
     public ClothesResponse getClothesById(
             @PathVariable Long id) {
