@@ -2,10 +2,10 @@ package com.vesti.backend.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.vesti.backend.dto.request.ClothesCreateRequest;
 import com.vesti.backend.dto.request.ClothesUpdateRequest;
 import com.vesti.backend.dto.response.ClothesResponse;
@@ -50,50 +50,12 @@ public class ClothesService {
         return clothesPage.map(ClothesResponse::new);
     }
 
-    public List<ClothesResponse> searchByCategory(String category) {
-
-        List<Clothes> clothesList = clothesRepository.findByCategory(category);
-
-        return clothesList.stream()
-                .map(ClothesResponse::new)
-                .toList();
-    }
-
-    public List<ClothesResponse> searchBySeason(String season) {
-
-        List<Clothes> clothesList = clothesRepository.findBySeason(season);
-
-        return clothesList.stream()
-                .map(ClothesResponse::new)
-                .toList();
-    }
-
-    public List<ClothesResponse> searchByColor(String color) {
-
-        List<Clothes> clothesList = clothesRepository.findByColor(color);
-
-        return clothesList.stream()
-                .map(ClothesResponse::new)
-                .toList();
-    }
-
-    public List<ClothesResponse> searchByCategoryAndSeason(
-            String category,
-            String season) {
-
-        List<Clothes> clothesList = clothesRepository.findByCategoryAndSeason(category, season);
-
-        return clothesList.stream()
-                .map(ClothesResponse::new)
-                .toList();
-    }
-
-    public List<ClothesResponse> searchByCategoryAndSeasonAndColor(
+    public List<ClothesResponse> searchClothes(
             String category,
             String season,
             String color) {
 
-        List<Clothes> clothesList = clothesRepository.findByCategoryAndSeasonAndColor(
+        List<Clothes> clothesList = clothesRepository.search(
                 category,
                 season,
                 color);

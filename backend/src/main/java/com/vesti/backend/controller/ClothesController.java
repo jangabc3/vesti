@@ -2,10 +2,10 @@ package com.vesti.backend.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.*;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
+
 import com.vesti.backend.dto.request.ClothesCreateRequest;
 import com.vesti.backend.dto.request.ClothesUpdateRequest;
 import com.vesti.backend.dto.response.ClothesResponse;
@@ -28,46 +28,16 @@ public class ClothesController {
 
     @GetMapping("/page")
     public Page<ClothesResponse> getClothesPage(Pageable pageable) {
-
         return clothesService.getClothesPage(pageable);
     }
 
     @GetMapping("/search")
-    public List<ClothesResponse> searchByCategory(
-            @RequestParam(name = "category") String category) {
+    public List<ClothesResponse> searchClothes(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String season,
+            @RequestParam(required = false) String color) {
 
-        return clothesService.searchByCategory(category);
-    }
-
-    @GetMapping("/search/season")
-    public List<ClothesResponse> searchBySeason(
-            @RequestParam(name = "season") String season) {
-
-        return clothesService.searchBySeason(season);
-    }
-
-    @GetMapping("/search/color")
-    public List<ClothesResponse> searchByColor(
-            @RequestParam(name = "color") String color) {
-
-        return clothesService.searchByColor(color);
-    }
-
-    @GetMapping("/search/category-season")
-    public List<ClothesResponse> searchByCategoryAndSeason(
-            @RequestParam String category,
-            @RequestParam String season) {
-
-        return clothesService.searchByCategoryAndSeason(category, season);
-    }
-
-    @GetMapping("/search/all")
-    public List<ClothesResponse> searchByCategoryAndSeasonAndColor(
-            @RequestParam String category,
-            @RequestParam String season,
-            @RequestParam String color) {
-
-        return clothesService.searchByCategoryAndSeasonAndColor(
+        return clothesService.searchClothes(
                 category,
                 season,
                 color);
@@ -96,7 +66,9 @@ public class ClothesController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteClothes(@PathVariable Long id) {
+    public void deleteClothes(
+            @PathVariable Long id) {
+
         clothesService.deleteClothes(id);
     }
 }
