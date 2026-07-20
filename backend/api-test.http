@@ -1,0 +1,9 @@
+POST http://localhost:8080/api/clothes
+Content-Type: application/json
+
+{
+  "name": "화이트 셔츠",
+  "category": "상의",
+  "color": "화이트",
+  "season": "봄"
+}
