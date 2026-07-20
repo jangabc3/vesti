@@ -41,6 +41,15 @@ public class ClothesService {
                 .toList();
     }
 
+    public List<ClothesResponse> searchByCategory(String category) {
+
+        List<Clothes> clothesList = clothesRepository.findByCategory(category);
+
+        return clothesList.stream()
+                .map(ClothesResponse::new)
+                .toList();
+    }
+
     public ClothesResponse getClothesById(Long id) {
 
         Clothes clothes = clothesRepository.findById(id)

@@ -24,6 +24,13 @@ public class ClothesController {
         return clothesService.getAllClothes();
     }
 
+    @GetMapping("/search")
+    public List<ClothesResponse> searchByCategory(
+            @RequestParam(name = "category") String category) {
+
+        return clothesService.searchByCategory(category);
+    }
+
     @GetMapping("/{id}")
     public ClothesResponse getClothesById(
             @PathVariable Long id) {
