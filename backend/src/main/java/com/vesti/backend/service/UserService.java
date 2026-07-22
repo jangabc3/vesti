@@ -8,6 +8,7 @@ import com.vesti.backend.dto.request.UserSignupRequest;
 import com.vesti.backend.dto.response.LoginResponse;
 import com.vesti.backend.dto.response.UserResponse;
 import com.vesti.backend.entity.User;
+import com.vesti.backend.exception.InvalidLoginException;
 import com.vesti.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -38,10 +39,14 @@ public class UserService {
     public LoginResponse login(UserLoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new InvalidLoginException("Invalid email or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+        if (!passwordEncoder.matches(
+                request.getPassword(),
+                user.getPassword())) {
+
+            throw new InvalidLoginException("Invalid email or password");
         }
 
         return new LoginResponse(
