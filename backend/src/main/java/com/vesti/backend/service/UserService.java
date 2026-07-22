@@ -3,6 +3,7 @@ package com.vesti.backend.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vesti.backend.config.JwtProvider;
 import com.vesti.backend.dto.request.UserLoginRequest;
 import com.vesti.backend.dto.request.UserSignupRequest;
 import com.vesti.backend.dto.response.LoginResponse;
@@ -19,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     public UserResponse signup(UserSignupRequest request) {
 
@@ -39,8 +41,7 @@ public class UserService {
     public LoginResponse login(UserLoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new InvalidLoginException("Invalid email or password"));
+                .orElseThrow(() -> new InvalidLoginException("Invalid email or password"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
@@ -49,8 +50,8 @@ public class UserService {
             throw new InvalidLoginException("Invalid email or password");
         }
 
-        return new LoginResponse(
-                user.getId(),
-                user.getEmail());
+        String token = jwtProvider.generateToken(user.getEmail());
+
+        return new LoginResponse(user.getId(), user.getEmail(), token);
     }
 }
