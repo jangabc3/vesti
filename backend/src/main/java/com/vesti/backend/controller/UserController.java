@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import com.vesti.backend.dto.request.UserLoginRequest;
 import com.vesti.backend.dto.request.UserSignupRequest;
@@ -30,4 +32,10 @@ public class UserController {
     public LoginResponse login(@RequestBody UserLoginRequest request) {
         return userService.login(request);
     }
+
+    @GetMapping("/me")
+    public String me(Authentication authentication) {
+        return authentication.getName();
+    }
+
 }
