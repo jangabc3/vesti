@@ -1,12 +1,14 @@
 package com.vesti.backend.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.vesti.backend.repository.UserRepository;
+import com.vesti.backend.dto.request.UserLoginRequest;
 import com.vesti.backend.dto.request.UserSignupRequest;
+import com.vesti.backend.dto.response.LoginResponse;
 import com.vesti.backend.dto.response.UserResponse;
 import com.vesti.backend.entity.User;
+import com.vesti.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,5 +33,19 @@ public class UserService {
         User savedUser = userRepository.save(user);
 
         return new UserResponse(savedUser);
+    }
+
+    public LoginResponse login(UserLoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        return new LoginResponse(
+                user.getId(),
+                user.getEmail());
     }
 }
