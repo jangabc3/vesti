@@ -34,8 +34,11 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public String me(Authentication authentication) {
-        return authentication.getName();
+    public UserResponse me(Authentication authentication) {
+
+        String email = authentication.getName();
+
+        return userService.getCurrentUser(email);
     }
 
 }
