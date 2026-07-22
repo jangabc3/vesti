@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.vesti.backend.dto.request.ClothesCreateRequest;
 import com.vesti.backend.dto.request.ClothesUpdateRequest;
 import com.vesti.backend.dto.response.ClothesResponse;
-import com.vesti.backend.service.ClothesService;
+import com.vesti.backend.service.ClothingService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +17,18 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/clothes")
 @RequiredArgsConstructor
-public class ClothesController {
+public class ClothingController {
 
-    private final ClothesService clothesService;
+    private final ClothingService clothingService;
 
     @GetMapping
     public List<ClothesResponse> getAllClothes() {
-        return clothesService.getAllClothes();
+        return clothingService.getAllClothes();
     }
 
     @GetMapping("/page")
     public Page<ClothesResponse> getClothesPage(Pageable pageable) {
-        return clothesService.getClothesPage(pageable);
+        return clothingService.getClothesPage(pageable);
     }
 
     @GetMapping("/search")
@@ -37,7 +37,7 @@ public class ClothesController {
             @RequestParam(required = false) String season,
             @RequestParam(required = false) String color) {
 
-        return clothesService.searchClothes(
+        return clothingService.searchClothes(
                 category,
                 season,
                 color);
@@ -47,14 +47,14 @@ public class ClothesController {
     public ClothesResponse getClothesById(
             @PathVariable Long id) {
 
-        return clothesService.getClothesById(id);
+        return clothingService.getClothesById(id);
     }
 
     @PostMapping
     public ClothesResponse createClothes(
             @Valid @RequestBody ClothesCreateRequest request) {
 
-        return clothesService.createClothes(request);
+        return clothingService.createClothes(request);
     }
 
     @PutMapping("/{id}")
@@ -62,13 +62,13 @@ public class ClothesController {
             @PathVariable Long id,
             @Valid @RequestBody ClothesUpdateRequest request) {
 
-        return clothesService.updateClothes(id, request);
+        return clothingService.updateClothes(id, request);
     }
 
     @DeleteMapping("/{id}")
     public void deleteClothes(
             @PathVariable Long id) {
 
-        clothesService.deleteClothes(id);
+        clothingService.deleteClothes(id);
     }
 }
