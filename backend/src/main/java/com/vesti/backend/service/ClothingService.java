@@ -58,7 +58,9 @@ public class ClothingService {
     // 옷 목록 페이지 조회
     public Page<ClothesResponse> getClothesPage(Pageable pageable) {
 
-        Page<Clothing> clothingPage = clothingRepository.findAll(pageable);
+        User user = getCurrentUser();
+
+        Page<Clothing> clothingPage = clothingRepository.findByUser(user, pageable);
 
         return clothingPage.map(ClothesResponse::new);
     }
@@ -69,7 +71,10 @@ public class ClothingService {
             String season,
             String color) {
 
+        User user = getCurrentUser();
+
         List<Clothing> clothingList = clothingRepository.search(
+                user,
                 category,
                 season,
                 color);
