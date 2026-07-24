@@ -28,12 +28,7 @@ public class ClothingService {
     // 옷 등록
     public ClothesResponse createClothes(ClothesCreateRequest request) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User user = getCurrentUser();
 
         Clothing clothing = Clothing.builder()
                 .user(user)
@@ -51,7 +46,9 @@ public class ClothingService {
     // 전체 옷 조회
     public List<ClothesResponse> getAllClothes() {
 
-        List<Clothing> clothingList = clothingRepository.findAll();
+        User user = getCurrentUser();
+
+        List<Clothing> clothingList = clothingRepository.findByUser(user);
 
         return clothingList.stream()
                 .map(ClothesResponse::new)
@@ -117,5 +114,17 @@ public class ClothingService {
         }
 
         clothingRepository.deleteById(id);
+
     }
+
+    private User getCurrentUser() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
 }
