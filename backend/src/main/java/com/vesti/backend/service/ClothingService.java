@@ -85,6 +85,13 @@ public class ClothingService {
         Clothing clothing = clothingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
 
+        User user = getCurrentUser();
+
+        if (clothing.getUser() == null
+                || !clothing.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("조회 권한이 없습니다.");
+        }
+
         return new ClothesResponse(clothing);
     }
 
@@ -95,6 +102,13 @@ public class ClothingService {
 
         Clothing clothing = clothingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
+
+        User user = getCurrentUser();
+
+        if (clothing.getUser() == null
+                || !clothing.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("수정 권한이 없습니다.");
+        }
 
         clothing.setName(request.getName());
         clothing.setCategory(request.getCategory());
@@ -109,12 +123,17 @@ public class ClothingService {
     // 옷 삭제
     public void deleteClothes(Long id) {
 
-        if (!clothingRepository.existsById(id)) {
-            throw new RuntimeException("옷을 찾을 수 없습니다.");
+        Clothing clothing = clothingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
+
+        User user = getCurrentUser();
+
+        if (clothing.getUser() == null
+                || !clothing.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("삭제 권한이 없습니다.");
         }
 
-        clothingRepository.deleteById(id);
-
+        clothingRepository.delete(clothing);
     }
 
     private User getCurrentUser() {
