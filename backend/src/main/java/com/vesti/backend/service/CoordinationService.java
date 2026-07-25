@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vesti.backend.dto.request.CoordinationCreateRequest;
+import com.vesti.backend.dto.request.CoordinationUpdateRequest;
 import com.vesti.backend.dto.response.ClothingResponse;
 import com.vesti.backend.dto.response.CoordinationDetailResponse;
 import com.vesti.backend.dto.response.CoordinationResponse;
@@ -88,6 +89,35 @@ public class CoordinationService {
                 .createdAt(coordination.getCreatedAt())
                 .clothes(clothes)
                 .build();
+    }
+
+    // 코디 수정
+    @Transactional
+    public CoordinationResponse updateCoordination(
+            Long coordinationId,
+            CoordinationUpdateRequest request) {
+
+        Coordination coordination = getMyCoordination(coordinationId);
+
+        coordination.update(
+                request.getName(),
+                request.getDescription());
+
+        return new CoordinationResponse(coordination);
+    }
+
+    // 코디 삭제
+    @Transactional
+    public void deleteCoordination(Long coordinationId) {
+
+        Coordination coordination = getMyCoordination(coordinationId);
+
+        List<CoordinationClothing> coordinationClothes = coordinationClothingRepository
+                .findByCoordination(coordination);
+
+        coordinationClothingRepository.deleteAll(coordinationClothes);
+
+        coordinationRepository.delete(coordination);
     }
 
     // 코디에 옷 추가

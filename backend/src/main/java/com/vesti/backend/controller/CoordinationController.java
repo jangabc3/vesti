@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 
+import com.vesti.backend.dto.request.CoordinationUpdateRequest;
 import com.vesti.backend.dto.request.CoordinationCreateRequest;
 import com.vesti.backend.dto.response.CoordinationDetailResponse;
 import com.vesti.backend.dto.response.CoordinationResponse;
@@ -88,6 +90,19 @@ public class CoordinationController {
         return ResponseEntity.ok(response);
     }
 
+    // 코디 수정
+    @PutMapping("/{coordinationId}")
+    public ResponseEntity<CoordinationResponse> updateCoordination(
+            @PathVariable Long coordinationId,
+            @Validated @RequestBody CoordinationUpdateRequest request) {
+
+        CoordinationResponse response = coordinationService.updateCoordination(
+                coordinationId,
+                request);
+
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{coordinationId}/clothes/{clothingId}")
     public ResponseEntity<Void> removeClothingFromCoordination(
             @PathVariable Long coordinationId,
@@ -96,6 +111,15 @@ public class CoordinationController {
         coordinationService.removeClothingFromCoordination(
                 coordinationId,
                 clothingId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{coordinationId}")
+    public ResponseEntity<Void> deleteCoordination(
+            @PathVariable Long coordinationId) {
+
+        coordinationService.deleteCoordination(coordinationId);
 
         return ResponseEntity.noContent().build();
     }

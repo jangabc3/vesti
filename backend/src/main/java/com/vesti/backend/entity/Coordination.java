@@ -43,4 +43,10 @@ public class Coordination {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    // 코디 정보 수정
+    public void update(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 }
