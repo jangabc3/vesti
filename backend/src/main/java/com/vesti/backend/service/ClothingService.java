@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.vesti.backend.exception.ClothingAccessDeniedException;
+import com.vesti.backend.exception.ClothingNotFoundException;
 import com.vesti.backend.entity.User;
 import com.vesti.backend.repository.UserRepository;
 import com.vesti.backend.dto.request.ClothesCreateRequest;
@@ -120,13 +122,13 @@ public class ClothingService {
     private Clothing getMyClothing(Long id) {
 
         Clothing clothing = clothingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
+                .orElseThrow(ClothingNotFoundException::new);
 
         User user = getCurrentUser();
 
         if (clothing.getUser() == null
                 || !clothing.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("권한이 없습니다.");
+            throw new ClothingAccessDeniedException();
         }
 
         return clothing;

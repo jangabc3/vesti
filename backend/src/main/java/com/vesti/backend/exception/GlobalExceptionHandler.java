@@ -40,4 +40,28 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.UNAUTHORIZED)
                                 .body(response);
         }
+
+        @ExceptionHandler(ClothingNotFoundException.class)
+        public ResponseEntity<Map<String, String>> handleClothingNotFound(
+                        ClothingNotFoundException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(response);
+        }
+
+        @ExceptionHandler(ClothingAccessDeniedException.class)
+        public ResponseEntity<Map<String, String>> handleClothingAccessDenied(
+                        ClothingAccessDeniedException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.FORBIDDEN)
+                                .body(response);
+        }
 }
