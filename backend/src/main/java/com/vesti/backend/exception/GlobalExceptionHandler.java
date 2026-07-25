@@ -173,4 +173,21 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.CONFLICT)
                                 .body(response);
         }
+
+        /*
+         * 코디에 해당 옷이 포함되어 있지 않은 경우
+         *
+         * HTTP 상태 코드: 404 Not Found
+         */
+        @ExceptionHandler(CoordinationClothingNotFoundException.class)
+        public ResponseEntity<Map<String, String>> handleCoordinationClothingNotFound(
+                        CoordinationClothingNotFoundException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(response);
+        }
 }

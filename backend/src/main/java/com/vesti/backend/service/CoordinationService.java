@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vesti.backend.dto.request.CoordinationCreateRequest;
 import com.vesti.backend.dto.response.ClothingResponse;
@@ -17,6 +18,7 @@ import com.vesti.backend.entity.User;
 import com.vesti.backend.exception.ClothingAccessDeniedException;
 import com.vesti.backend.exception.ClothingNotFoundException;
 import com.vesti.backend.exception.CoordinationAccessDeniedException;
+import com.vesti.backend.exception.CoordinationClothingNotFoundException;
 import com.vesti.backend.exception.CoordinationNotFoundException;
 import com.vesti.backend.exception.DuplicateCoordinationClothingException;
 import com.vesti.backend.exception.UserNotFoundException;
@@ -125,6 +127,36 @@ public class CoordinationService {
         coordinationClothingRepository.save(coordinationClothing);
 
         return new CoordinationResponse(coordination);
+    }
+
+    // 코디에서 옷 제거
+    @Transactional
+    public void removeClothingFromCoordination(
+            Long coordinationId,
+            Long clothingId) {
+
+        Coordination coordination = getMyCoordination(coordinationId);
+
+        Clothing clothing = clothingRepository.findById(clothingId)
+                .orElseThrow(ClothingNotFoundException::new);
+
+        User user = getCurrentUser();
+
+        // 현재 사용자의 옷인지 확인
+        if (clothing.getUser() == null
+                || !clothing.getUser().getId().equals(user.getId())) {
+            throw new ClothingAccessDeniedException();
+        }
+
+        // 코디에 해당 옷이 포함되어 있는지 확인
+        CoordinationClothing coordinationClothing = coordinationClothingRepository
+                .findByCoordinationAndClothing(
+                        coordination,
+                        clothing)
+                .orElseThrow(
+                        CoordinationClothingNotFoundException::new);
+
+        coordinationClothingRepository.delete(coordinationClothing);
     }
 
     // 내 코디 조회
