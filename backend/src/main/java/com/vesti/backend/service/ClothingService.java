@@ -87,15 +87,7 @@ public class ClothingService {
     // 옷 상세 조회
     public ClothesResponse getClothesById(Long id) {
 
-        Clothing clothing = clothingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
-
-        User user = getCurrentUser();
-
-        if (clothing.getUser() == null
-                || !clothing.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("조회 권한이 없습니다.");
-        }
+        Clothing clothing = getMyClothing(id);
 
         return new ClothesResponse(clothing);
     }
@@ -105,15 +97,7 @@ public class ClothingService {
             Long id,
             ClothesUpdateRequest request) {
 
-        Clothing clothing = clothingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
-
-        User user = getCurrentUser();
-
-        if (clothing.getUser() == null
-                || !clothing.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("수정 권한이 없습니다.");
-        }
+        Clothing clothing = getMyClothing(id);
 
         clothing.setName(request.getName());
         clothing.setCategory(request.getCategory());
@@ -128,6 +112,13 @@ public class ClothingService {
     // 옷 삭제
     public void deleteClothes(Long id) {
 
+        Clothing clothing = getMyClothing(id);
+
+        clothingRepository.delete(clothing);
+    }
+
+    private Clothing getMyClothing(Long id) {
+
         Clothing clothing = clothingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("옷을 찾을 수 없습니다."));
 
@@ -135,10 +126,10 @@ public class ClothingService {
 
         if (clothing.getUser() == null
                 || !clothing.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("삭제 권한이 없습니다.");
+            throw new RuntimeException("권한이 없습니다.");
         }
 
-        clothingRepository.delete(clothing);
+        return clothing;
     }
 
     private User getCurrentUser() {

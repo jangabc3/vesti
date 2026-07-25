@@ -21,7 +21,7 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/users/signup",
@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .authenticated())
 
                 .httpBasic(httpBasic -> httpBasic.disable())
+
                 .formLogin(formLogin -> formLogin.disable())
 
                 .addFilterBefore(
