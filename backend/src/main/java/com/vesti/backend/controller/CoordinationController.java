@@ -2,6 +2,7 @@ package com.vesti.backend.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vesti.backend.dto.request.CoordinationCreateRequest;
+import com.vesti.backend.dto.response.CoordinationDetailResponse;
 import com.vesti.backend.dto.response.CoordinationResponse;
 import com.vesti.backend.service.CoordinationService;
 
@@ -30,8 +32,8 @@ public class CoordinationController {
      *
      * 요청 예시:
      * {
-     *   "name": "출근 코디",
-     *   "description": "검정 셔츠 + 슬랙스"
+     * "name": "출근 코디",
+     * "description": "검정 셔츠 + 슬랙스"
      * }
      */
     @PostMapping
@@ -73,5 +75,14 @@ public class CoordinationController {
         return coordinationService.addClothingToCoordination(
                 coordinationId,
                 clothingId);
+    }
+
+    @GetMapping("/{coordinationId}")
+    public ResponseEntity<CoordinationDetailResponse> getCoordinationById(
+            @PathVariable Long coordinationId) {
+
+        CoordinationDetailResponse response = coordinationService.getCoordinationById(coordinationId);
+
+        return ResponseEntity.ok(response);
     }
 }

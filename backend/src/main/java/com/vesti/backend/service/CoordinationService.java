@@ -7,6 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vesti.backend.dto.request.CoordinationCreateRequest;
+import com.vesti.backend.dto.response.ClothingResponse;
+import com.vesti.backend.dto.response.CoordinationDetailResponse;
 import com.vesti.backend.dto.response.CoordinationResponse;
 import com.vesti.backend.entity.Clothing;
 import com.vesti.backend.entity.Coordination;
@@ -46,8 +48,7 @@ public class CoordinationService {
                 .description(request.getDescription())
                 .build();
 
-        Coordination savedCoordination =
-                coordinationRepository.save(coordination);
+        Coordination savedCoordination = coordinationRepository.save(coordination);
 
         return new CoordinationResponse(savedCoordination);
     }
@@ -57,12 +58,34 @@ public class CoordinationService {
 
         User user = getCurrentUser();
 
-        List<Coordination> coordinationList =
-                coordinationRepository.findByUser(user);
+        List<Coordination> coordinationList = coordinationRepository.findByUser(user);
 
         return coordinationList.stream()
                 .map(CoordinationResponse::new)
                 .toList();
+    }
+
+    // 코디 상세 조회
+    public CoordinationDetailResponse getCoordinationById(
+            Long coordinationId) {
+
+        Coordination coordination = getMyCoordination(coordinationId);
+
+        List<CoordinationClothing> coordinationClothes = coordinationClothingRepository
+                .findByCoordination(coordination);
+
+        List<ClothingResponse> clothes = coordinationClothes.stream()
+                .map(CoordinationClothing::getClothing)
+                .map(ClothingResponse::new)
+                .toList();
+
+        return CoordinationDetailResponse.builder()
+                .id(coordination.getId())
+                .name(coordination.getName())
+                .description(coordination.getDescription())
+                .createdAt(coordination.getCreatedAt())
+                .clothes(clothes)
+                .build();
     }
 
     // 코디에 옷 추가
@@ -70,28 +93,23 @@ public class CoordinationService {
             Long coordinationId,
             Long clothingId) {
 
+        Coordination coordination = getMyCoordination(coordinationId);
+
+        Clothing clothing = clothingRepository.findById(clothingId)
+                .orElseThrow(ClothingNotFoundException::new);
+
         User user = getCurrentUser();
 
-        Coordination coordination =
-                coordinationRepository.findById(coordinationId)
-                        .orElseThrow(CoordinationNotFoundException::new);
-
-        Clothing clothing =
-                clothingRepository.findById(clothingId)
-                        .orElseThrow(ClothingNotFoundException::new);
-
-        // 현재 사용자의 코디인지 확인
-        if (!coordination.getUser().getId().equals(user.getId())) {
-            throw new CoordinationAccessDeniedException();
-        }
-
         // 현재 사용자의 옷인지 확인
-        if (!clothing.getUser().getId().equals(user.getId())) {
+        if (clothing.getUser() == null
+                || !clothing.getUser().getId().equals(user.getId())) {
             throw new ClothingAccessDeniedException();
         }
 
         boolean alreadyExists = coordinationClothingRepository
-                .findByCoordinationAndClothing(coordination, clothing)
+                .findByCoordinationAndClothing(
+                        coordination,
+                        clothing)
                 .isPresent();
 
         // 같은 옷 중복 추가 방지
@@ -99,22 +117,38 @@ public class CoordinationService {
             throw new DuplicateCoordinationClothingException();
         }
 
-        CoordinationClothing coordinationClothing =
-                CoordinationClothing.builder()
-                        .coordination(coordination)
-                        .clothing(clothing)
-                        .build();
+        CoordinationClothing coordinationClothing = CoordinationClothing.builder()
+                .coordination(coordination)
+                .clothing(clothing)
+                .build();
 
         coordinationClothingRepository.save(coordinationClothing);
 
         return new CoordinationResponse(coordination);
     }
 
+    // 내 코디 조회
+    private Coordination getMyCoordination(
+            Long coordinationId) {
+
+        Coordination coordination = coordinationRepository.findById(coordinationId)
+                .orElseThrow(CoordinationNotFoundException::new);
+
+        User user = getCurrentUser();
+
+        if (coordination.getUser() == null
+                || !coordination.getUser().getId().equals(user.getId())) {
+            throw new CoordinationAccessDeniedException();
+        }
+
+        return coordination;
+    }
+
     // 현재 로그인한 사용자 조회
     private User getCurrentUser() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext()
+                .getAuthentication();
 
         String email = authentication.getName();
 
