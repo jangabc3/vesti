@@ -9,21 +9,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @Configuration
-@OpenAPIDefinition(
-        info = @Info(
-                title = "VESTI API",
-                version = "v1",
-                description = "VESTI Backend API"
-        ),
-        security = {
+@OpenAPIDefinition(info = @Info(title = "VESTI API", version = "v1", description = "VESTI Backend API"), security = {
                 @SecurityRequirement(name = "bearerAuth")
-        }
-)
-@SecurityScheme(
-        name = "bearerAuth",
-        type = SecuritySchemeType.HTTP,
-        scheme = "bearer",
-        bearerFormat = "JWT"
-)
+})
+@SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
 public class OpenApiConfig {
 }
