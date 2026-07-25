@@ -8,9 +8,18 @@ import org.springframework.stereotype.Service;
 
 import com.vesti.backend.dto.request.CoordinationCreateRequest;
 import com.vesti.backend.dto.response.CoordinationResponse;
+import com.vesti.backend.entity.Clothing;
 import com.vesti.backend.entity.Coordination;
+import com.vesti.backend.entity.CoordinationClothing;
 import com.vesti.backend.entity.User;
+import com.vesti.backend.exception.ClothingAccessDeniedException;
+import com.vesti.backend.exception.ClothingNotFoundException;
+import com.vesti.backend.exception.CoordinationAccessDeniedException;
+import com.vesti.backend.exception.CoordinationNotFoundException;
+import com.vesti.backend.exception.DuplicateCoordinationClothingException;
 import com.vesti.backend.exception.UserNotFoundException;
+import com.vesti.backend.repository.ClothingRepository;
+import com.vesti.backend.repository.CoordinationClothingRepository;
 import com.vesti.backend.repository.CoordinationRepository;
 import com.vesti.backend.repository.UserRepository;
 
@@ -22,6 +31,8 @@ public class CoordinationService {
 
     private final CoordinationRepository coordinationRepository;
     private final UserRepository userRepository;
+    private final ClothingRepository clothingRepository;
+    private final CoordinationClothingRepository coordinationClothingRepository;
 
     // 코디 등록
     public CoordinationResponse createCoordination(
@@ -54,6 +65,52 @@ public class CoordinationService {
                 .toList();
     }
 
+    // 코디에 옷 추가
+    public CoordinationResponse addClothingToCoordination(
+            Long coordinationId,
+            Long clothingId) {
+
+        User user = getCurrentUser();
+
+        Coordination coordination =
+                coordinationRepository.findById(coordinationId)
+                        .orElseThrow(CoordinationNotFoundException::new);
+
+        Clothing clothing =
+                clothingRepository.findById(clothingId)
+                        .orElseThrow(ClothingNotFoundException::new);
+
+        // 현재 사용자의 코디인지 확인
+        if (!coordination.getUser().getId().equals(user.getId())) {
+            throw new CoordinationAccessDeniedException();
+        }
+
+        // 현재 사용자의 옷인지 확인
+        if (!clothing.getUser().getId().equals(user.getId())) {
+            throw new ClothingAccessDeniedException();
+        }
+
+        boolean alreadyExists = coordinationClothingRepository
+                .findByCoordinationAndClothing(coordination, clothing)
+                .isPresent();
+
+        // 같은 옷 중복 추가 방지
+        if (alreadyExists) {
+            throw new DuplicateCoordinationClothingException();
+        }
+
+        CoordinationClothing coordinationClothing =
+                CoordinationClothing.builder()
+                        .coordination(coordination)
+                        .clothing(clothing)
+                        .build();
+
+        coordinationClothingRepository.save(coordinationClothing);
+
+        return new CoordinationResponse(coordination);
+    }
+
+    // 현재 로그인한 사용자 조회
     private User getCurrentUser() {
 
         Authentication authentication =
