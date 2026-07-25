@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import com.vesti.backend.dto.request.ClothesCreateRequest;
-import com.vesti.backend.dto.request.ClothesUpdateRequest;
-import com.vesti.backend.dto.response.ClothesResponse;
+import com.vesti.backend.dto.request.ClothingCreateRequest;
+import com.vesti.backend.dto.request.ClothingUpdateRequest;
+import com.vesti.backend.dto.response.ClothingResponse;
 import com.vesti.backend.service.ClothingService;
 
 import jakarta.validation.Valid;
@@ -22,17 +22,17 @@ public class ClothingController {
     private final ClothingService clothingService;
 
     @GetMapping
-    public List<ClothesResponse> getAllClothes() {
+    public List<ClothingResponse> getAllClothes() {
         return clothingService.getAllClothes();
     }
 
     @GetMapping("/page")
-    public Page<ClothesResponse> getClothesPage(Pageable pageable) {
+    public Page<ClothingResponse> getClothesPage(Pageable pageable) {
         return clothingService.getClothesPage(pageable);
     }
 
     @GetMapping("/search")
-    public List<ClothesResponse> searchClothes(
+    public List<ClothingResponse> searchClothes(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String season,
             @RequestParam(required = false) String color) {
@@ -44,23 +44,23 @@ public class ClothingController {
     }
 
     @GetMapping("/{id}")
-    public ClothesResponse getClothesById(
+    public ClothingResponse getClothesById(
             @PathVariable Long id) {
 
         return clothingService.getClothesById(id);
     }
 
     @PostMapping
-    public ClothesResponse createClothes(
-            @Valid @RequestBody ClothesCreateRequest request) {
+    public ClothingResponse createClothes(
+            @Valid @RequestBody ClothingCreateRequest request) {
 
         return clothingService.createClothes(request);
     }
 
     @PutMapping("/{id}")
-    public ClothesResponse updateClothes(
+    public ClothingResponse updateClothes(
             @PathVariable Long id,
-            @Valid @RequestBody ClothesUpdateRequest request) {
+            @Valid @RequestBody ClothingUpdateRequest request) {
 
         return clothingService.updateClothes(id, request);
     }

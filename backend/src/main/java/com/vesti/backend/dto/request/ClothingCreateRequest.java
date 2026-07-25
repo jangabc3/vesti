@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ClothesCreateRequest {
+public class ClothingCreateRequest {
 
     @NotBlank(message = "옷 이름은 필수입니다.")
     private String name;

@@ -13,9 +13,9 @@ import com.vesti.backend.exception.ClothingAccessDeniedException;
 import com.vesti.backend.exception.ClothingNotFoundException;
 import com.vesti.backend.entity.User;
 import com.vesti.backend.repository.UserRepository;
-import com.vesti.backend.dto.request.ClothesCreateRequest;
-import com.vesti.backend.dto.request.ClothesUpdateRequest;
-import com.vesti.backend.dto.response.ClothesResponse;
+import com.vesti.backend.dto.request.ClothingCreateRequest;
+import com.vesti.backend.dto.request.ClothingUpdateRequest;
+import com.vesti.backend.dto.response.ClothingResponse;
 import com.vesti.backend.entity.Clothing;
 import com.vesti.backend.repository.ClothingRepository;
 
@@ -29,7 +29,7 @@ public class ClothingService {
     private final UserRepository userRepository;
 
     // 옷 등록
-    public ClothesResponse createClothes(ClothesCreateRequest request) {
+    public ClothingResponse createClothes(ClothingCreateRequest request) {
 
         User user = getCurrentUser();
 
@@ -43,33 +43,33 @@ public class ClothingService {
 
         Clothing savedClothing = clothingRepository.save(clothing);
 
-        return new ClothesResponse(savedClothing);
+        return new ClothingResponse(savedClothing);
     }
 
     // 전체 옷 조회
-    public List<ClothesResponse> getAllClothes() {
+    public List<ClothingResponse> getAllClothes() {
 
         User user = getCurrentUser();
 
         List<Clothing> clothingList = clothingRepository.findByUser(user);
 
         return clothingList.stream()
-                .map(ClothesResponse::new)
+                .map(ClothingResponse::new)
                 .toList();
     }
 
     // 옷 목록 페이지 조회
-    public Page<ClothesResponse> getClothesPage(Pageable pageable) {
+    public Page<ClothingResponse> getClothesPage(Pageable pageable) {
 
         User user = getCurrentUser();
 
         Page<Clothing> clothingPage = clothingRepository.findByUser(user, pageable);
 
-        return clothingPage.map(ClothesResponse::new);
+        return clothingPage.map(ClothingResponse::new);
     }
 
     // 카테고리, 계절, 색상 검색
-    public List<ClothesResponse> searchClothes(
+    public List<ClothingResponse> searchClothes(
             String category,
             String season,
             String color) {
@@ -83,22 +83,22 @@ public class ClothingService {
                 color);
 
         return clothingList.stream()
-                .map(ClothesResponse::new)
+                .map(ClothingResponse::new)
                 .toList();
     }
 
     // 옷 상세 조회
-    public ClothesResponse getClothesById(Long id) {
+    public ClothingResponse getClothesById(Long id) {
 
         Clothing clothing = getMyClothing(id);
 
-        return new ClothesResponse(clothing);
+        return new ClothingResponse(clothing);
     }
 
     // 옷 수정
-    public ClothesResponse updateClothes(
+    public ClothingResponse updateClothes(
             Long id,
-            ClothesUpdateRequest request) {
+            ClothingUpdateRequest request) {
 
         Clothing clothing = getMyClothing(id);
 
@@ -109,7 +109,7 @@ public class ClothingService {
 
         Clothing updatedClothing = clothingRepository.save(clothing);
 
-        return new ClothesResponse(updatedClothing);
+        return new ClothingResponse(updatedClothing);
     }
 
     // 옷 삭제
