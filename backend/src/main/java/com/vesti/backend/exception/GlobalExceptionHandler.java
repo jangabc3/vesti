@@ -64,4 +64,29 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.FORBIDDEN)
                                 .body(response);
         }
+
+        @ExceptionHandler(UserNotFoundException.class)
+        public ResponseEntity<Map<String, String>> handleUserNotFound(
+                        UserNotFoundException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(response);
+        }
+
+        @ExceptionHandler(DuplicateEmailException.class)
+        public ResponseEntity<Map<String, String>> handleDuplicateEmail(
+                        DuplicateEmailException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.CONFLICT)
+                                .body(response);
+        }
+
 }

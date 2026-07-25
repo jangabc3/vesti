@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.vesti.backend.exception.UserNotFoundException;
 import com.vesti.backend.exception.ClothingAccessDeniedException;
 import com.vesti.backend.exception.ClothingNotFoundException;
 import com.vesti.backend.entity.User;
@@ -141,7 +142,7 @@ public class ClothingService {
         String email = authentication.getName();
 
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-    }
+                .orElseThrow(UserNotFoundException::new);
 
+    }
 }
