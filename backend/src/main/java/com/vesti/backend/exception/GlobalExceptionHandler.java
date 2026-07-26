@@ -141,6 +141,40 @@ public class GlobalExceptionHandler {
         }
 
         /*
+         * 요청한 코디 기록을 찾을 수 없는 경우
+         *
+         * HTTP 상태 코드: 404 Not Found
+         */
+        @ExceptionHandler(CoordinationRecordNotFoundException.class)
+        public ResponseEntity<Map<String, String>> handleCoordinationRecordNotFound(
+                        CoordinationRecordNotFoundException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(response);
+        }
+
+        /*
+         * 다른 사용자의 코디 기록에 접근한 경우
+         *
+         * HTTP 상태 코드: 403 Forbidden
+         */
+        @ExceptionHandler(CoordinationRecordAccessDeniedException.class)
+        public ResponseEntity<Map<String, String>> handleCoordinationRecordAccessDenied(
+                        CoordinationRecordAccessDeniedException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.FORBIDDEN)
+                                .body(response);
+        }
+
+        /*
          * 다른 사용자의 코디에 접근한 경우
          *
          * HTTP 상태 코드: 403 Forbidden
