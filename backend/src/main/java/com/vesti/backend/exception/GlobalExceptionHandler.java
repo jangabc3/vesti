@@ -241,4 +241,21 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.NOT_FOUND)
                                 .body(response);
         }
+
+        /*
+         * 시작 날짜가 종료 날짜보다 늦은 경우
+         *
+         * HTTP 상태 코드: 400 Bad Request
+         */
+        @ExceptionHandler(InvalidDateRangeException.class)
+        public ResponseEntity<Map<String, String>> handleInvalidDateRange(
+                        InvalidDateRangeException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
 }

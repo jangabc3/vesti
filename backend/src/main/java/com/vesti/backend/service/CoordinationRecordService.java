@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.vesti.backend.dto.request.CoordinationRecordCreateRequest;
 import com.vesti.backend.dto.request.CoordinationRecordUpdateRequest;
 import com.vesti.backend.dto.response.CoordinationRecordResponse;
@@ -20,6 +19,7 @@ import com.vesti.backend.exception.CoordinationRecordAccessDeniedException;
 import com.vesti.backend.exception.CoordinationRecordNotFoundException;
 import com.vesti.backend.exception.DuplicateCoordinationRecordException;
 import com.vesti.backend.exception.UserNotFoundException;
+import com.vesti.backend.exception.InvalidDateRangeException;
 import com.vesti.backend.repository.CoordinationRecordRepository;
 import com.vesti.backend.repository.CoordinationRepository;
 import com.vesti.backend.repository.UserRepository;
@@ -76,6 +76,8 @@ public class CoordinationRecordService {
         public List<CoordinationRecordResponse> getCoordinationRecords(
                         LocalDate startDate,
                         LocalDate endDate) {
+
+                validateDateRange(startDate, endDate);
 
                 User user = getCurrentUser();
 
@@ -152,6 +154,16 @@ public class CoordinationRecordService {
                 }
 
                 coordinationRecordRepository.delete(record);
+        }
+
+        // 날짜 범위 검증
+        private void validateDateRange(
+                        LocalDate startDate,
+                        LocalDate endDate) {
+
+                if (startDate.isAfter(endDate)) {
+                        throw new InvalidDateRangeException();
+                }
         }
 
         // 현재 로그인한 사용자 조회
