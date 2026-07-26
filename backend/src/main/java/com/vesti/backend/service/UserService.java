@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vesti.backend.config.JwtProvider;
 import com.vesti.backend.dto.request.UserLoginRequest;
 import com.vesti.backend.dto.request.UserSignupRequest;
+import com.vesti.backend.dto.request.ChangePasswordRequest;
 import com.vesti.backend.dto.response.LoginResponse;
 import com.vesti.backend.dto.response.UserResponse;
 import com.vesti.backend.entity.User;
@@ -83,5 +84,28 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
 
         return new UserResponse(user);
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        String email = authentication.getName();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+
+        if (!passwordEncoder.matches(
+                request.getCurrentPassword(),
+                user.getPassword())) {
+
+            throw new InvalidLoginException("Current password is incorrect.");
+        }
+
+        user.changePassword(
+                passwordEncoder.encode(request.getNewPassword()));
     }
 }
