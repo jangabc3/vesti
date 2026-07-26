@@ -51,6 +51,13 @@ public class CoordinationRecordController {
                 endDate);
     }
 
+    // 오늘의 코디 조회
+    @GetMapping("/today")
+    public CoordinationRecordResponse getTodayCoordinationRecord() {
+
+        return coordinationRecordService.getTodayCoordinationRecord();
+    }
+
     // 코디 기록 수정
     @PutMapping("/{recordId}")
     public CoordinationRecordResponse updateCoordinationRecord(

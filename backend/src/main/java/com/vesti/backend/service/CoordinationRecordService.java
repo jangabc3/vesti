@@ -156,6 +156,21 @@ public class CoordinationRecordService {
                 coordinationRecordRepository.delete(record);
         }
 
+        // 오늘의 코디 조회
+        @Transactional(readOnly = true)
+        public CoordinationRecordResponse getTodayCoordinationRecord() {
+
+                User user = getCurrentUser();
+
+                CoordinationRecord record = coordinationRecordRepository
+                                .findByUserAndDate(
+                                                user,
+                                                LocalDate.now())
+                                .orElseThrow(CoordinationRecordNotFoundException::new);
+
+                return new CoordinationRecordResponse(record);
+        }
+
         // 날짜 범위 검증
         private void validateDateRange(
                         LocalDate startDate,
