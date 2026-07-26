@@ -16,6 +16,7 @@ import com.vesti.backend.entity.User;
 import com.vesti.backend.exception.DuplicateEmailException;
 import com.vesti.backend.exception.InvalidLoginException;
 import com.vesti.backend.exception.UserNotFoundException;
+import com.vesti.backend.exception.CurrentPasswordMismatchException;
 import com.vesti.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -102,7 +103,7 @@ public class UserService {
                 request.getCurrentPassword(),
                 user.getPassword())) {
 
-            throw new InvalidLoginException("Current password is incorrect.");
+            throw new CurrentPasswordMismatchException();
         }
 
         user.changePassword(

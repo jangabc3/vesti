@@ -258,4 +258,21 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.BAD_REQUEST)
                                 .body(response);
         }
+
+        /*
+         * 현재 비밀번호가 일치하지 않는 경우
+         *
+         * HTTP 상태 코드: 400 Bad Request
+         */
+        @ExceptionHandler(CurrentPasswordMismatchException.class)
+        public ResponseEntity<Map<String, String>> handleCurrentPasswordMismatch(
+                        CurrentPasswordMismatchException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.BAD_REQUEST)
+                                .body(response);
+        }
 }
