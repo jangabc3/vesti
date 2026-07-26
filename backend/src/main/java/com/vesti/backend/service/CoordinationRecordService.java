@@ -8,16 +8,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vesti.backend.exception.CoordinationRecordAccessDeniedException;
-import com.vesti.backend.exception.CoordinationRecordNotFoundException;
-import com.vesti.backend.dto.request.CoordinationRecordUpdateRequest;
 import com.vesti.backend.dto.request.CoordinationRecordCreateRequest;
+import com.vesti.backend.dto.request.CoordinationRecordUpdateRequest;
 import com.vesti.backend.dto.response.CoordinationRecordResponse;
 import com.vesti.backend.entity.Coordination;
 import com.vesti.backend.entity.CoordinationRecord;
 import com.vesti.backend.entity.User;
 import com.vesti.backend.exception.CoordinationAccessDeniedException;
 import com.vesti.backend.exception.CoordinationNotFoundException;
+import com.vesti.backend.exception.CoordinationRecordAccessDeniedException;
+import com.vesti.backend.exception.CoordinationRecordNotFoundException;
+import com.vesti.backend.exception.DuplicateCoordinationRecordException;
 import com.vesti.backend.exception.UserNotFoundException;
 import com.vesti.backend.repository.CoordinationRecordRepository;
 import com.vesti.backend.repository.CoordinationRepository;
@@ -39,6 +40,15 @@ public class CoordinationRecordService {
                         CoordinationRecordCreateRequest request) {
 
                 User user = getCurrentUser();
+
+                // 같은 날짜의 기록이 이미 있는지 확인
+                coordinationRecordRepository
+                                .findByUserAndDate(
+                                                user,
+                                                request.getDate())
+                                .ifPresent(record -> {
+                                        throw new DuplicateCoordinationRecordException();
+                                });
 
                 Coordination coordination = coordinationRepository
                                 .findById(request.getCoordinationId())
@@ -97,6 +107,17 @@ public class CoordinationRecordService {
                                 || !record.getUser().getId().equals(user.getId())) {
                         throw new CoordinationRecordAccessDeniedException();
                 }
+
+                // 다른 기록과 날짜가 중복되는지 확인
+                coordinationRecordRepository
+                                .findByUserAndDateAndIdNot(
+                                                user,
+                                                request.getDate(),
+                                                record.getId())
+                                .ifPresent(existing -> {
+                                        throw new DuplicateCoordinationRecordException();
+                                });
+
                 Coordination coordination = coordinationRepository
                                 .findById(request.getCoordinationId())
                                 .orElseThrow(CoordinationNotFoundException::new);

@@ -209,6 +209,23 @@ public class GlobalExceptionHandler {
         }
 
         /*
+         * 같은 날짜에 이미 코디 기록이 존재하는 경우
+         *
+         * HTTP 상태 코드: 409 Conflict
+         */
+        @ExceptionHandler(DuplicateCoordinationRecordException.class)
+        public ResponseEntity<Map<String, String>> handleDuplicateCoordinationRecord(
+                        DuplicateCoordinationRecordException exception) {
+
+                Map<String, String> response = Map.of(
+                                "message", exception.getMessage());
+
+                return ResponseEntity
+                                .status(HttpStatus.CONFLICT)
+                                .body(response);
+        }
+
+        /*
          * 코디에 해당 옷이 포함되어 있지 않은 경우
          *
          * HTTP 상태 코드: 404 Not Found
