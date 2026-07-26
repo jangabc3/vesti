@@ -1,8 +1,10 @@
 package com.vesti.backend.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vesti.backend.config.JwtProvider;
 import com.vesti.backend.dto.request.UserLoginRequest;
@@ -25,6 +27,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
+    // 회원가입
+    @Transactional
     public UserResponse signup(UserSignupRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -41,17 +45,20 @@ public class UserService {
         return new UserResponse(savedUser);
     }
 
+    // 로그인
+    @Transactional(readOnly = true)
     public LoginResponse login(UserLoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() ->
-                        new InvalidLoginException("Invalid email or password"));
+                .orElseThrow(() -> new InvalidLoginException(
+                        "Invalid email or password"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword())) {
 
-            throw new InvalidLoginException("Invalid email or password");
+            throw new InvalidLoginException(
+                    "Invalid email or password");
         }
 
         String token = jwtProvider.generateToken(user.getEmail());
@@ -62,7 +69,15 @@ public class UserService {
                 token);
     }
 
-    public UserResponse getCurrentUser(String email) {
+    // 현재 로그인한 사용자 조회
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser() {
+
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        String email = authentication.getName();
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);

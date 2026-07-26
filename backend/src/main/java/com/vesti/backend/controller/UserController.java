@@ -1,11 +1,10 @@
 package com.vesti.backend.controller;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import com.vesti.backend.dto.request.UserLoginRequest;
 import com.vesti.backend.dto.request.UserSignupRequest;
@@ -24,21 +23,21 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public UserResponse signup(@Valid @RequestBody UserSignupRequest request) {
+    public UserResponse signup(
+            @Valid @RequestBody UserSignupRequest request) {
+
         return userService.signup(request);
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody UserLoginRequest request) {
+    public LoginResponse login(
+            @Valid @RequestBody UserLoginRequest request) {
+
         return userService.login(request);
     }
 
     @GetMapping("/me")
-    public UserResponse me(Authentication authentication) {
-
-        String email = authentication.getName();
-
-        return userService.getCurrentUser(email);
+    public UserResponse me() {
+        return userService.getCurrentUser();
     }
-
 }
