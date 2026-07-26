@@ -1,22 +1,20 @@
 package com.vesti.backend.service;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vesti.backend.config.CurrentUserProvider;
 import com.vesti.backend.config.JwtProvider;
+import com.vesti.backend.dto.request.ChangePasswordRequest;
 import com.vesti.backend.dto.request.UserLoginRequest;
 import com.vesti.backend.dto.request.UserSignupRequest;
-import com.vesti.backend.dto.request.ChangePasswordRequest;
 import com.vesti.backend.dto.response.LoginResponse;
 import com.vesti.backend.dto.response.UserResponse;
 import com.vesti.backend.entity.User;
+import com.vesti.backend.exception.CurrentPasswordMismatchException;
 import com.vesti.backend.exception.DuplicateEmailException;
 import com.vesti.backend.exception.InvalidLoginException;
-import com.vesti.backend.exception.UserNotFoundException;
-import com.vesti.backend.exception.CurrentPasswordMismatchException;
 import com.vesti.backend.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final CurrentUserProvider currentUserProvider;
 
     // 회원가입
     @Transactional
@@ -73,29 +72,16 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser() {
 
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+        User user = currentUserProvider.getCurrentUser();
 
         return new UserResponse(user);
     }
 
+    // 비밀번호 변경
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
 
-        Authentication authentication = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
+        User user = currentUserProvider.getCurrentUser();
 
         if (!passwordEncoder.matches(
                 request.getCurrentPassword(),
