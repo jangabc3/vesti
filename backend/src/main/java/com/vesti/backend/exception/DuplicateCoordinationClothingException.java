@@ -1,8 +1,8 @@
 package com.vesti.backend.exception;
 
-public class DuplicateCoordinationClothingException extends RuntimeException {
+public class DuplicateCoordinationClothingException extends BusinessException {
 
     public DuplicateCoordinationClothingException() {
-        super("이미 코디에 추가된 옷입니다.");
+        super(ErrorCode.DUPLICATE_COORDINATION_CLOTHING);
     }
 }

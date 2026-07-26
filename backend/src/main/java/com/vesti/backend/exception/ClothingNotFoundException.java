@@ -1,8 +1,8 @@
 package com.vesti.backend.exception;
 
-public class ClothingNotFoundException extends RuntimeException {
+public class ClothingNotFoundException extends BusinessException {
 
     public ClothingNotFoundException() {
-        super("옷을 찾을 수 없습니다.");
+        super(ErrorCode.CLOTHING_NOT_FOUND);
     }
 }

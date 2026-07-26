@@ -1,9 +1,8 @@
 package com.vesti.backend.exception;
 
-public class InvalidLoginException extends RuntimeException {
+public class InvalidLoginException extends BusinessException {
 
-    public InvalidLoginException(String message) {
-        super(message);
+    public InvalidLoginException() {
+        super(ErrorCode.INVALID_LOGIN);
     }
-
 }

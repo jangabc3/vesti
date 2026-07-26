@@ -52,15 +52,13 @@ public class UserService {
     public LoginResponse login(UserLoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidLoginException(
-                        "Invalid email or password"));
+                .orElseThrow(InvalidLoginException::new);
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword())) {
 
-            throw new InvalidLoginException(
-                    "Invalid email or password");
+            throw new InvalidLoginException();
         }
 
         String token = jwtProvider.generateToken(user.getEmail());

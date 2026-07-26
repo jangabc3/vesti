@@ -1,8 +1,8 @@
 package com.vesti.backend.exception;
 
-public class CoordinationRecordNotFoundException extends RuntimeException {
+public class CoordinationRecordNotFoundException extends BusinessException {
 
     public CoordinationRecordNotFoundException() {
-        super("코디 기록을 찾을 수 없습니다.");
+        super(ErrorCode.COORDINATION_RECORD_NOT_FOUND);
     }
 }

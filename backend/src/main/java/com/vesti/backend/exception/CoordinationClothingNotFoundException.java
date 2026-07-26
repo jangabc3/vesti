@@ -1,9 +1,8 @@
 package com.vesti.backend.exception;
 
-public class CoordinationClothingNotFoundException
-        extends RuntimeException {
+public class CoordinationClothingNotFoundException extends BusinessException {
 
     public CoordinationClothingNotFoundException() {
-        super("코디에 해당 옷이 포함되어 있지 않습니다.");
+        super(ErrorCode.COORDINATION_CLOTHING_NOT_FOUND);
     }
 }

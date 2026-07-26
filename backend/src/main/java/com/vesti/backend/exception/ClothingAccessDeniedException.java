@@ -1,8 +1,8 @@
 package com.vesti.backend.exception;
 
-public class ClothingAccessDeniedException extends RuntimeException {
+public class ClothingAccessDeniedException extends BusinessException {
 
     public ClothingAccessDeniedException() {
-        super("권한이 없습니다.");
+        super(ErrorCode.CLOTHING_ACCESS_DENIED);
     }
 }

@@ -1,9 +1,7 @@
 package com.vesti.backend.exception;
 
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,267 +10,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        /*
-         * DTO의 유효성 검사 실패 처리
-         *
-         * 예:
-         * 
-         * @NotBlank가 붙은 필드에 빈 문자열이 들어온 경우
-         *
-         * HTTP 상태 코드: 400 Bad Request
-         */
+        // DTO 유효성 검사 실패
         @ExceptionHandler(MethodArgumentNotValidException.class)
-        public ResponseEntity<Map<String, String>> handleValidationException(
-                        MethodArgumentNotValidException exception) {
+        public ResponseEntity<ErrorResponse> handleValidationException(
+                        MethodArgumentNotValidException exception,
+                        HttpServletRequest request) {
 
-                Map<String, String> errors = new HashMap<>();
+                ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
 
-                exception.getBindingResult()
-                                .getFieldErrors()
-                                .forEach(error -> errors.put(
-                                                error.getField(),
-                                                error.getDefaultMessage()));
-
-                return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(errors);
-        }
-
-        /*
-         * 로그인 정보가 올바르지 않은 경우
-         *
-         * HTTP 상태 코드: 401 Unauthorized
-         */
-        @ExceptionHandler(InvalidLoginException.class)
-        public ResponseEntity<Map<String, String>> handleInvalidLogin(
-                        InvalidLoginException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
+                ErrorResponse response = ErrorResponse.of(
+                                errorCode,
+                                request.getRequestURI(),
+                                exception.getBindingResult().getFieldErrors());
 
                 return ResponseEntity
-                                .status(HttpStatus.UNAUTHORIZED)
+                                .status(errorCode.getStatus())
                                 .body(response);
         }
 
-        /*
-         * 요청한 옷을 찾을 수 없는 경우
-         *
-         * HTTP 상태 코드: 404 Not Found
-         */
-        @ExceptionHandler(ClothingNotFoundException.class)
-        public ResponseEntity<Map<String, String>> handleClothingNotFound(
-                        ClothingNotFoundException exception) {
+        // 모든 비즈니스 예외 처리
+        @ExceptionHandler(BusinessException.class)
+        public ResponseEntity<ErrorResponse> handleBusinessException(
+                        BusinessException exception,
+                        HttpServletRequest request) {
 
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
+                ErrorCode errorCode = exception.getErrorCode();
 
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(response);
-        }
-
-        /*
-         * 다른 사용자의 옷에 접근한 경우
-         *
-         * HTTP 상태 코드: 403 Forbidden
-         */
-        @ExceptionHandler(ClothingAccessDeniedException.class)
-        public ResponseEntity<Map<String, String>> handleClothingAccessDenied(
-                        ClothingAccessDeniedException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
+                ErrorResponse response = ErrorResponse.of(
+                                errorCode,
+                                request.getRequestURI());
 
                 return ResponseEntity
-                                .status(HttpStatus.FORBIDDEN)
-                                .body(response);
-        }
-
-        /*
-         * 사용자를 찾을 수 없는 경우
-         *
-         * HTTP 상태 코드: 404 Not Found
-         */
-        @ExceptionHandler(UserNotFoundException.class)
-        public ResponseEntity<Map<String, String>> handleUserNotFound(
-                        UserNotFoundException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(response);
-        }
-
-        /*
-         * 이미 가입된 이메일로 회원가입을 시도한 경우
-         *
-         * HTTP 상태 코드: 409 Conflict
-         */
-        @ExceptionHandler(DuplicateEmailException.class)
-        public ResponseEntity<Map<String, String>> handleDuplicateEmail(
-                        DuplicateEmailException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.CONFLICT)
-                                .body(response);
-        }
-
-        /*
-         * 요청한 코디를 찾을 수 없는 경우
-         *
-         * HTTP 상태 코드: 404 Not Found
-         */
-        @ExceptionHandler(CoordinationNotFoundException.class)
-        public ResponseEntity<Map<String, String>> handleCoordinationNotFound(
-                        CoordinationNotFoundException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(response);
-        }
-
-        /*
-         * 요청한 코디 기록을 찾을 수 없는 경우
-         *
-         * HTTP 상태 코드: 404 Not Found
-         */
-        @ExceptionHandler(CoordinationRecordNotFoundException.class)
-        public ResponseEntity<Map<String, String>> handleCoordinationRecordNotFound(
-                        CoordinationRecordNotFoundException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(response);
-        }
-
-        /*
-         * 다른 사용자의 코디 기록에 접근한 경우
-         *
-         * HTTP 상태 코드: 403 Forbidden
-         */
-        @ExceptionHandler(CoordinationRecordAccessDeniedException.class)
-        public ResponseEntity<Map<String, String>> handleCoordinationRecordAccessDenied(
-                        CoordinationRecordAccessDeniedException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.FORBIDDEN)
-                                .body(response);
-        }
-
-        /*
-         * 다른 사용자의 코디에 접근한 경우
-         *
-         * HTTP 상태 코드: 403 Forbidden
-         */
-        @ExceptionHandler(CoordinationAccessDeniedException.class)
-        public ResponseEntity<Map<String, String>> handleCoordinationAccessDenied(
-                        CoordinationAccessDeniedException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.FORBIDDEN)
-                                .body(response);
-        }
-
-        /*
-         * 이미 코디에 들어 있는 옷을 다시 추가한 경우
-         *
-         * HTTP 상태 코드: 409 Conflict
-         */
-        @ExceptionHandler(DuplicateCoordinationClothingException.class)
-        public ResponseEntity<Map<String, String>> handleDuplicateCoordinationClothing(
-                        DuplicateCoordinationClothingException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.CONFLICT)
-                                .body(response);
-        }
-
-        /*
-         * 같은 날짜에 이미 코디 기록이 존재하는 경우
-         *
-         * HTTP 상태 코드: 409 Conflict
-         */
-        @ExceptionHandler(DuplicateCoordinationRecordException.class)
-        public ResponseEntity<Map<String, String>> handleDuplicateCoordinationRecord(
-                        DuplicateCoordinationRecordException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.CONFLICT)
-                                .body(response);
-        }
-
-        /*
-         * 코디에 해당 옷이 포함되어 있지 않은 경우
-         *
-         * HTTP 상태 코드: 404 Not Found
-         */
-        @ExceptionHandler(CoordinationClothingNotFoundException.class)
-        public ResponseEntity<Map<String, String>> handleCoordinationClothingNotFound(
-                        CoordinationClothingNotFoundException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.NOT_FOUND)
-                                .body(response);
-        }
-
-        /*
-         * 시작 날짜가 종료 날짜보다 늦은 경우
-         *
-         * HTTP 상태 코드: 400 Bad Request
-         */
-        @ExceptionHandler(InvalidDateRangeException.class)
-        public ResponseEntity<Map<String, String>> handleInvalidDateRange(
-                        InvalidDateRangeException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
-                                .body(response);
-        }
-
-        /*
-         * 현재 비밀번호가 일치하지 않는 경우
-         *
-         * HTTP 상태 코드: 400 Bad Request
-         */
-        @ExceptionHandler(CurrentPasswordMismatchException.class)
-        public ResponseEntity<Map<String, String>> handleCurrentPasswordMismatch(
-                        CurrentPasswordMismatchException exception) {
-
-                Map<String, String> response = Map.of(
-                                "message", exception.getMessage());
-
-                return ResponseEntity
-                                .status(HttpStatus.BAD_REQUEST)
+                                .status(errorCode.getStatus())
                                 .body(response);
         }
 }

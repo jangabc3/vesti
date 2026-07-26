@@ -1,8 +1,8 @@
 package com.vesti.backend.exception;
 
-public class CoordinationAccessDeniedException extends RuntimeException {
+public class CoordinationAccessDeniedException extends BusinessException {
 
     public CoordinationAccessDeniedException() {
-        super("해당 코디에 접근할 권한이 없습니다.");
+        super(ErrorCode.COORDINATION_ACCESS_DENIED);
     }
 }
