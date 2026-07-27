@@ -5,11 +5,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vesti.backend.config.CurrentUserProvider;
 import com.vesti.backend.dto.request.ClothingCreateRequest;
 import com.vesti.backend.dto.request.ClothingUpdateRequest;
 import com.vesti.backend.dto.response.ClothingResponse;
@@ -17,9 +16,7 @@ import com.vesti.backend.entity.Clothing;
 import com.vesti.backend.entity.User;
 import com.vesti.backend.exception.ClothingAccessDeniedException;
 import com.vesti.backend.exception.ClothingNotFoundException;
-import com.vesti.backend.exception.UserNotFoundException;
 import com.vesti.backend.repository.ClothingRepository;
-import com.vesti.backend.repository.UserRepository;
 import com.vesti.backend.repository.specification.ClothingSpecification;
 
 import lombok.RequiredArgsConstructor;
@@ -30,14 +27,14 @@ import lombok.RequiredArgsConstructor;
 public class ClothingService {
 
     private final ClothingRepository clothingRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     // 옷 등록
     @Transactional
     public ClothingResponse createClothes(
             ClothingCreateRequest request) {
 
-        User user = getCurrentUser();
+        User user = currentUserProvider.getCurrentUser();
 
         Clothing clothing = Clothing.builder()
                 .user(user)
@@ -59,7 +56,7 @@ public class ClothingService {
             String color,
             Pageable pageable) {
 
-        User user = getCurrentUser();
+        User user = currentUserProvider.getCurrentUser();
 
         Pageable sortedPageable = applyDefaultSort(pageable);
 
@@ -137,7 +134,7 @@ public class ClothingService {
         Clothing clothing = clothingRepository.findById(id)
                 .orElseThrow(ClothingNotFoundException::new);
 
-        User user = getCurrentUser();
+        User user = currentUserProvider.getCurrentUser();
 
         if (clothing.getUser() == null
                 || !clothing.getUser().getId().equals(user.getId())) {
@@ -146,18 +143,5 @@ public class ClothingService {
         }
 
         return clothing;
-    }
-
-    // 현재 로그인한 사용자 조회
-    private User getCurrentUser() {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext()
-                        .getAuthentication();
-
-        String email = authentication.getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(UserNotFoundException::new);
     }
 }
