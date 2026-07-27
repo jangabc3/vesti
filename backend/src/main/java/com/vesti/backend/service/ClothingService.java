@@ -1,11 +1,10 @@
 package com.vesti.backend.service;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,6 +20,7 @@ import com.vesti.backend.exception.ClothingNotFoundException;
 import com.vesti.backend.exception.UserNotFoundException;
 import com.vesti.backend.repository.ClothingRepository;
 import com.vesti.backend.repository.UserRepository;
+import com.vesti.backend.repository.specification.ClothingSpecification;
 
 import lombok.RequiredArgsConstructor;
 
@@ -52,50 +52,29 @@ public class ClothingService {
         return new ClothingResponse(savedClothing);
     }
 
-    // 전체 옷 조회: 최신 등록순
-    public List<ClothingResponse> getAllClothes() {
-
-        User user = getCurrentUser();
-
-        List<Clothing> clothingList = clothingRepository.findByUserOrderByCreatedAtDesc(user);
-
-        return clothingList.stream()
-                .map(ClothingResponse::new)
-                .toList();
-    }
-
-    // 옷 목록 페이지 조회
-    public Page<ClothingResponse> getClothesPage(
+    // 검색, 정렬, 페이지네이션 통합 조회
+    public Page<ClothingResponse> getClothes(
+            String category,
+            String season,
+            String color,
             Pageable pageable) {
 
         User user = getCurrentUser();
 
         Pageable sortedPageable = applyDefaultSort(pageable);
 
-        Page<Clothing> clothingPage = clothingRepository.findByUser(
-                user,
-                sortedPageable);
+        Specification<Clothing> specification =
+                ClothingSpecification.belongsTo(user)
+                        .and(ClothingSpecification.hasCategory(category))
+                        .and(ClothingSpecification.hasSeason(season))
+                        .and(ClothingSpecification.hasColor(color));
+
+        Page<Clothing> clothingPage =
+                clothingRepository.findAll(
+                        specification,
+                        sortedPageable);
 
         return clothingPage.map(ClothingResponse::new);
-    }
-
-    // 카테고리, 계절, 색상 검색: 최신 등록순
-    public List<ClothingResponse> searchClothes(
-            String category,
-            String season,
-            String color) {
-
-        User user = getCurrentUser();
-
-        List<Clothing> clothingList = clothingRepository.search(
-                user,
-                category,
-                season,
-                color);
-
-        return clothingList.stream()
-                .map(ClothingResponse::new)
-                .toList();
     }
 
     // 옷 상세 조회
@@ -125,7 +104,8 @@ public class ClothingService {
 
     // 옷 삭제
     @Transactional
-    public void deleteClothes(Long id) {
+    public void deleteClothes(
+            Long id) {
 
         Clothing clothing = getMyClothing(id);
 
@@ -151,7 +131,8 @@ public class ClothingService {
     }
 
     // 현재 사용자의 옷 조회 및 소유권 확인
-    private Clothing getMyClothing(Long id) {
+    private Clothing getMyClothing(
+            Long id) {
 
         Clothing clothing = clothingRepository.findById(id)
                 .orElseThrow(ClothingNotFoundException::new);
@@ -170,8 +151,9 @@ public class ClothingService {
     // 현재 로그인한 사용자 조회
     private User getCurrentUser() {
 
-        Authentication authentication = SecurityContextHolder.getContext()
-                .getAuthentication();
+        Authentication authentication =
+                SecurityContextHolder.getContext()
+                        .getAuthentication();
 
         String email = authentication.getName();
 
