@@ -13,10 +13,13 @@ import com.vesti.backend.entity.User;
 
 public interface ClothingRepository extends JpaRepository<Clothing, Long> {
 
-        List<Clothing> findByUser(User user);
+        // 사용자의 옷 전체 조회: 최신 등록순
+        List<Clothing> findByUserOrderByCreatedAtDesc(User user);
 
+        // 사용자의 옷 페이지 조회
         Page<Clothing> findByUser(User user, Pageable pageable);
 
+        // 카테고리, 계절, 색상 검색: 최신 등록순
         @Query("""
                         SELECT c
                         FROM Clothing c
@@ -24,6 +27,7 @@ public interface ClothingRepository extends JpaRepository<Clothing, Long> {
                         AND (:category IS NULL OR c.category = :category)
                         AND (:season IS NULL OR c.season = :season)
                         AND (:color IS NULL OR c.color = :color)
+                        ORDER BY c.createdAt DESC
                         """)
         List<Clothing> search(
                         @Param("user") User user,
