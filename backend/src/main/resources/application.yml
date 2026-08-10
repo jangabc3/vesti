@@ -18,3 +18,10 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 3600000
+
+# Supabase Storage
+supabase:
+  url: ${SUPABASE_URL}
+  secret-key: ${SUPABASE_SECRET_KEY}
+  storage:
+    bucket: clothing-images

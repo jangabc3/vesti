@@ -1,5 +1,6 @@
 package com.vesti.backend.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,7 @@ public class ClothingService {
 
     private final ClothingRepository clothingRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final SupabaseStorageService supabaseStorageService;
 
     // 옷 등록
     @Transactional
@@ -60,16 +62,14 @@ public class ClothingService {
 
         Pageable sortedPageable = applyDefaultSort(pageable);
 
-        Specification<Clothing> specification =
-                ClothingSpecification.belongsTo(user)
-                        .and(ClothingSpecification.hasCategory(category))
-                        .and(ClothingSpecification.hasSeason(season))
-                        .and(ClothingSpecification.hasColor(color));
+        Specification<Clothing> specification = ClothingSpecification.belongsTo(user)
+                .and(ClothingSpecification.hasCategory(category))
+                .and(ClothingSpecification.hasSeason(season))
+                .and(ClothingSpecification.hasColor(color));
 
-        Page<Clothing> clothingPage =
-                clothingRepository.findAll(
-                        specification,
-                        sortedPageable);
+        Page<Clothing> clothingPage = clothingRepository.findAll(
+                specification,
+                sortedPageable);
 
         return clothingPage.map(ClothingResponse::new);
     }
@@ -96,6 +96,27 @@ public class ClothingService {
         clothing.setColor(request.getColor());
         clothing.setSeason(request.getSeason());
 
+        return new ClothingResponse(clothing);
+    }
+
+    // 옷 이미지 업로드
+    @Transactional
+    public ClothingResponse uploadImage(
+            Long id,
+            MultipartFile file) {
+
+        // 1. 옷 존재 여부 + 현재 사용자 소유권 확인
+        Clothing clothing = getMyClothing(id);
+
+        // 2. Supabase Storage에 실제 이미지 업로드
+        String imageUrl = supabaseStorageService.upload(
+                file,
+                clothing.getUser().getId());
+
+        // 3. 반환받은 이미지 URL을 Clothing에 저장
+        clothing.setImageUrl(imageUrl);
+
+        // 4. 변경된 옷 정보 반환
         return new ClothingResponse(clothing);
     }
 
