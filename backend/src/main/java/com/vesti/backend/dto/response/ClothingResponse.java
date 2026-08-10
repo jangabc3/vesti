@@ -14,6 +14,8 @@ public class ClothingResponse {
     private String category;
     private String color;
     private String season;
+    private String imageUrl;
+
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -23,6 +25,7 @@ public class ClothingResponse {
         this.category = clothing.getCategory();
         this.color = clothing.getColor();
         this.season = clothing.getSeason();
+        this.imageUrl = clothing.getImageUrl();
         this.createdAt = clothing.getCreatedAt();
         this.updatedAt = clothing.getUpdatedAt();
     }

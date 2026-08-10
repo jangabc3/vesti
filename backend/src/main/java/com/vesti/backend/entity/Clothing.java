@@ -28,5 +28,6 @@ public class Clothing extends BaseEntity {
 
     private String season;
 
+    @Column(name = "image_url")
     private String imageUrl;
 }
