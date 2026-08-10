@@ -99,7 +99,7 @@ public class ClothingService {
         return new ClothingResponse(clothing);
     }
 
-    // 옷 이미지 업로드
+    // 옷 이미지 업로드 및 교체
     @Transactional
     public ClothingResponse uploadImage(
             Long id,
@@ -108,15 +108,25 @@ public class ClothingService {
         // 1. 옷 존재 여부 + 현재 사용자 소유권 확인
         Clothing clothing = getMyClothing(id);
 
-        // 2. Supabase Storage에 실제 이미지 업로드
-        String imageUrl = supabaseStorageService.upload(
+        // 2. 기존 이미지 URL 기억
+        String oldImageUrl = clothing.getImageUrl();
+
+        // 3. 새 이미지 먼저 업로드
+        String newImageUrl = supabaseStorageService.upload(
                 file,
                 clothing.getUser().getId());
 
-        // 3. 반환받은 이미지 URL을 Clothing에 저장
-        clothing.setImageUrl(imageUrl);
+        // 4. DB에 새로운 이미지 URL 설정
+        clothing.setImageUrl(newImageUrl);
 
-        // 4. 변경된 옷 정보 반환
+        // 5. 기존 이미지가 있었다면 Storage에서 삭제
+        if (oldImageUrl != null
+                && !oldImageUrl.isBlank()) {
+
+            supabaseStorageService.delete(oldImageUrl);
+        }
+
+        // 6. 변경된 옷 정보 반환
         return new ClothingResponse(clothing);
     }
 
@@ -125,8 +135,20 @@ public class ClothingService {
     public void deleteClothes(
             Long id) {
 
+        // 1. 옷 존재 여부 + 현재 사용자 소유권 확인
         Clothing clothing = getMyClothing(id);
 
+        // 2. 현재 이미지 URL 확인
+        String imageUrl = clothing.getImageUrl();
+
+        // 3. 이미지가 있다면 Supabase Storage에서 삭제
+        if (imageUrl != null
+                && !imageUrl.isBlank()) {
+
+            supabaseStorageService.delete(imageUrl);
+        }
+
+        // 4. DB에서 옷 삭제
         clothingRepository.delete(clothing);
     }
 
