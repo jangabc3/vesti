@@ -3,6 +3,7 @@ package com.vesti.backend.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -32,11 +33,14 @@ public class CoordinationRecordController {
 
     // 코디 기록 등록
     @PostMapping
-    public CoordinationRecordResponse createCoordinationRecord(
+    public ResponseEntity<CoordinationRecordResponse> createCoordinationRecord(
             @Validated @RequestBody CoordinationRecordCreateRequest request) {
 
-        return coordinationRecordService
-                .createCoordinationRecord(request);
+        CoordinationRecordResponse response = coordinationRecordService.createCoordinationRecord(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     // 기간별 코디 기록 조회
@@ -78,5 +82,4 @@ public class CoordinationRecordController {
 
         return ResponseEntity.noContent().build();
     }
-
 }

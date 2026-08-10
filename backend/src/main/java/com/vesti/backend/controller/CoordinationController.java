@@ -2,6 +2,7 @@ package com.vesti.backend.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 
@@ -33,44 +34,26 @@ public class CoordinationController {
      * 코디 등록 API
      *
      * POST /api/coordinations
-     *
-     * 요청 예시:
-     * {
-     * "name": "출근 코디",
-     * "description": "검정 셔츠 + 슬랙스"
-     * }
      */
     @PostMapping
-    public CoordinationResponse createCoordination(
+    public ResponseEntity<CoordinationResponse> createCoordination(
             @Validated @RequestBody CoordinationCreateRequest request) {
 
-        return coordinationService.createCoordination(request);
+        CoordinationResponse response = coordinationService.createCoordination(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
-    /*
-     * 현재 로그인한 사용자의 코디 목록 조회 API
-     *
-     * GET /api/coordinations
-     */
+    // 내 코디 목록 조회
     @GetMapping
     public List<CoordinationResponse> getAllCoordinations() {
 
         return coordinationService.getAllCoordinations();
     }
 
-    /*
-     * 특정 코디에 특정 옷을 추가하는 API
-     *
-     * POST /api/coordinations/{coordinationId}/clothes/{clothingId}
-     *
-     * 예시:
-     * POST /api/coordinations/1/clothes/3
-     *
-     * coordinationId = 코디 번호
-     * clothingId = 옷 번호
-     *
-     * 요청 본문은 필요하지 않다.
-     */
+    // 코디에 옷 추가
     @PostMapping("/{coordinationId}/clothes/{clothingId}")
     public CoordinationResponse addClothingToCoordination(
             @PathVariable Long coordinationId,
@@ -81,6 +64,7 @@ public class CoordinationController {
                 clothingId);
     }
 
+    // 코디 상세 조회
     @GetMapping("/{coordinationId}")
     public ResponseEntity<CoordinationDetailResponse> getCoordinationById(
             @PathVariable Long coordinationId) {
@@ -103,6 +87,7 @@ public class CoordinationController {
         return ResponseEntity.ok(response);
     }
 
+    // 코디에서 옷 제거
     @DeleteMapping("/{coordinationId}/clothes/{clothingId}")
     public ResponseEntity<Void> removeClothingFromCoordination(
             @PathVariable Long coordinationId,
@@ -115,6 +100,7 @@ public class CoordinationController {
         return ResponseEntity.noContent().build();
     }
 
+    // 코디 삭제
     @DeleteMapping("/{coordinationId}")
     public ResponseEntity<Void> deleteCoordination(
             @PathVariable Long coordinationId) {

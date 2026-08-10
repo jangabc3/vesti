@@ -151,28 +151,28 @@
 
 ## 5. 현재 진행 상황
 
-| 영역 | 상태 |
-|---|---|
-| 프로젝트 초기 설정 | ✅ 완료 |
-| PostgreSQL 연결 | ✅ 완료 |
-| JWT 인증 | ✅ 완료 |
-| Spring Security | ✅ 완료 |
-| 예외 처리 | ✅ 완료 |
-| CurrentUserProvider | ✅ 완료 |
-| User 핵심 기능 | ✅ 완료 |
-| Clothing | ✅ 완료 |
-| Coordination | ✅ 완료 |
-| CoordinationRecord | ✅ 완료 |
-| JPA Auditing | ✅ 완료 |
-| Request Validation | ✅ 완료 |
+| 영역                | 상태         |
+| ------------------- | ------------ |
+| 프로젝트 초기 설정  | ✅ 완료      |
+| PostgreSQL 연결     | ✅ 완료      |
+| JWT 인증            | ✅ 완료      |
+| Spring Security     | ✅ 완료      |
+| 예외 처리           | ✅ 완료      |
+| CurrentUserProvider | ✅ 완료      |
+| User 핵심 기능      | ✅ 완료      |
+| Clothing            | ✅ 완료      |
+| Coordination        | ✅ 완료      |
+| CoordinationRecord  | ✅ 완료      |
+| JPA Auditing        | ✅ 완료      |
+| Request Validation  | ✅ 완료      |
 | HTTP 상태 코드 정리 | 🔄 다음 작업 |
-| Swagger 문서 정리 | ⏳ 예정 |
-| 이미지 업로드 | ⏳ 예정 |
-| 통합 테스트 | ⏳ 예정 |
-| React 연동 | ⏳ 예정 |
-| Today 화면 | ⏳ 예정 |
-| AI 추천 기능 | ⏳ 예정 |
-| 배포 | ⏳ 예정 |
+| Swagger 문서 정리   | ⏳ 예정      |
+| 이미지 업로드       | ⏳ 예정      |
+| 통합 테스트         | ⏳ 예정      |
+| React 연동          | ⏳ 예정      |
+| Today 화면          | ⏳ 예정      |
+| AI 추천 기능        | ⏳ 예정      |
+| 배포                | ⏳ 예정      |
 
 ---
 
@@ -267,10 +267,9 @@ HTTP 상태 코드 일관성 정리
 6. Git Commit
 7. CHANGELOG 기록
 
-그 다음:
+### HTTP 상태 코드 정리
 
-HTTP 상태 코드 정리
-→ Swagger 문서화
-→ 이미지 업로드
-→ 백엔드 통합 테스트
-→ React 연동
+- [x] ClothingController
+- [x] CoordinationController
+- [x] CoordinationRecordController
+- [ ] UserController
