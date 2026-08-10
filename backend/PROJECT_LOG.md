@@ -272,4 +272,4 @@ HTTP 상태 코드 일관성 정리
 - [x] ClothingController
 - [x] CoordinationController
 - [x] CoordinationRecordController
-- [ ] UserController
+- [x] UserController

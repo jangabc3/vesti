@@ -171,6 +171,56 @@ Hibernate Dialect 오류만 보고 JPA 설정 문제라고 판단하면 안 된�
 
 ---
 
-## 다음 작업
+---
 
-HTTP 상태 코드 일관성 정리
+## 2026-08-10 — HTTP 상태 코드 일관성 정리
+
+### 작업 목적
+
+API별로 서로 다르게 사용되던 성공 상태 코드를 HTTP 의미에 맞게 통일했다.
+
+### 적용 규칙
+
+- GET 조회 → 200 OK
+- POST 리소스 생성 → 201 Created
+- PUT 수정 → 200 OK
+- DELETE → 204 No Content
+- 비밀번호 변경 → 204 No Content
+- 로그인 → 200 OK
+
+### Clothing
+
+- POST /api/clothes → 201 Created
+- GET /api/clothes/{id} → 200 OK
+- PUT /api/clothes/{id} → 200 OK
+- DELETE /api/clothes/{id} → 204 No Content
+- 삭제 후 조회 → 404 Not Found
+
+### Coordination
+
+- POST /api/coordinations → 201 Created
+- GET /api/coordinations/{id} → 200 OK
+- PUT /api/coordinations/{id} → 200 OK
+- DELETE /api/coordinations/{id} → 204 No Content
+
+### CoordinationRecord
+
+- POST /api/coordination-records → 201 Created
+- PUT /api/coordination-records/{id} → 200 OK
+- DELETE /api/coordination-records/{id} → 204 No Content
+
+### User
+
+- POST /users/signup → 201 Created
+- POST /users/login → 200 OK
+- GET /users/me → 200 OK
+- PATCH /users/me/password → 204 No Content
+- 변경한 비밀번호로 재로그인 성공 확인
+
+### 결과
+
+API의 실제 동작과 HTTP 의미를 일관된 규칙으로 정리했다.
+
+### 다음 작업
+
+Swagger / OpenAPI 문서 정리

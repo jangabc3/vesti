@@ -1,5 +1,7 @@
 package com.vesti.backend.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,10 +27,14 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public UserResponse signup(
+    public ResponseEntity<UserResponse> signup(
             @Valid @RequestBody UserSignupRequest request) {
 
-        return userService.signup(request);
+        UserResponse response = userService.signup(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PostMapping("/login")
@@ -40,13 +46,16 @@ public class UserController {
 
     @GetMapping("/me")
     public UserResponse me() {
+
         return userService.getCurrentUser();
     }
 
     @PatchMapping("/me/password")
-    public void changePassword(
+    public ResponseEntity<Void> changePassword(
             @Valid @RequestBody ChangePasswordRequest request) {
 
         userService.changePassword(request);
+
+        return ResponseEntity.noContent().build();
     }
 }
