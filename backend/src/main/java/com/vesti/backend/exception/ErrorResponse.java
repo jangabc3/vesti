@@ -2,8 +2,8 @@ package com.vesti.backend.exception;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.validation.FieldError;
@@ -24,6 +24,7 @@ public class ErrorResponse {
     @Builder.Default
     private final List<ValidationError> errors = Collections.emptyList();
 
+    // 일반 비즈니스 예외 응답
     public static ErrorResponse of(
             ErrorCode errorCode,
             String path) {
@@ -37,6 +38,7 @@ public class ErrorResponse {
                 .build();
     }
 
+    // Validation 예외 응답
     public static ErrorResponse of(
             ErrorCode errorCode,
             String path,
@@ -72,6 +74,7 @@ public class ErrorResponse {
         private final String message;
 
         public static ValidationError from(FieldError fieldError) {
+
             return ValidationError.builder()
                     .field(fieldError.getField())
                     .message(fieldError.getDefaultMessage())

@@ -44,4 +44,21 @@ public class GlobalExceptionHandler {
                                 .status(errorCode.getStatus())
                                 .body(response);
         }
+
+        // 예상하지 못한 서버 내부 예외 처리
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleException(
+                        Exception exception,
+                        HttpServletRequest request) {
+
+                ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
+
+                ErrorResponse response = ErrorResponse.of(
+                                errorCode,
+                                request.getRequestURI());
+
+                return ResponseEntity
+                                .status(errorCode.getStatus())
+                                .body(response);
+        }
 }
