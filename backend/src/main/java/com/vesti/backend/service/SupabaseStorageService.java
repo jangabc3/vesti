@@ -1,5 +1,6 @@
 package com.vesti.backend.service;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -8,8 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vesti.backend.exception.InvalidImageFileException;
+
 @Service
 public class SupabaseStorageService {
+
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
+            "image/jpeg",
+            "image/png",
+            "image/webp");
 
     private final RestClient restClient;
 
@@ -31,7 +39,12 @@ public class SupabaseStorageService {
                 .build();
     }
 
-    public String upload(MultipartFile file, Long userId) {
+    public String upload(
+            MultipartFile file,
+            Long userId) {
+
+        // 이미지 파일 검증
+        validateImage(file);
 
         String originalFilename = file.getOriginalFilename();
         String extension = getExtension(originalFilename);
@@ -42,10 +55,10 @@ public class SupabaseStorageService {
 
         try {
             restClient.post()
-                    .uri("/storage/v1/object/{bucket}/{filePath}",
+                    .uri(
+                            "/storage/v1/object/{bucket}/{filePath}",
                             bucket,
                             filePath)
-                    .header("Authorization", "Bearer " + secretKey)
                     .header("apikey", secretKey)
                     .contentType(
                             MediaType.parseMediaType(
@@ -67,9 +80,32 @@ public class SupabaseStorageService {
                 + filePath;
     }
 
-    private String getExtension(String filename) {
+    // 이미지 파일 검증
+    private void validateImage(
+            MultipartFile file) {
 
-        if (filename == null || !filename.contains(".")) {
+        // 파일이 없거나 비어 있는 경우
+        if (file == null || file.isEmpty()) {
+            throw new InvalidImageFileException();
+        }
+
+        String contentType = file.getContentType();
+
+        // JPG, PNG, WebP가 아닌 경우
+        if (contentType == null
+                || !ALLOWED_IMAGE_TYPES.contains(contentType)) {
+
+            throw new InvalidImageFileException();
+        }
+    }
+
+    // 파일 확장자 추출
+    private String getExtension(
+            String filename) {
+
+        if (filename == null
+                || !filename.contains(".")) {
+
             return "";
         }
 

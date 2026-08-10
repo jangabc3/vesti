@@ -105,6 +105,7 @@ public class ClothingController {
     @Operation(summary = "옷 이미지 업로드", description = "옷 ID와 이미지 파일을 전달하여 옷 이미지를 업로드합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "옷 이미지 업로드 성공"),
+            @ApiResponse(responseCode = "400", description = "지원하지 않는 이미지 형식 또는 이미지 파일 크기 초과", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 옷에 접근할 권한이 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "옷을 찾을 수 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })

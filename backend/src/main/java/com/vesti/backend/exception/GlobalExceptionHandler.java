@@ -6,11 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-        // DTO 유효성 검사 실패
+        // ========================================
+        // 1. DTO 입력값 검증 실패
+        // ========================================
         @ExceptionHandler(MethodArgumentNotValidException.class)
         public ResponseEntity<ErrorResponse> handleValidationException(
                         MethodArgumentNotValidException exception,
@@ -28,7 +31,9 @@ public class GlobalExceptionHandler {
                                 .body(response);
         }
 
-        // 모든 비즈니스 예외 처리
+        // ========================================
+        // 2. 비즈니스 예외
+        // ========================================
         @ExceptionHandler(BusinessException.class)
         public ResponseEntity<ErrorResponse> handleBusinessException(
                         BusinessException exception,
@@ -45,7 +50,28 @@ public class GlobalExceptionHandler {
                                 .body(response);
         }
 
-        // 예상하지 못한 서버 내부 예외 처리
+        // ========================================
+        // 3. 이미지 파일 크기 초과
+        // ========================================
+        @ExceptionHandler(MaxUploadSizeExceededException.class)
+        public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(
+                        MaxUploadSizeExceededException exception,
+                        HttpServletRequest request) {
+
+                ErrorCode errorCode = ErrorCode.IMAGE_FILE_TOO_LARGE;
+
+                ErrorResponse response = ErrorResponse.of(
+                                errorCode,
+                                request.getRequestURI());
+
+                return ResponseEntity
+                                .status(errorCode.getStatus())
+                                .body(response);
+        }
+
+        // ========================================
+        // 4. 예상하지 못한 서버 내부 오류
+        // ========================================
         @ExceptionHandler(Exception.class)
         public ResponseEntity<ErrorResponse> handleException(
                         Exception exception,
