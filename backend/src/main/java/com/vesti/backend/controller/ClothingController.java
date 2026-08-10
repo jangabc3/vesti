@@ -3,6 +3,8 @@ package com.vesti.backend.controller;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.vesti.backend.dto.request.ClothingCreateRequest;
@@ -46,10 +48,14 @@ public class ClothingController {
 
     // 옷 등록
     @PostMapping
-    public ClothingResponse createClothes(
+    public ResponseEntity<ClothingResponse> createClothes(
             @Valid @RequestBody ClothingCreateRequest request) {
 
-        return clothingService.createClothes(request);
+        ClothingResponse response = clothingService.createClothes(request);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     // 옷 수정
@@ -65,9 +71,11 @@ public class ClothingController {
 
     // 옷 삭제
     @DeleteMapping("/{id}")
-    public void deleteClothes(
+    public ResponseEntity<Void> deleteClothes(
             @PathVariable Long id) {
 
         clothingService.deleteClothes(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
