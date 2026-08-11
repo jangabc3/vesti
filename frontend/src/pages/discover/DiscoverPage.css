@@ -1,0 +1,1716 @@
+/* ========================================
+   VESTI Discover
+======================================== */
+
+.discover-page-v4 {
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: 88px;
+  color: #151515;
+  background: #ffffff;
+}
+
+/* ========================================
+   Header
+======================================== */
+
+.discover-main-header {
+  position: sticky;
+  z-index: 25;
+  top: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 66px;
+  padding: 0 18px;
+
+  background: rgb(255 255 255 / 96%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.discover-main-header > strong {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.12em;
+}
+
+.discover-main-header > div {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.discover-main-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+  padding: 0;
+
+  border: 0;
+
+  color: #171717;
+  background: transparent;
+}
+
+.discover-main-header svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ========================================
+   Search
+======================================== */
+
+.discover-search-bar {
+  display: grid;
+
+  grid-template-columns:
+    20px
+    minmax(0, 1fr)
+    34px;
+
+  align-items: center;
+  gap: 8px;
+
+  min-height: 48px;
+  margin: 0 16px 12px;
+  padding: 0 12px;
+
+  border-radius: 9px;
+
+  background: #f4f4f3;
+}
+
+.discover-search-bar > svg {
+  width: 18px;
+  height: 18px;
+  color: #77736e;
+}
+
+.discover-search-bar input {
+  width: 100%;
+  height: 48px;
+  padding: 0;
+
+  border: 0;
+  outline: 0;
+
+  color: #151515;
+  background: transparent;
+
+  font-size: 12px;
+}
+
+.discover-search-bar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+}
+
+.discover-search-bar button svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ========================================
+   Top Tabs
+======================================== */
+
+.discover-top-tabs {
+  display: flex;
+  align-items: center;
+
+  min-height: 52px;
+  gap: 28px;
+  padding: 0 18px;
+
+  overflow-x: auto;
+
+  border-bottom: 1px solid #e8e8e6;
+
+  scrollbar-width: none;
+}
+
+.discover-top-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.discover-top-tabs__item {
+  position: relative;
+
+  height: 52px;
+  flex-shrink: 0;
+  padding: 0;
+
+  border: 0;
+
+  color: #85817c;
+  background: transparent;
+
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.discover-top-tabs__item--active {
+  color: #111111;
+  font-weight: 750;
+}
+
+.discover-top-tabs__item--active::after {
+  position: absolute;
+
+  right: 0;
+  bottom: -1px;
+  left: 0;
+
+  height: 2px;
+
+  background: #111111;
+
+  content: "";
+}
+
+.discover-top-tabs__dot {
+  position: absolute;
+
+  top: 11px;
+  right: -7px;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #4e76ff;
+}
+
+/* ========================================
+   Filters
+======================================== */
+
+.discover-filter-rail {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+  padding: 18px 14px 15px;
+
+  overflow-x: auto;
+
+  border-bottom: 1px solid #efefed;
+
+  scrollbar-width: none;
+}
+
+.discover-filter-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.discover-filter-button {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 43px;
+  height: 39px;
+  flex: 0 0 43px;
+
+  padding: 0;
+
+  border: 1px solid #d3d1cd;
+  border-radius: 9px;
+
+  color: #292725;
+  background: #ffffff;
+}
+
+.discover-filter-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.discover-filter-button > span {
+  position: absolute;
+
+  top: -5px;
+  right: -4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: #151515;
+
+  font-size: 7px;
+}
+
+.discover-filter-chip {
+  display: flex;
+  align-items: center;
+
+  min-height: 39px;
+  flex-shrink: 0;
+
+  gap: 5px;
+  padding: 0 12px;
+
+  border: 1px solid #d7d5d1;
+  border-radius: 9px;
+
+  color: #77736f;
+  background: #ffffff;
+
+  font-size: 11px;
+}
+
+.discover-filter-chip svg {
+  width: 14px;
+  height: 14px;
+}
+
+.discover-filter-chip--selected {
+  border-color: #151515;
+
+  color: #151515;
+  font-weight: 700;
+}
+
+.discover-filter-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 47px;
+  gap: 12px;
+  padding: 0 16px;
+
+  background: #fafafa;
+}
+
+.discover-filter-selected > div {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.discover-filter-selected span {
+  flex-shrink: 0;
+  color: #77736e;
+  font-size: 10px;
+}
+
+.discover-filter-selected > button {
+  flex-shrink: 0;
+
+  padding: 0;
+  border: 0;
+
+  color: #68645f;
+  background: transparent;
+
+  font-size: 10px;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.discover-result-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 53px;
+  padding: 0 16px;
+}
+
+.discover-result-control > span {
+  color: #85817c;
+  font-size: 10px;
+}
+
+.discover-result-control label {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.discover-result-control select {
+  min-width: 72px;
+  height: 38px;
+  padding: 0 22px 0 5px;
+
+  border: 0;
+  outline: 0;
+
+  appearance: none;
+
+  color: #45413d;
+  background: transparent;
+
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.discover-result-control label svg {
+  position: absolute;
+  right: 2px;
+
+  width: 14px;
+  height: 14px;
+
+  pointer-events: none;
+}
+
+/* ========================================
+   Style Grid
+======================================== */
+
+.discover-gallery-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 2px;
+}
+
+.discover-gallery-card {
+  position: relative;
+
+  aspect-ratio: 0.72;
+
+  overflow: hidden;
+
+  background: #efefed;
+}
+
+.discover-gallery-card__image {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+
+  border: 0;
+}
+
+.discover-gallery-card__image img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.discover-gallery-card__like {
+  position: absolute;
+
+  right: 7px;
+  bottom: 7px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 31px;
+  height: 31px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: rgb(20 20 20 / 17%);
+
+  backdrop-filter: blur(5px);
+}
+
+.discover-gallery-card__like svg {
+  width: 19px;
+  height: 19px;
+}
+
+.discover-gallery-card__like--active {
+  background: rgb(17 17 17 / 70%);
+}
+
+/* ========================================
+   TODAY
+======================================== */
+
+.discover-today {
+  padding-bottom: 36px;
+  background: #f6f6f5;
+}
+
+.discover-today-header {
+  padding: 29px 18px 25px;
+  background: #ffffff;
+}
+
+.discover-today-header > span {
+  color: #aaa49e;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
+}
+
+.discover-today-header h1 {
+  margin-top: 5px;
+
+  font-size: 27px;
+  font-weight: 760;
+
+  letter-spacing: -0.055em;
+}
+
+.discover-today-header p {
+  margin-top: 6px;
+
+  color: #88837d;
+
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.discover-today-section {
+  padding: 25px 0 27px;
+  margin-top: 9px;
+
+  background: #ffffff;
+}
+
+.discover-today-heading {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 0 17px;
+  margin-bottom: 15px;
+}
+
+.discover-today-heading h2 {
+  margin: 0;
+
+  font-size: 19px;
+  font-weight: 750;
+
+  letter-spacing: -0.045em;
+}
+
+.discover-today-heading p {
+  margin-top: 5px;
+
+  color: #8c8781;
+
+  font-size: 10px;
+}
+
+.discover-today-heading > button {
+  display: flex;
+  align-items: center;
+
+  flex-shrink: 0;
+
+  gap: 3px;
+  padding: 5px 0;
+
+  border: 0;
+
+  color: #6d6964;
+  background: transparent;
+
+  font-size: 10px;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.discover-today-heading > button svg {
+  width: 13px;
+  height: 13px;
+}
+
+.discover-today-rail {
+  display: flex;
+
+  gap: 3px;
+  padding: 0 17px;
+
+  overflow-x: auto;
+
+  scroll-snap-type: x mandatory;
+
+  scrollbar-width: none;
+}
+
+.discover-today-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.discover-today-card {
+  width: 150px;
+  flex: 0 0 150px;
+
+  scroll-snap-align: start;
+}
+
+.discover-today-card__visual {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 0.75;
+
+  overflow: hidden;
+
+  background: #ededeb;
+}
+
+.discover-today-card__visual > button:first-child {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+  padding: 0;
+
+  border: 0;
+}
+
+.discover-today-card__visual img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.discover-today-card__heart {
+  position: absolute;
+
+  right: 7px;
+  bottom: 7px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: rgb(15 15 15 / 18%);
+}
+
+.discover-today-card__heart svg {
+  width: 19px;
+  height: 19px;
+}
+
+.discover-today-card__heart--active {
+  background: rgb(20 20 20 / 75%);
+}
+
+.discover-today-card__creator {
+  display: flex;
+  align-items: center;
+
+  max-width: 100%;
+
+  gap: 6px;
+  margin-top: 8px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+}
+
+.discover-today-card__creator img {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.discover-today-card__creator strong {
+  overflow: hidden;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discover-today-card > p {
+  margin-top: 6px;
+
+  overflow: hidden;
+
+  color: #33302d;
+
+  font-size: 9px;
+  line-height: 1.45;
+
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.discover-today-card__engagement {
+  display: flex;
+
+  gap: 8px;
+  margin-top: 7px;
+
+  color: #85807a;
+
+  font-size: 8px;
+}
+
+/* ========================================
+   RANKING
+======================================== */
+
+.discover-ranking {
+  padding-bottom: 40px;
+  background: #ffffff;
+}
+
+.discover-ranking-type {
+  display: flex;
+
+  gap: 26px;
+
+  min-height: 51px;
+  padding: 0 18px;
+
+  border-bottom: 1px solid #e8e7e4;
+}
+
+.discover-ranking-type__item {
+  position: relative;
+
+  height: 51px;
+  padding: 0;
+
+  border: 0;
+
+  color: #8c8781;
+  background: transparent;
+
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.discover-ranking-type__item--active {
+  color: #151515;
+  font-weight: 750;
+}
+
+.discover-ranking-type__item--active::after {
+  position: absolute;
+
+  right: 0;
+  bottom: -1px;
+  left: 0;
+
+  height: 2px;
+
+  background: #151515;
+
+  content: "";
+}
+
+.discover-ranking-style {
+  display: flex;
+  align-items: center;
+
+  gap: 22px;
+
+  min-height: 52px;
+  padding: 0 18px;
+
+  overflow-x: auto;
+
+  border-bottom: 1px solid #eeeeec;
+
+  scrollbar-width: none;
+}
+
+.discover-ranking-style::-webkit-scrollbar {
+  display: none;
+}
+
+.discover-ranking-style__item {
+  flex-shrink: 0;
+
+  padding: 0;
+
+  border: 0;
+
+  color: #85817c;
+  background: transparent;
+
+  font-size: 12px;
+}
+
+.discover-ranking-style__item--active {
+  color: #151515;
+  font-weight: 750;
+}
+
+.discover-ranking-period {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 67px;
+  padding: 0 18px;
+
+  background: #fafafa;
+}
+
+.discover-ranking-period > div > span {
+  display: block;
+
+  color: #99948e;
+
+  font-size: 8px;
+}
+
+.discover-ranking-period > div > strong {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #25221f;
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.discover-ranking-period label {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+}
+
+.discover-ranking-period select {
+  min-width: 83px;
+  height: 40px;
+  padding: 0 22px 0 5px;
+
+  border: 0;
+  outline: 0;
+
+  appearance: none;
+
+  color: #5d5853;
+  background: transparent;
+
+  font-family: inherit;
+
+  font-size: 10px;
+}
+
+.discover-ranking-period label svg {
+  position: absolute;
+  right: 2px;
+
+  width: 14px;
+  height: 14px;
+
+  pointer-events: none;
+}
+
+.discover-ranking-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 28px 2px;
+}
+
+.discover-ranking-card {
+  min-width: 0;
+}
+
+.discover-ranking-card__visual {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+
+  aspect-ratio: 0.76;
+
+  overflow: hidden;
+  padding: 0;
+
+  border: 0;
+
+  background: #eeeeec;
+}
+
+.discover-ranking-card__visual img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.discover-ranking-card__number {
+  position: absolute;
+
+  top: 8px;
+  left: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 25px;
+  height: 25px;
+  padding: 0 7px;
+
+  border-radius: 4px;
+
+  color: #111111;
+  background: rgb(255 255 255 / 94%);
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.discover-ranking-card__heart {
+  position: absolute;
+
+  right: 8px;
+  bottom: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 31px;
+  height: 31px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: rgb(20 20 20 / 17%);
+}
+
+.discover-ranking-card__heart svg {
+  width: 20px;
+  height: 20px;
+}
+
+.discover-ranking-card__heart--active {
+  background: rgb(20 20 20 / 75%);
+}
+
+.discover-ranking-card__content {
+  padding: 9px 11px 0;
+}
+
+.discover-ranking-card__creator {
+  display: flex;
+  align-items: center;
+
+  max-width: 100%;
+
+  gap: 6px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+}
+
+.discover-ranking-card__creator img {
+  width: 20px;
+  height: 20px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.discover-ranking-card__creator strong {
+  overflow: hidden;
+
+  color: #1d1b19;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.discover-ranking-card__content > p {
+  min-height: 32px;
+  margin-top: 7px;
+
+  overflow: hidden;
+
+  color: #45413d;
+
+  font-size: 9px;
+  line-height: 1.45;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.discover-ranking-card__engagement {
+  display: flex;
+
+  gap: 9px;
+  margin-top: 8px;
+
+  color: #77726c;
+
+  font-size: 8px;
+}
+
+/* ========================================
+   CREATOR RANKING
+======================================== */
+
+.discover-creator-ranking-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.discover-creator-ranking {
+  display: grid;
+
+  grid-template-columns:
+    34px
+    minmax(0, 1fr);
+
+  gap: 14px 10px;
+  padding: 20px 17px;
+
+  border-bottom: 1px solid #ecebe8;
+}
+
+.discover-creator-ranking__rank {
+  padding-top: 12px;
+
+  color: #1a1816;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.discover-creator-ranking__profile {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  text-align: left;
+}
+
+.discover-creator-ranking__profile > img {
+  width: 45px;
+  height: 45px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.discover-creator-ranking__profile strong {
+  display: block;
+
+  color: #1a1816;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.discover-creator-ranking__profile span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: #918c85;
+
+  font-size: 8px;
+}
+
+.discover-creator-ranking__photos {
+  grid-column: 2 / 3;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 2px;
+}
+
+.discover-creator-ranking__photos button {
+  aspect-ratio: 0.78;
+
+  overflow: hidden;
+  padding: 0;
+
+  border: 0;
+
+  background: #efefed;
+}
+
+.discover-creator-ranking__photos img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+/* ========================================
+   Following
+======================================== */
+
+.discover-following {
+  padding-bottom: 32px;
+
+  background: #f7f7f6;
+}
+
+.discover-following-post {
+  margin-bottom: 8px;
+
+  background: #ffffff;
+}
+
+.discover-following-post__creator {
+  padding: 14px 16px;
+}
+
+.discover-following-post__creator > button {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  text-align: left;
+}
+
+.discover-following-post__creator img {
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+}
+
+.discover-following-post__creator strong {
+  display: block;
+
+  font-size: 11px;
+}
+
+.discover-following-post__creator span {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #9b9690;
+
+  font-size: 8px;
+}
+
+.discover-following-post__photo {
+  display: block;
+
+  width: 100%;
+
+  aspect-ratio: 0.79;
+
+  overflow: hidden;
+  padding: 0;
+
+  border: 0;
+
+  background: #eeeeec;
+}
+
+.discover-following-post__photo img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.discover-following-post__actions {
+  display: flex;
+
+  gap: 8px;
+  padding: 10px 15px 2px;
+}
+
+.discover-following-post__actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+}
+
+.discover-following-post__actions svg {
+  width: 22px;
+  height: 22px;
+}
+
+.discover-following-post__like--active {
+  color: #cf5365;
+}
+
+.discover-following-post__caption {
+  padding: 0 16px 18px;
+}
+
+/*
+  좋아요 / 댓글 반응 수를
+  상세 페이지와 동일한 10px 기준으로 통일
+*/
+.discover-following-post__engagement {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin: 0;
+
+  color: #171717;
+
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.discover-following-post__engagement strong {
+  margin: 0;
+
+  color: inherit;
+
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.discover-following-post__engagement button {
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+
+  color: inherit;
+  background: transparent;
+
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
+.discover-following-post__caption > p {
+  margin-top: 8px;
+
+  font-size: 11px;
+}
+
+.discover-following-post__caption > div:last-child {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 5px 8px;
+
+  margin-top: 8px;
+}
+
+.discover-following-post__caption span {
+  color: #6f6b66;
+
+  font-size: 9px;
+}
+
+/* ========================================
+   Create Button
+======================================== */
+
+.discover-create-button {
+  position: fixed;
+  z-index: 41;
+
+  right: max(calc((100vw - 430px) / 2 + 16px), 16px);
+
+  bottom: calc(82px + env(safe-area-inset-bottom));
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 54px;
+  height: 54px;
+  padding: 0;
+
+  border: 0;
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: #171717;
+
+  box-shadow: 0 7px 22px rgb(0 0 0 / 15%);
+}
+
+.discover-create-button svg {
+  width: 23px;
+  height: 23px;
+}
+
+/* ========================================
+   Empty
+======================================== */
+
+.discover-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 340px;
+  padding: 40px;
+
+  text-align: center;
+}
+
+.discover-empty strong {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.discover-empty p {
+  margin-top: 7px;
+
+  color: #96918b;
+
+  font-size: 10px;
+}
+
+.discover-empty button {
+  min-height: 42px;
+
+  margin-top: 17px;
+  padding: 0 16px;
+
+  border: 0;
+  border-radius: 999px;
+
+  color: #ffffff;
+  background: #171717;
+
+  font-size: 10px;
+}
+
+/* ========================================
+   Filter Bottom Sheet
+======================================== */
+
+.discover-filter-backdrop {
+  position: fixed;
+  z-index: 100;
+
+  inset: 0;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  background: rgb(0 0 0 / 47%);
+}
+
+.discover-filter-sheet {
+  display: flex;
+  flex-direction: column;
+
+  width: min(100%, 430px);
+  height: min(78vh, 680px);
+
+  overflow: hidden;
+
+  border-radius: 24px 24px 0 0;
+
+  background: #ffffff;
+}
+
+.discover-filter-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 70px;
+  padding: 0 18px;
+}
+
+.discover-filter-sheet__header h2 {
+  margin: 0;
+
+  font-size: 21px;
+}
+
+.discover-filter-sheet__header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+}
+
+.discover-filter-sheet__header svg {
+  width: 23px;
+  height: 23px;
+}
+
+.discover-filter-sheet__tabs {
+  display: flex;
+
+  gap: 25px;
+  padding: 0 18px;
+
+  overflow-x: auto;
+
+  border-bottom: 1px solid #e7e6e3;
+
+  scrollbar-width: none;
+}
+
+.discover-filter-sheet__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.discover-filter-sheet__tab {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+
+  height: 51px;
+  flex-shrink: 0;
+
+  gap: 4px;
+  padding: 0;
+
+  border: 0;
+
+  color: #8c8781;
+  background: transparent;
+
+  font-size: 12px;
+}
+
+.discover-filter-sheet__tab--active {
+  color: #151515;
+  font-weight: 750;
+}
+
+.discover-filter-sheet__tab--active::after {
+  position: absolute;
+
+  right: 0;
+  bottom: -1px;
+  left: 0;
+
+  height: 2px;
+
+  background: #151515;
+
+  content: "";
+}
+
+.discover-filter-sheet__tab > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+  background: #151515;
+
+  font-size: 7px;
+}
+
+.discover-filter-sheet__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 56px;
+  padding: 0 18px;
+
+  background: #f8f8f7;
+}
+
+.discover-filter-sheet__summary > span {
+  color: #6e6963;
+
+  font-size: 11px;
+}
+
+.discover-filter-sheet__summary button {
+  padding: 0;
+
+  border: 0;
+
+  color: #6e6963;
+  background: transparent;
+
+  font-size: 10px;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.discover-filter-options {
+  flex: 1;
+
+  padding: 22px 20px;
+
+  overflow-y: auto;
+}
+
+.discover-filter-option {
+  display: grid;
+
+  grid-template-columns:
+    28px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 56px;
+
+  gap: 8px;
+  padding: 0;
+
+  border: 0;
+
+  color: #86817b;
+  background: transparent;
+
+  text-align: left;
+}
+
+.discover-filter-option strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.discover-filter-option--selected {
+  color: #151515;
+}
+
+.discover-filter-option--selected strong {
+  font-weight: 750;
+}
+
+.discover-filter-option__radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 20px;
+  height: 20px;
+
+  border: 1px solid #c9c6c1;
+  border-radius: 50%;
+}
+
+.discover-filter-option--selected .discover-filter-option__radio {
+  border-color: #151515;
+
+  background: #151515;
+}
+
+.discover-filter-option__radio > span {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+}
+
+.discover-filter-sheet__footer {
+  padding: 13px 18px calc(15px + env(safe-area-inset-bottom));
+
+  border-top: 1px solid #e7e6e3;
+}
+
+.discover-filter-sheet__apply {
+  width: 100%;
+  min-height: 52px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #ffffff;
+  background: #151515;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.discover-filter-sheet__reset {
+  width: 100%;
+
+  margin-top: 11px;
+  padding: 5px 0;
+
+  border: 0;
+
+  color: #48443f;
+  background: transparent;
+
+  font-size: 10px;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ========================================
+   Interactions
+======================================== */
+
+.discover-page-v4 button,
+.discover-page-v4 select {
+  font-family: inherit;
+
+  cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+.discover-page-v4 button:focus-visible,
+.discover-page-v4 select:focus-visible {
+  outline: 2px solid #171717;
+
+  outline-offset: 2px;
+}
+
+.discover-create-button:active {
+  transform: scale(0.94);
+}
+
+/* ========================================
+   Mobile
+======================================== */
+
+@media (max-width: 430px) {
+  .discover-create-button {
+    right: 16px;
+  }
+
+  .discover-filter-sheet {
+    width: 100%;
+  }
+}
+
+@media (max-width: 359px) {
+  .discover-main-header,
+  .discover-top-tabs {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .discover-top-tabs {
+    gap: 22px;
+  }
+
+  .discover-today-card {
+    width: 140px;
+    flex-basis: 140px;
+  }
+
+  .discover-ranking-card__content {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+}

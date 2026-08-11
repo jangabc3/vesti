@@ -1,0 +1,522 @@
+/* ========================================
+   VESTI
+   Style Post Comments
+======================================== */
+
+/* ========================================
+   Existing Comment Preview Button
+======================================== */
+
+.style-post-comment-input {
+  width: 100%;
+
+  padding: 0;
+
+  border: 0;
+
+  color: inherit;
+
+  background: transparent;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+/* ========================================
+   Backdrop
+======================================== */
+
+.style-comments-backdrop {
+  position: fixed;
+  z-index: 160;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: center;
+
+  background: rgb(0 0 0 / 48%);
+}
+
+/* ========================================
+   Sheet
+======================================== */
+
+.style-comments-sheet {
+  display: flex;
+
+  flex-direction: column;
+
+  width: min(100%, 430px);
+
+  height: min(72vh, 650px);
+
+  overflow: hidden;
+
+  border-radius: 22px 22px 0 0;
+
+  background: #ffffff;
+
+  box-shadow: 0 -18px 50px rgb(0 0 0 / 12%);
+}
+
+/* ========================================
+   Header
+======================================== */
+
+.style-comments-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 64px;
+
+  flex-shrink: 0;
+
+  padding: 0 16px;
+
+  border-bottom: 1px solid #eeeeec;
+}
+
+.style-comments-header > div {
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 7px;
+}
+
+.style-comments-header h2 {
+  margin: 0;
+
+  color: #171717;
+
+  font-size: 17px;
+  font-weight: 750;
+
+  letter-spacing: -0.04em;
+}
+
+.style-comments-header span {
+  color: #96918b;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.style-comments-header > button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: 0;
+
+  color: #171717;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.style-comments-header svg {
+  width: 21px;
+  height: 21px;
+}
+
+/* ========================================
+   List
+======================================== */
+
+.style-comments-list {
+  flex: 1;
+
+  min-height: 0;
+
+  padding: 5px 16px 22px;
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+}
+
+.style-comment {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    36px
+    minmax(0, 1fr)
+    32px;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+  padding: 15px 0;
+
+  border-bottom: 1px solid #f1f0ee;
+}
+
+.style-comment > img {
+  width: 36px;
+  height: 36px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  background: #eeeeec;
+}
+
+.style-comment__body {
+  min-width: 0;
+
+  padding-top: 1px;
+}
+
+.style-comment__meta {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+}
+
+.style-comment__meta strong {
+  overflow: hidden;
+
+  color: #242220;
+
+  font-size: 10px;
+  font-weight: 720;
+
+  line-height: 1.3;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.style-comment__meta span {
+  flex-shrink: 0;
+
+  color: #aaa59f;
+
+  font-size: 8px;
+
+  line-height: 1.3;
+}
+
+.style-comment__body p {
+  margin-top: 6px;
+
+  color: #48443f;
+
+  font-size: 11px;
+
+  line-height: 1.55;
+
+  letter-spacing: -0.02em;
+
+  word-break: break-word;
+}
+
+/* ========================================
+   Comment Menu
+======================================== */
+
+.style-comment__menu {
+  position: relative;
+
+  display: flex;
+
+  justify-content: flex-end;
+}
+
+.style-comment__menu-button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 30px;
+  height: 30px;
+
+  padding: 0;
+
+  border: 0;
+
+  color: #8e8983;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.style-comment__menu-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.style-comment__menu-popup {
+  position: absolute;
+
+  z-index: 5;
+
+  top: 29px;
+  right: 0;
+
+  width: 96px;
+
+  padding: 5px;
+
+  border: 1px solid #e9e7e4;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  box-shadow: 0 8px 26px rgb(0 0 0 / 10%);
+}
+
+.style-comment__menu-popup button {
+  width: 100%;
+  min-height: 34px;
+
+  padding: 0 9px;
+
+  border: 0;
+  border-radius: 6px;
+
+  color: #d34d55;
+
+  background: transparent;
+
+  text-align: left;
+
+  font-size: 9px;
+  font-weight: 650;
+
+  cursor: pointer;
+}
+
+.style-comment__menu-popup button:hover {
+  background: #faf3f3;
+}
+
+/* ========================================
+   Remaining Count
+======================================== */
+
+.style-comments-more-count {
+  padding: 18px 0 4px;
+
+  color: #aaa59f;
+
+  font-size: 9px;
+
+  text-align: center;
+}
+
+/* ========================================
+   Empty
+======================================== */
+
+.style-comments-empty {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 260px;
+
+  padding: 40px 20px;
+
+  text-align: center;
+}
+
+.style-comments-empty strong {
+  color: #292724;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.style-comments-empty p {
+  margin-top: 7px;
+
+  color: #96918b;
+
+  font-size: 10px;
+
+  line-height: 1.55;
+}
+
+/* ========================================
+   Form
+======================================== */
+
+.style-comments-form {
+  display: grid;
+
+  grid-template-columns:
+    32px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  min-height: 68px;
+
+  flex-shrink: 0;
+
+  gap: 9px;
+
+  padding: 9px 14px calc(9px + env(safe-area-inset-bottom));
+
+  border-top: 1px solid #eae9e7;
+
+  background: rgb(255 255 255 / 98%);
+
+  backdrop-filter: blur(18px);
+}
+
+.style-comments-form__avatar {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+
+  background: #242220;
+
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.style-comments-form input {
+  width: 100%;
+  height: 40px;
+
+  min-width: 0;
+
+  padding: 0 14px;
+
+  border: 1px solid #e8e6e3;
+
+  border-radius: 999px;
+
+  outline: 0;
+
+  color: #242220;
+
+  background: #f7f7f6;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.style-comments-form input::placeholder {
+  color: #aaa59f;
+}
+
+.style-comments-form input:focus {
+  border-color: #bdb8b2;
+
+  background: #ffffff;
+}
+
+.style-comments-form > button {
+  min-width: 45px;
+  min-height: 38px;
+
+  padding: 0 8px;
+
+  border: 0;
+
+  color: #171717;
+
+  background: transparent;
+
+  font-size: 10px;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+.style-comments-form > button:disabled {
+  color: #c5c1bc;
+
+  cursor: default;
+}
+
+/* ========================================
+   Interaction
+======================================== */
+
+.style-comments-sheet button {
+  font-family: inherit;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+.style-comments-sheet button:focus-visible,
+.style-comments-sheet input:focus-visible {
+  outline: 2px solid #171717;
+
+  outline-offset: 2px;
+}
+
+/* ========================================
+   Small Mobile
+======================================== */
+
+@media (max-width: 359px) {
+  .style-comments-list {
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .style-comments-form {
+    padding-right: 11px;
+    padding-left: 11px;
+  }
+
+  .style-comment {
+    grid-template-columns:
+      33px
+      minmax(0, 1fr)
+      29px;
+
+    gap: 8px;
+  }
+
+  .style-comment > img {
+    width: 33px;
+    height: 33px;
+  }
+}

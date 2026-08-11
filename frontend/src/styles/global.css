@@ -1,63 +1,229 @@
+/* ========================================
+   VESTI — Global Styles
+   Warm Editorial Minimal
+======================================== */
+
+
+/* ========================================
+   Reset
+======================================== */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-html,
-body,
-#root {
-  min-height: 100%;
-}
-
 html {
+  min-width: 320px;
+  min-height: 100%;
+
+  font-family: var(--font-family-sans);
+
+  color: var(--color-text-primary);
   background: var(--color-background);
-  -webkit-tap-highlight-color: transparent;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  scroll-behavior: smooth;
 }
 
 body {
+  min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: var(--color-background);
+
   color: var(--color-text-primary);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR',
-    'Apple SD Gothic Neo', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--color-background);
+
+  font-family: var(--font-family-sans);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-regular);
-  line-height: 1.5;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-body);
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
+#root {
+  min-height: 100vh;
 }
 
-button {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
+
+/* ========================================
+   Typography Reset
+======================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
 }
 
-img {
-  display: block;
-  max-width: 100%;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--color-text-primary);
+
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-heading);
+
+  text-wrap: balance;
 }
+
+p {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+strong,
+b {
+  font-weight: var(--font-weight-semibold);
+}
+
+small {
+  font-size: var(--font-size-xs);
+}
+
+address {
+  font-style: normal;
+}
+
+
+/* ========================================
+   Links
+======================================== */
 
 a {
   color: inherit;
   text-decoration: none;
 }
 
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+/* ========================================
+   Lists
+======================================== */
+
 ul,
 ol {
+  margin: 0;
   padding: 0;
+
+  list-style: none;
+}
+
+
+/* ========================================
+   Media
+======================================== */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  height: auto;
+
+  object-fit: cover;
+}
+
+svg {
+  flex-shrink: 0;
+}
+
+
+/* ========================================
+   Form Elements
+======================================== */
+
+button,
+input,
+textarea,
+select {
+  margin: 0;
+
+  color: inherit;
+
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+button {
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+
+  opacity: 0.45;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+
+  outline: none;
+
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-tertiary);
+
+  opacity: 1;
+}
+
+textarea {
+  resize: vertical;
+}
+
+select {
+  cursor: pointer;
+}
+
+
+/* ========================================
+   Focus
+======================================== */
+
+:focus {
+  outline: none;
 }
 
 :focus-visible {
@@ -65,13 +231,177 @@ ol {
   outline-offset: 3px;
 }
 
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-accent);
+  box-shadow:
+    0 0 0 3px rgb(40 35 31 / 8%);
+}
+
+
+/* ========================================
+   Selection
+======================================== */
+
+::selection {
+  color: var(--color-text-primary);
+  background: var(--color-accent-soft-strong);
+}
+
+
+/* ========================================
+   Horizontal Rule
+======================================== */
+
+hr {
+  width: 100%;
+  height: 1px;
+  margin: 0;
+
+  border: 0;
+  background: var(--color-border);
+}
+
+
+/* ========================================
+   Table
+======================================== */
+
+table {
+  width: 100%;
+
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+
+/* ========================================
+   Scrollbar
+======================================== */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color:
+    var(--color-border-strong)
+    transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: var(--radius-full);
+
+  background-color: var(--color-border-strong);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-dark);
+}
+
+
+/* ========================================
+   Utility
+======================================== */
+
+.visually-hidden {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+
+  overflow: hidden;
+
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+
+  border: 0;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+.truncate {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ========================================
+   Mobile Interaction
+======================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  button,
+  a {
+    transition:
+      opacity var(--transition-fast),
+      color var(--transition-fast),
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+}
+
+
+/* ========================================
+   Mobile
+======================================== */
+
+@media (max-width: 599px) {
+  html {
+    scroll-padding-bottom: calc(
+      var(--bottom-nav-height) + var(--space-4)
+    );
+  }
+
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  input,
+  textarea,
+  select {
+    /*
+      iOS에서 input focus 시
+      자동 확대되는 현상 방지
+    */
+    font-size: 16px;
+  }
+}
+
+
+/* ========================================
+   Reduced Motion
+======================================== */
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
+
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+
     transition-duration: 0.01ms !important;
   }
 }

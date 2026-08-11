@@ -1,182 +1,544 @@
-import { useState } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
-import FilterChip from '@/components/common/FilterChip'
-import PageHeader from '@/components/common/PageHeader'
-import { CLOTHES_CATEGORIES as categories, CLOTHES_SEASONS as seasons } from '@/constants/clothesOptions'
+
 import './ClothesCreatePage.css'
+
+
+const categories = [
+  '상의',
+  '하의',
+  '아우터',
+  '신발',
+  '가방',
+  '액세서리',
+]
+
+
+const colors = [
+  '블랙',
+  '화이트',
+  '그레이',
+  '네이비',
+  '베이지',
+  '브라운',
+  '블루',
+  '그린',
+  '레드',
+  '기타',
+]
+
+
+const seasons = [
+  '봄',
+  '여름',
+  '가을',
+  '겨울',
+]
+
+
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
+
+function BackIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+
+function CameraIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 5.5 10.2 4h3.6L15 5.5h3.5A2.5 2.5 0 0 1 21 8v9.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5V8a2.5 2.5 0 0 1 2.5-2.5H9Z" />
+      <circle cx="12" cy="12.5" r="3.5" />
+    </svg>
+  )
+}
+
+
+function ChevronIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+}
+
 
 function ClothesCreatePage() {
   const navigate = useNavigate()
-  const [imagePreview, setImagePreview] = useState('')
+  const fileInputRef = useRef(null)
+
   const [name, setName] = useState('')
   const [brand, setBrand] = useState('')
-  const [color, setColor] = useState('')
-  const [category, setCategory] = useState('')
-  const [selectedSeasons, setSelectedSeasons] = useState([])
-  const [memo, setMemo] = useState('')
 
-  const isSubmitDisabled =
-    !imagePreview || !name.trim() || !color.trim() || !category
+  const [category, setCategory] = useState('')
+  const [color, setColor] = useState('')
+  const [season, setSeason] = useState('')
+
+  const [imageFile, setImageFile] =
+    useState(null)
+
+  const [imagePreview, setImagePreview] =
+    useState('')
+
+  const [imageError, setImageError] =
+    useState('')
+
+
+  const isFormValid =
+    name.trim().length > 0 &&
+    category &&
+    color &&
+    season
+
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview)
+      }
+    }
+  }, [imagePreview])
+
 
   const handleImageChange = (event) => {
     const file = event.target.files?.[0]
 
-    if (!file) return
+    if (!file) {
+      return
+    }
 
-    const reader = new FileReader()
-    reader.onload = () => setImagePreview(reader.result)
-    reader.readAsDataURL(file)
+    setImageError('')
+
+
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      setImageError(
+        'JPG, PNG, WEBP 이미지만 등록할 수 있어요.',
+      )
+
+      event.target.value = ''
+
+      return
+    }
+
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageError(
+        '이미지는 5MB 이하로 등록해주세요.',
+      )
+
+      event.target.value = ''
+
+      return
+    }
+
+
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview)
+    }
+
+
+    const previewUrl =
+      URL.createObjectURL(file)
+
+    setImageFile(file)
+    setImagePreview(previewUrl)
   }
 
-  const toggleSeason = (season) => {
-    setSelectedSeasons((currentSeasons) =>
-      currentSeasons.includes(season)
-        ? currentSeasons.filter((item) => item !== season)
-        : [...currentSeasons, season],
-    )
+
+  const handleRemoveImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview)
+    }
+
+    setImageFile(null)
+    setImagePreview('')
+    setImageError('')
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
+
 
   const handleSubmit = (event) => {
     event.preventDefault()
+
+    if (!isFormValid) {
+      return
+    }
+
+    /*
+      현재는 프론트 UI 디자인 단계.
+
+      추후 실제 API 연동 단계에서:
+
+      1. POST /api/clothes
+      2. 생성된 clothing.id 확인
+      3. 이미지가 있다면
+         POST /api/clothes/{id}/image
+      4. /closet 이동
+
+      순서로 연결한다.
+    */
+
+    console.log({
+      name,
+      brand,
+      category,
+      color,
+      season,
+      imageFile,
+    })
   }
 
+
   return (
-    <div className="clothes-create">
-      <PageHeader
-        className="clothes-create__header"
-        title="옷 등록"
-        onBack={() => navigate(-1)}
-      />
+    <div className="clothes-create-page">
+      {/* Header */}
+      <header className="clothes-create-header">
+        <button
+          type="button"
+          className="clothes-create-header__back"
+          onClick={() => navigate(-1)}
+          aria-label="뒤로 가기"
+        >
+          <BackIcon />
+        </button>
 
-      <form className="clothes-create__form" onSubmit={handleSubmit}>
-        <section className="clothes-create__section">
-          <label className="clothes-create__image-field">
-            <input
-              className="clothes-create__file-input"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              aria-label="옷 사진 추가"
-            />
-            {imagePreview ? (
-              <img
-                className="clothes-create__preview"
-                src={imagePreview}
-                alt="선택한 옷 미리보기"
-              />
-            ) : (
-              <span className="clothes-create__image-placeholder">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                >
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                <span>사진 추가</span>
-              </span>
-            )}
-          </label>
-        </section>
+        <h1>
+          옷 등록
+        </h1>
 
-        <section className="clothes-create__section clothes-create__fields">
-          <label className="clothes-create__field">
-            <span>이름 <span aria-hidden="true">*</span></span>
-            <input
-              type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="옷 이름을 입력해주세요"
-              required
-            />
-          </label>
+        <button
+          type="submit"
+          form="clothes-create-form"
+          className="clothes-create-header__complete"
+          disabled={!isFormValid}
+        >
+          완료
+        </button>
+      </header>
 
-          <label className="clothes-create__field">
-            <span>브랜드</span>
-            <input
-              type="text"
-              value={brand}
-              onChange={(event) => setBrand(event.target.value)}
-              placeholder="브랜드를 입력해주세요"
-            />
-          </label>
 
-          <label className="clothes-create__field">
-            <span>색상 <span aria-hidden="true">*</span></span>
-            <input
-              type="text"
-              value={color}
-              onChange={(event) => setColor(event.target.value)}
-              placeholder="색상을 입력해주세요"
-              required
-            />
-          </label>
+      <form
+        id="clothes-create-form"
+        className="clothes-create-form"
+        onSubmit={handleSubmit}
+      >
+        {/* Photo */}
+        <section className="clothes-create-section clothes-create-photo-section">
+          <div className="clothes-create-section__heading">
+            <span>
+              사진
+            </span>
 
-          <label className="clothes-create__field">
-            <span>카테고리 <span aria-hidden="true">*</span></span>
-            <select
-              value={category}
-              onChange={(event) => setCategory(event.target.value)}
-              required
-            >
-              <option value="" disabled>
-                카테고리를 선택해주세요
-              </option>
-              {categories.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-        </section>
-
-        <fieldset className="clothes-create__section clothes-create__fieldset">
-          <legend>계절</legend>
-          <div className="clothes-create__chips">
-            {seasons.map((season) => {
-              const isSelected = selectedSeasons.includes(season)
-
-              return (
-                <FilterChip
-                  key={season}
-                  className={`clothes-create__chip${isSelected ? ' clothes-create__chip--selected' : ''}`}
-                  label={season}
-                  selected={isSelected}
-                  onClick={() => toggleSeason(season)}
-                />
-              )
-            })}
+            <span className="clothes-create-section__optional">
+              선택
+            </span>
           </div>
-        </fieldset>
 
-        <label className="clothes-create__section clothes-create__field">
-          <span>메모</span>
-          <textarea
-            value={memo}
-            onChange={(event) => setMemo(event.target.value)}
-            placeholder="소재, 핏 등 기억할 내용을 적어주세요"
-            maxLength={300}
-            rows={5}
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="clothes-create-photo__input"
+            onChange={handleImageChange}
           />
-          <span className="clothes-create__memo-count">{memo.length}/300</span>
-        </label>
 
-        <div className="clothes-create__actions">
+
+          {imagePreview ? (
+            <div className="clothes-create-photo clothes-create-photo--selected">
+              <img
+                src={imagePreview}
+                alt="등록할 옷 미리보기"
+              />
+
+              <div className="clothes-create-photo__overlay">
+                <button
+                  type="button"
+                  onClick={() =>
+                    fileInputRef.current?.click()
+                  }
+                >
+                  사진 변경
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="clothes-create-photo"
+              onClick={() =>
+                fileInputRef.current?.click()
+              }
+            >
+              <span className="clothes-create-photo__icon">
+                <CameraIcon />
+              </span>
+
+              <strong>
+                옷 사진 추가
+              </strong>
+
+              <span>
+                사진을 추가하면 옷장을 더 쉽게
+                확인할 수 있어요.
+              </span>
+            </button>
+          )}
+
+
+          {imageError && (
+            <p className="clothes-create-photo__error">
+              {imageError}
+            </p>
+          )}
+        </section>
+
+
+        {/* Basic Information */}
+        <section className="clothes-create-section">
+          <div className="clothes-create-section__heading">
+            <span>
+              기본 정보
+            </span>
+          </div>
+
+
+          <div className="clothes-create-fields">
+            <label className="clothes-create-field">
+              <span className="clothes-create-field__label">
+                이름
+                <em>
+                  *
+                </em>
+              </span>
+
+              <input
+                type="text"
+                value={name}
+                onChange={(event) =>
+                  setName(event.target.value)
+                }
+                placeholder="예: 화이트 코튼 셔츠"
+                autoComplete="off"
+              />
+            </label>
+
+
+            <label className="clothes-create-field">
+              <span className="clothes-create-field__label">
+                브랜드
+              </span>
+
+              <input
+                type="text"
+                value={brand}
+                onChange={(event) =>
+                  setBrand(event.target.value)
+                }
+                placeholder="예: COS"
+                autoComplete="off"
+              />
+            </label>
+          </div>
+        </section>
+
+
+        {/* Category */}
+        <section className="clothes-create-section">
+          <div className="clothes-create-section__heading">
+            <span>
+              카테고리
+              <em>
+                *
+              </em>
+            </span>
+          </div>
+
+          <div className="clothes-create-options">
+            {categories.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={[
+                  'clothes-create-option',
+                  category === item
+                    ? 'clothes-create-option--active'
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() =>
+                  setCategory(item)
+                }
+                aria-pressed={category === item}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </section>
+
+
+        {/* Color */}
+        <section className="clothes-create-section">
+          <div className="clothes-create-section__heading">
+            <span>
+              색상
+              <em>
+                *
+              </em>
+            </span>
+          </div>
+
+          <div className="clothes-create-color-list">
+            {colors.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={[
+                  'clothes-create-color',
+                  color === item
+                    ? 'clothes-create-color--active'
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() =>
+                  setColor(item)
+                }
+                aria-pressed={color === item}
+              >
+                <span
+                  className={`clothes-create-color__swatch clothes-create-color__swatch--${item}`}
+                  aria-hidden="true"
+                />
+
+                <span>
+                  {item}
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+
+
+        {/* Season */}
+        <section className="clothes-create-section">
+          <div className="clothes-create-section__heading">
+            <span>
+              계절
+              <em>
+                *
+              </em>
+            </span>
+          </div>
+
+          <div className="clothes-create-options clothes-create-options--season">
+            {seasons.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={[
+                  'clothes-create-option',
+                  season === item
+                    ? 'clothes-create-option--active'
+                    : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={() =>
+                  setSeason(item)
+                }
+                aria-pressed={season === item}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </section>
+
+
+        {/* Summary */}
+        <section className="clothes-create-summary">
+          <div className="clothes-create-summary__row">
+            <span>
+              선택한 정보
+            </span>
+
+            <ChevronIcon />
+          </div>
+
+          <p>
+            {[category, color, season]
+              .filter(Boolean)
+              .join(' · ') ||
+              '카테고리, 색상, 계절을 선택해주세요.'}
+          </p>
+        </section>
+
+
+        {/* Bottom Action */}
+        <div className="clothes-create-action">
           <button
             type="submit"
-            className="clothes-create__submit"
-            disabled={isSubmitDisabled}
+            className="clothes-create-action__button"
+            disabled={!isFormValid}
           >
-            등록
+            옷 등록하기
           </button>
         </div>
       </form>
     </div>
   )
 }
+
 
 export default ClothesCreatePage

@@ -1,230 +1,324 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import EmptyState from '@/components/common/EmptyState'
-import FavoriteButton from '@/components/common/FavoriteButton'
-import PageHeader from '@/components/common/PageHeader'
-import ToastMessage from '@/components/common/ToastMessage'
+import { useNavigate, useParams } from 'react-router-dom'
+
 import { clothes } from '@/mocks/clothes'
+
 import './ClothesDetailPage.css'
 
-const formatDate = (date) =>
-  date
-    ? new Intl.DateTimeFormat('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(new Date(date))
-    : ''
+
+function BackIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+
+function ChevronIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+}
+
+
+function ImagePlaceholderIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect
+        x="7"
+        y="9"
+        width="34"
+        height="30"
+        rx="4"
+      />
+
+      <circle
+        cx="18"
+        cy="19"
+        r="3"
+      />
+
+      <path d="m11 34 8-8 6 6 5-5 7 7" />
+    </svg>
+  )
+}
+
+
+function DetailRow({
+  label,
+  value,
+}) {
+  return (
+    <div className="clothes-detail-row">
+      <span className="clothes-detail-row__label">
+        {label}
+      </span>
+
+      <span className="clothes-detail-row__value">
+        {value || '정보 없음'}
+      </span>
+    </div>
+  )
+}
+
 
 function ClothesDetailPage() {
   const navigate = useNavigate()
-  const location = useLocation()
-  const { clothesId } = useParams()
-  const menuRef = useRef(null)
-  const clothesItem = clothes.find((item) => item.id === Number(clothesId))
-  const [isFavorite, setIsFavorite] = useState(
-    clothesItem?.favorite ?? clothesItem?.isFavorite ?? false,
+
+  /*
+    Router에서 사용하는 파라미터 이름이
+    id / clothesId / clothingId 중 무엇이든
+    정상적으로 받을 수 있게 처리한다.
+  */
+  const params = useParams()
+
+  const clothingId =
+    params.id ??
+    params.clothesId ??
+    params.clothingId
+
+
+  const clothing = clothes.find(
+    (item) =>
+      String(item.id) === String(clothingId),
   )
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [notification, setNotification] = useState(
-    location.state?.message ?? '',
-  )
 
-  useEffect(() => {
-    if (!isMenuOpen) return undefined
 
-    const closeMenu = (event) => {
-      if (!menuRef.current?.contains(event.target)) {
-        setIsMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', closeMenu)
-    return () => document.removeEventListener('pointerdown', closeMenu)
-  }, [isMenuOpen])
-
-  if (!clothesItem) {
-    return (
-      <EmptyState
-        className="clothes-detail-empty"
-        title="옷을 찾을 수 없습니다"
-        description="삭제되었거나 존재하지 않는 옷입니다."
-        buttonText="옷장으로 돌아가기"
-        onButtonClick={() => navigate('/closet', { replace: true })}
-      />
+  const handleEdit = () => {
+    navigate(
+      `/clothes/${clothingId}/edit`,
     )
   }
 
-  const seasons = Array.isArray(clothesItem.seasons)
-    ? clothesItem.seasons
-    : clothesItem.season
-      ? [clothesItem.season]
-      : []
 
   const handleDelete = () => {
-    if (!window.confirm('이 옷을 삭제하시겠습니까?')) return
+    const confirmed = window.confirm(
+      '이 옷을 삭제하시겠습니까?',
+    )
 
-    navigate('/closet', {
-      replace: true,
-      state: { message: '옷이 삭제되었습니다.' },
-    })
+    if (!confirmed) {
+      return
+    }
+
+    /*
+      현재는 UI 디자인 단계.
+
+      실제 API 연결 시:
+
+      DELETE /api/clothes/{id}
+
+      성공 후:
+      navigate('/closet')
+    */
+
+    window.alert(
+      '삭제 기능은 실제 API 연결 단계에서 연결할게요.',
+    )
   }
 
-  const moreMenu = (
-    <div className="clothes-detail__menu-wrap" ref={menuRef}>
-      <button
-        type="button"
-        className="clothes-detail__more-button"
-        onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
-        aria-label="더보기"
-        aria-expanded={isMenuOpen}
-        aria-haspopup="menu"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <circle cx="5" cy="12" r="1.7" />
-          <circle cx="12" cy="12" r="1.7" />
-          <circle cx="19" cy="12" r="1.7" />
-        </svg>
-      </button>
-      {isMenuOpen && (
-        <div className="clothes-detail__menu" role="menu">
+
+  if (!clothing) {
+    return (
+      <div className="clothes-detail-page">
+        <header className="clothes-detail-header">
           <button
             type="button"
-            role="menuitem"
-            onClick={() => navigate(`/clothes/${clothesId}/edit`)}
+            className="clothes-detail-header__back"
+            onClick={() => navigate(-1)}
+            aria-label="뒤로 가기"
           >
-            수정
+            <BackIcon />
           </button>
+
+          <h1>
+            옷 상세
+          </h1>
+
+          <span
+            className="clothes-detail-header__spacer"
+            aria-hidden="true"
+          />
+        </header>
+
+
+        <div className="clothes-detail-not-found">
+          <h2>
+            옷을 찾을 수 없어요.
+          </h2>
+
+          <p>
+            삭제되었거나 존재하지 않는 옷이에요.
+          </p>
+
           <button
             type="button"
-            role="menuitem"
-            className="clothes-detail__delete"
-            onClick={handleDelete}
+            onClick={() => navigate('/closet')}
           >
-            삭제
+            옷장으로 돌아가기
           </button>
         </div>
-      )}
-    </div>
-  )
+      </div>
+    )
+  }
+
 
   return (
-    <div className="clothes-detail">
-      <ToastMessage
-        message={notification}
-        onClose={() => setNotification('')}
-      />
-      <PageHeader
-        className="clothes-detail__header"
-        title="옷 정보"
-        onBack={() => navigate(-1)}
-        action={moreMenu}
-      />
+    <div className="clothes-detail-page">
 
-      <main className="clothes-detail__content">
-        <section className="clothes-detail__hero">
-          {clothesItem.image ? (
-            <img src={clothesItem.image} alt={clothesItem.name} />
-          ) : (
-            <div className="clothes-detail__image-empty">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <rect x="3" y="4" width="18" height="16" rx="2" />
-                <circle cx="8.5" cy="9" r="1.5" />
-                <path d="m4 17 5-5 4 4 2-2 5 5" />
-              </svg>
-              <span>등록된 이미지가 없습니다.</span>
-            </div>
-          )}
-          <FavoriteButton
-            className="clothes-detail__favorite"
-            active={isFavorite}
-            onClick={() => setIsFavorite((current) => !current)}
-            ariaLabel={`즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
-          />
-        </section>
-
-        <section className="clothes-detail__summary">
-          <h2>{clothesItem.name}</h2>
-          <p>{clothesItem.brand || '브랜드 정보 없음'}</p>
-          <div className="clothes-detail__tags">
-            <span>{clothesItem.category}</span>
-            <span>{clothesItem.color}</span>
-          </div>
-        </section>
-
-        <section className="clothes-detail__section">
-          <h2>계절</h2>
-          {seasons.length > 0 ? (
-            <div className="clothes-detail__seasons">
-              {seasons.map((season) => (
-                <span key={season}>{season}</span>
-              ))}
-            </div>
-          ) : (
-            <p className="clothes-detail__muted">계절 정보가 없습니다.</p>
-          )}
-        </section>
-
-        <section className="clothes-detail__section">
-          <h2>메모</h2>
-          <p className="clothes-detail__memo">
-            {clothesItem.memo || '작성된 메모가 없습니다.'}
-          </p>
-        </section>
-
-        <section className="clothes-detail__section">
-          <h2>착용 정보</h2>
-          <dl className="clothes-detail__info-list">
-            <div>
-              <dt>등록일</dt>
-              <dd>
-                {clothesItem.createdAt
-                  ? formatDate(clothesItem.createdAt)
-                  : '등록일 정보 없음'}
-              </dd>
-            </div>
-            <div>
-              <dt>착용 횟수</dt>
-              <dd>{clothesItem.wearCount ?? 0}회</dd>
-            </div>
-            <div>
-              <dt>최근 착용일</dt>
-              <dd>
-                {clothesItem.lastWornAt
-                  ? formatDate(clothesItem.lastWornAt)
-                  : '아직 착용 기록이 없습니다.'}
-              </dd>
-            </div>
-          </dl>
-        </section>
-      </main>
-
-      <div className="clothes-detail__actions">
+      {/* Header */}
+      <header className="clothes-detail-header">
         <button
           type="button"
-          className="clothes-detail__edit-button"
-          onClick={() => navigate(`/clothes/${clothesId}/edit`)}
+          className="clothes-detail-header__back"
+          onClick={() => navigate(-1)}
+          aria-label="뒤로 가기"
+        >
+          <BackIcon />
+        </button>
+
+        <h1>
+          옷 상세
+        </h1>
+
+        <span
+          className="clothes-detail-header__spacer"
+          aria-hidden="true"
+        />
+      </header>
+
+
+      {/* Hero Image */}
+      <section className="clothes-detail-hero">
+        {clothing.image ? (
+          <img
+            src={clothing.image}
+            alt={clothing.name}
+          />
+        ) : (
+          <div className="clothes-detail-hero__empty">
+            <ImagePlaceholderIcon />
+
+            <span>
+              등록된 사진이 없어요.
+            </span>
+          </div>
+        )}
+      </section>
+
+
+      {/* Main Information */}
+      <section className="clothes-detail-main">
+        <div className="clothes-detail-main__category">
+          {clothing.category}
+        </div>
+
+        <h2>
+          {clothing.name}
+        </h2>
+
+        <p className="clothes-detail-main__brand">
+          {clothing.brand || '브랜드 없음'}
+        </p>
+      </section>
+
+
+      {/* Information */}
+      <section className="clothes-detail-section">
+        <h3>
+          옷 정보
+        </h3>
+
+        <div className="clothes-detail-info">
+          <DetailRow
+            label="카테고리"
+            value={clothing.category}
+          />
+
+          <DetailRow
+            label="색상"
+            value={clothing.color}
+          />
+
+          <DetailRow
+            label="계절"
+            value={clothing.season}
+          />
+        </div>
+      </section>
+
+
+      {/* Wardrobe Shortcut */}
+      <section className="clothes-detail-section">
+        <button
+          type="button"
+          className="clothes-detail-link"
+          onClick={() => navigate('/closet')}
+        >
+          <div>
+            <strong>
+              내 옷장
+            </strong>
+
+            <span>
+              등록한 다른 옷 둘러보기
+            </span>
+          </div>
+
+          <ChevronIcon />
+        </button>
+      </section>
+
+
+      {/* Delete */}
+      <section className="clothes-detail-danger">
+        <button
+          type="button"
+          onClick={handleDelete}
+        >
+          옷 삭제하기
+        </button>
+      </section>
+
+
+      {/* Bottom Action */}
+      <div className="clothes-detail-action">
+        <button
+          type="button"
+          className="clothes-detail-action__button"
+          onClick={handleEdit}
         >
           수정하기
-        </button>
-        <button
-          type="button"
-          className="clothes-detail__outfit-button"
-          onClick={() => navigate(`/outfits/new?clothesId=${clothesId}`)}
-        >
-          코디에 추가
         </button>
       </div>
     </div>
   )
 }
+
 
 export default ClothesDetailPage

@@ -1,366 +1,1309 @@
-.outfit-create {
+/* ========================================
+   VESTI — Outfit Create
+   Mobile First
+======================================== */
+
+.outfit-create-page {
+  width: 100%;
+
   min-height: 100vh;
-  background: var(--color-surface);
+  min-height: 100dvh;
+
+  background:
+    var(--color-surface);
 }
 
-.outfit-create__header {
+
+/* ========================================
+   Header
+======================================== */
+
+.outfit-create-header {
   position: sticky;
-  z-index: 5;
+  z-index: var(--z-sticky);
+
   top: 0;
+
   display: grid;
-  grid-template-columns: 64px 1fr 64px;
+
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    48px;
+
   align-items: center;
-  min-height: 56px;
-  padding: var(--space-2) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  background: var(--color-surface);
+
+  min-height: 60px;
+
+  padding:
+    env(safe-area-inset-top)
+    12px
+    0;
+
+  border-bottom:
+    1px
+    solid
+    var(--color-border);
+
+  background:
+    rgb(255 255 255 / 96%);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
 }
 
-.outfit-create__header h1 {
+
+.outfit-create-header h1 {
   margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 16px;
+  font-weight:
+    var(--font-weight-semibold);
+
+  line-height: 1.3;
+
+  letter-spacing:
+    -0.025em;
+
   text-align: center;
 }
 
-.outfit-create__back-button {
-  display: grid;
-  width: var(--space-10);
-  height: var(--space-10);
-  place-items: center;
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  cursor: pointer;
-}
 
-.outfit-create__back-button svg {
-  width: var(--space-6);
-  height: var(--space-6);
-}
-
-.outfit-create__save-button {
-  justify-self: end;
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-}
-
-.outfit-create__save-button:disabled {
-  color: var(--color-text-tertiary);
-  cursor: not-allowed;
-}
-
-.outfit-create__form {
-  padding: var(--space-6) var(--space-5)
-    calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + var(--space-10));
-}
-
-.outfit-create__section {
-  margin: 0 0 var(--space-8);
-}
-
-.outfit-create__field {
-  position: relative;
+.outfit-create-header__back {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  color:
+    var(--color-text-primary);
 }
 
-.outfit-create__field input,
-.outfit-create__field textarea {
+
+.outfit-create-header__back svg {
+  width: 24px;
+  height: 24px;
+}
+
+
+.outfit-create-header__complete {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  min-height: 44px;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight:
+    var(--font-weight-semibold);
+}
+
+
+.outfit-create-header__complete:disabled {
+  color:
+    var(--color-text-disabled);
+
+  cursor: default;
+
+  opacity: 1;
+}
+
+
+/* ========================================
+   Form
+======================================== */
+
+.outfit-create-form {
   width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-regular);
+
+  padding-bottom:
+    calc(
+      96px
+      + env(safe-area-inset-bottom)
+    );
 }
 
-.outfit-create__field input {
-  height: 48px;
-  padding: 0 var(--space-3);
+
+/* ========================================
+   Common Section
+======================================== */
+
+.outfit-create-section {
+  padding:
+    27px
+    20px;
+
+  border-bottom:
+    1px
+    solid
+    var(--color-border);
 }
 
-.outfit-create__field textarea {
-  min-height: 120px;
-  padding: var(--space-3);
-  resize: vertical;
-}
 
-.outfit-create__field input::placeholder,
-.outfit-create__field textarea::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.outfit-create__field small {
-  align-self: flex-end;
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
-}
-
-.outfit-create__fieldset {
-  padding: 0;
-  border: 0;
-}
-
-.outfit-create__fieldset legend {
-  margin-bottom: var(--space-3);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.outfit-create__chips {
+.outfit-create-section__heading {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
 
-.outfit-create__chip {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background-color var(--transition-fast),
-    color var(--transition-fast);
-}
-
-.outfit-create__chip--selected {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  font-weight: var(--font-weight-semibold);
-}
-
-.outfit-create__section-heading {
-  display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-3);
+
+  margin-bottom: 14px;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight:
+    var(--font-weight-semibold);
+
+  line-height: 1.4;
+
+  letter-spacing:
+    -0.025em;
 }
 
-.outfit-create__section-heading h2 {
-  margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-semibold);
+
+.outfit-create-section__heading em {
+  margin-left: 2px;
+
+  color:
+    var(--color-danger);
+
+  font-style: normal;
 }
 
-.outfit-create__section-heading > span {
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-xs);
-}
 
-.outfit-create__preview-empty {
-  display: grid;
-  min-height: 112px;
-  padding: var(--space-4);
-  place-items: center;
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-muted);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  text-align: center;
-}
+/* ========================================
+   Outfit Name
+======================================== */
 
-.outfit-create__preview-grid {
-  display: grid;
-  overflow: hidden;
-  max-width: 240px;
-  aspect-ratio: 1;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-border);
-}
-
-.outfit-create__preview-item {
+.outfit-create-name {
   position: relative;
-  overflow: hidden;
-  background: var(--color-surface-muted);
-}
 
-.outfit-create__preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.outfit-create__preview-item > span {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgb(36 33 31 / 68%);
-  color: var(--color-surface);
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-}
-
-.outfit-create__clothes-section {
-  margin-right: calc(var(--space-5) * -1);
-  margin-left: calc(var(--space-5) * -1);
-}
-
-.outfit-create__clothes-section > .outfit-create__section-heading,
-.outfit-create__category h3 {
-  padding: 0 var(--space-5);
-}
-
-.outfit-create__category + .outfit-create__category {
-  margin-top: var(--space-6);
-}
-
-.outfit-create__category h3 {
-  margin: 0 0 var(--space-3);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-.outfit-create__clothes-list {
   display: flex;
+
+  align-items: flex-end;
+
+  min-height: 48px;
+
+  gap: 12px;
+
+  border-bottom:
+    1px
+    solid
+    var(--color-border-strong);
+}
+
+
+.outfit-create-name input {
+  width: 100%;
+
+  padding:
+    0
+    0
+    12px;
+
+  border: 0;
+  border-radius: 0;
+
+  outline: 0;
+  box-shadow: none;
+
+  color:
+    var(--color-text-primary);
+
+  background: transparent;
+
+  font-size: 18px;
+  font-weight:
+    var(--font-weight-medium);
+
+  line-height: 1.45;
+
+  letter-spacing:
+    -0.035em;
+}
+
+
+.outfit-create-name input:focus {
+  border: 0;
+
+  box-shadow: none;
+}
+
+
+.outfit-create-name input::placeholder {
+  color:
+    var(--color-text-disabled);
+
+  font-weight:
+    var(--font-weight-regular);
+}
+
+
+.outfit-create-name > span {
+  flex-shrink: 0;
+
+  padding-bottom: 13px;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 10px;
+
+  line-height: 1;
+}
+
+
+/* ========================================
+   Occasion
+======================================== */
+
+.outfit-create-options {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+
+.outfit-create-option {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 44px;
+
+  padding:
+    0
+    8px;
+
+  border:
+    1px
+    solid
+    var(--color-border);
+
+  border-radius: 12px;
+
+  color:
+    var(--color-text-secondary);
+
+  background:
+    var(--color-surface);
+
+  font-size: 12px;
+  font-weight:
+    var(--font-weight-medium);
+
+  transition:
+    color
+      var(--transition-fast),
+    background-color
+      var(--transition-fast),
+    border-color
+      var(--transition-fast),
+    transform
+      var(--transition-fast);
+}
+
+
+.outfit-create-option--active {
+  border-color: #171717;
+
+  color: #ffffff;
+
+  background: #171717;
+}
+
+
+.outfit-create-option:active {
+  transform: scale(0.97);
+}
+
+
+/* ========================================
+   Season
+======================================== */
+
+.outfit-create-season {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+
+  gap: 8px;
+}
+
+
+.outfit-create-season__item {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 0;
+  min-height: 44px;
+
+  border:
+    1px
+    solid
+    var(--color-border);
+
+  border-radius: 12px;
+
+  color:
+    var(--color-text-secondary);
+
+  background:
+    var(--color-surface);
+
+  font-size: 12px;
+  font-weight:
+    var(--font-weight-medium);
+}
+
+
+.outfit-create-season__item--active {
+  border-color: #171717;
+
+  color: #ffffff;
+
+  background: #171717;
+}
+
+
+/* ========================================
+   Selected Clothes
+======================================== */
+
+.outfit-create-selected-section {
+  padding:
+    27px
+    20px
+    30px;
+
+  border-bottom:
+    1px
+    solid
+    var(--color-border);
+}
+
+
+.outfit-create-selected-heading {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 14px;
+}
+
+
+.outfit-create-selected-heading > div {
+  display: flex;
+
+  align-items: baseline;
+
+  gap: 7px;
+}
+
+
+.outfit-create-selected-heading h2 {
+  margin: 0;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight:
+    var(--font-weight-semibold);
+
+  line-height: 1.4;
+
+  letter-spacing:
+    -0.025em;
+}
+
+
+.outfit-create-selected-heading span {
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 11px;
+}
+
+
+.outfit-create-selected-heading > button {
+  min-height: 36px;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 11px;
+  font-weight:
+    var(--font-weight-medium);
+}
+
+
+/* Selected list */
+
+.outfit-create-selected-list {
+  display: flex;
+
+  gap: 10px;
+
+  margin:
+    0
+    -20px;
+
+  padding:
+    0
+    20px
+    4px;
+
   overflow-x: auto;
-  gap: var(--space-3);
-  padding: 0 var(--space-5) var(--space-1);
+
   scrollbar-width: none;
 }
 
-.outfit-create__clothes-list::-webkit-scrollbar {
+
+.outfit-create-selected-list::-webkit-scrollbar {
   display: none;
 }
 
-.outfit-clothes-card {
-  width: 116px;
-  flex: 0 0 116px;
-  color: var(--color-text-primary);
-  text-align: left;
-  cursor: pointer;
-}
 
-.outfit-clothes-card__image {
+.outfit-create-selected-item {
   position: relative;
-  display: block;
+
+  width: 92px;
+
+  flex:
+    0
+    0
+    92px;
+}
+
+
+.outfit-create-selected-item__image {
+  width: 92px;
+  height: 112px;
+
   overflow: hidden;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  border: 2px solid transparent;
-  border-radius: var(--radius-md);
-  background: var(--color-surface-muted);
+
+  border-radius: 13px;
+
+  background: #f5f4f1;
 }
 
-.outfit-clothes-card--selected .outfit-clothes-card__image {
-  border-color: var(--color-accent);
-}
 
-.outfit-clothes-card__image img {
+.outfit-create-selected-item__image img {
   width: 100%;
   height: 100%;
+
   object-fit: cover;
 }
 
-.outfit-clothes-card--selected .outfit-clothes-card__image img {
-  opacity: 0.78;
+
+.outfit-create-selected-item__image > span {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 9px;
 }
 
-.outfit-clothes-card__check {
+
+.outfit-create-selected-item__remove {
   position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  display: grid;
-  width: var(--space-6);
-  height: var(--space-6);
-  place-items: center;
-  border-radius: var(--radius-full);
-  background: var(--color-accent);
-  color: var(--color-surface);
+
+  top: 6px;
+  right: 6px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+
+  border-radius: 50%;
+
+  color: #ffffff;
+
+  background:
+    rgb(17 17 17 / 72%);
+
+  backdrop-filter:
+    blur(8px);
+
+  -webkit-backdrop-filter:
+    blur(8px);
 }
 
-.outfit-clothes-card__check svg {
-  width: var(--space-4);
-  height: var(--space-4);
+
+.outfit-create-selected-item__remove svg {
+  width: 14px;
+  height: 14px;
 }
 
-.outfit-clothes-card strong,
-.outfit-clothes-card small {
+
+/* No selection */
+
+.outfit-create-selected-empty {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 90px;
+
+  padding:
+    20px;
+
+  border-radius: 14px;
+
+  background: #f7f7f5;
+
+  text-align: center;
+}
+
+
+.outfit-create-selected-empty p {
+  max-width: 220px;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 12px;
+
+  line-height: 1.55;
+}
+
+
+/* ========================================
+   Wardrobe
+======================================== */
+
+.outfit-create-wardrobe {
+  padding:
+    30px
+    20px
+    40px;
+}
+
+
+.outfit-create-wardrobe__heading {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+
+.outfit-create-wardrobe__eyebrow {
   display: block;
+
+  margin-bottom: 5px;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 9px;
+  font-weight:
+    var(--font-weight-semibold);
+
+  letter-spacing: 0.11em;
+}
+
+
+.outfit-create-wardrobe__heading h2 {
+  margin: 0;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 20px;
+  font-weight: 700;
+
+  line-height: 1.3;
+
+  letter-spacing:
+    -0.04em;
+}
+
+
+.outfit-create-wardrobe__heading
+> span {
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 11px;
+}
+
+
+/* ========================================
+   Search
+======================================== */
+
+.outfit-create-search {
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  width: 100%;
+  height: 46px;
+
+  margin-bottom: 18px;
+
+  padding:
+    0
+    44px
+    0
+    14px;
+
+  border-radius: 13px;
+
+  background: #f5f5f3;
+}
+
+
+.outfit-create-search > svg {
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+
+  margin-right: 9px;
+
+  color:
+    var(--color-text-tertiary);
+}
+
+
+.outfit-create-search input {
+  width: 100%;
+  height: 100%;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 0;
+
+  outline: 0;
+  box-shadow: none;
+
+  color:
+    var(--color-text-primary);
+
+  background: transparent;
+
+  font-size: 13px;
+
+  letter-spacing:
+    -0.02em;
+}
+
+
+.outfit-create-search input:focus {
+  border: 0;
+
+  box-shadow: none;
+}
+
+
+.outfit-create-search input::placeholder {
+  color:
+    var(--color-text-tertiary);
+}
+
+
+.outfit-create-search__clear {
+  position: absolute;
+
+  top: 50%;
+  right: 11px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 20px;
+
+  transform:
+    translateY(-50%);
+}
+
+
+/* ========================================
+   Category
+======================================== */
+
+.outfit-create-categories {
+  display: flex;
+
+  gap: 22px;
+
+  margin:
+    0
+    -20px
+    22px;
+
+  padding:
+    0
+    20px
+    4px;
+
+  overflow-x: auto;
+
+  white-space: nowrap;
+
+  scrollbar-width: none;
+}
+
+
+.outfit-create-categories::-webkit-scrollbar {
+  display: none;
+}
+
+
+.outfit-create-category {
+  position: relative;
+
+  min-height: 38px;
+
+  flex-shrink: 0;
+
+  padding: 0;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 13px;
+  font-weight:
+    var(--font-weight-medium);
+}
+
+
+.outfit-create-category--active {
+  color:
+    var(--color-text-primary);
+
+  font-weight:
+    var(--font-weight-semibold);
+}
+
+
+.outfit-create-category--active::after {
+  position: absolute;
+
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  height: 2px;
+
+  border-radius:
+    var(--radius-full);
+
+  background:
+    var(--color-text-primary);
+
+  content: '';
+}
+
+
+/* ========================================
+   Clothing Grid
+======================================== */
+
+.outfit-create-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  column-gap: 10px;
+  row-gap: 24px;
+}
+
+
+.outfit-create-clothing {
+  display: block;
+
+  min-width: 0;
+
+  padding: 0;
+
+  color:
+    var(--color-text-primary);
+
+  text-align: left;
+}
+
+
+.outfit-create-clothing__image {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 0.84;
+
   overflow: hidden;
+
+  border-radius: 14px;
+
+  background: #f5f4f1;
+}
+
+
+.outfit-create-clothing__image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform
+      220ms
+      ease,
+    opacity
+      180ms
+      ease;
+}
+
+
+.outfit-create-clothing--selected
+.outfit-create-clothing__image img {
+  opacity: 0.82;
+}
+
+
+.outfit-create-clothing__empty {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 10px;
+}
+
+
+/* Selection circle */
+
+.outfit-create-clothing__check {
+  position: absolute;
+
+  top: 9px;
+  right: 9px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  border:
+    1.5px
+    solid
+    rgb(255 255 255 / 96%);
+
+  border-radius: 50%;
+
+  background:
+    rgb(255 255 255 / 84%);
+
+  box-shadow:
+    0
+    1px
+    5px
+    rgb(0 0 0 / 8%);
+
+  backdrop-filter:
+    blur(6px);
+
+  -webkit-backdrop-filter:
+    blur(6px);
+}
+
+
+.outfit-create-clothing--selected
+.outfit-create-clothing__check {
+  border-color: #171717;
+
+  color: #ffffff;
+
+  background: #171717;
+}
+
+
+.outfit-create-clothing__check svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* Clothing info */
+
+.outfit-create-clothing__info {
+  padding-top: 9px;
+}
+
+
+.outfit-create-clothing__info strong {
+  display: block;
+
+  overflow: hidden;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 12px;
+  font-weight:
+    var(--font-weight-semibold);
+
+  line-height: 1.4;
+
+  letter-spacing:
+    -0.02em;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
-.outfit-clothes-card strong {
-  margin-top: var(--space-2);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-}
 
-.outfit-clothes-card small {
-  margin-top: 2px;
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-xs);
-}
+.outfit-create-clothing__info span {
+  display: block;
 
-.outfit-create__favorite {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-}
+  margin-top: 3px;
 
-.outfit-create__favorite input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
   overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
+
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 10px;
+
+  line-height: 1.4;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
 }
 
-.outfit-create__switch {
-  position: relative;
-  width: 42px;
-  height: 24px;
-  border-radius: var(--radius-full);
-  background: var(--color-border-strong);
-  transition: background-color var(--transition-fast);
+
+/* ========================================
+   Empty Search
+======================================== */
+
+.outfit-create-empty {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 220px;
+
+  text-align: center;
 }
 
-.outfit-create__switch::after {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface);
-  content: '';
-  transition: transform var(--transition-fast);
+
+.outfit-create-empty p {
+  color:
+    var(--color-text-secondary);
+
+  font-size: 13px;
 }
 
-.outfit-create__favorite input:checked + .outfit-create__switch {
-  background: var(--color-accent);
+
+.outfit-create-empty button {
+  min-height: 42px;
+
+  margin-top: 14px;
+
+  padding:
+    0
+    16px;
+
+  border:
+    1px
+    solid
+    var(--color-border-strong);
+
+  border-radius: 10px;
+
+  color:
+    var(--color-text-primary);
+
+  font-size: 12px;
+  font-weight:
+    var(--font-weight-medium);
 }
 
-.outfit-create__favorite input:checked + .outfit-create__switch::after {
-  transform: translateX(18px);
+
+/* ========================================
+   Bottom Action
+======================================== */
+
+.outfit-create-action {
+  position: fixed;
+  z-index:
+    var(--z-navigation);
+
+  left: 50%;
+  bottom: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  width:
+    min(100%, 430px);
+
+  gap: 16px;
+
+  padding:
+    11px
+    20px
+    calc(
+      11px
+      + env(safe-area-inset-bottom)
+    );
+
+  border-top:
+    1px
+    solid
+    var(--color-border);
+
+  background:
+    rgb(255 255 255 / 96%);
+
+  backdrop-filter:
+    blur(18px);
+
+  -webkit-backdrop-filter:
+    blur(18px);
+
+  transform:
+    translateX(-50%);
 }
 
-.outfit-create__favorite input:focus-visible + .outfit-create__switch {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 3px;
+
+.outfit-create-action__summary {
+  display: flex;
+
+  align-items: baseline;
+
+  min-width: 48px;
+
+  gap: 3px;
+
+  flex-shrink: 0;
+}
+
+
+.outfit-create-action__summary strong {
+  color:
+    var(--color-text-primary);
+
+  font-size: 17px;
+  font-weight: 700;
+}
+
+
+.outfit-create-action__summary span {
+  color:
+    var(--color-text-tertiary);
+
+  font-size: 10px;
+}
+
+
+.outfit-create-action__button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 52px;
+
+  border-radius: 12px;
+
+  color: #ffffff;
+
+  background: #171717;
+
+  font-size: 14px;
+  font-weight:
+    var(--font-weight-semibold);
+
+  letter-spacing:
+    -0.02em;
+}
+
+
+.outfit-create-action__button:disabled {
+  color:
+    var(--color-text-tertiary);
+
+  background: #ececea;
+
+  cursor: default;
+
+  opacity: 1;
+}
+
+
+/* ========================================
+   Pointer
+======================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .outfit-create-header__back:hover {
+    border-radius: 50%;
+
+    background:
+      var(--color-surface-muted);
+  }
+
+
+  .outfit-create-option:not(
+    .outfit-create-option--active
+  ):hover,
+  .outfit-create-season__item:not(
+    .outfit-create-season__item--active
+  ):hover {
+    border-color:
+      var(--color-border-strong);
+  }
+
+
+  .outfit-create-clothing:hover
+  .outfit-create-clothing__image img {
+    transform: scale(1.02);
+  }
+
+
+  .outfit-create-category:hover {
+    color:
+      var(--color-text-primary);
+  }
+
+
+  .outfit-create-action__button:not(
+    :disabled
+  ):hover {
+    background: #2a2a2a;
+  }
+}
+
+
+/* ========================================
+   Real Mobile
+======================================== */
+
+@media (max-width: 430px) {
+  .outfit-create-action {
+    width: 100%;
+  }
+}
+
+
+/* ========================================
+   Small Mobile
+======================================== */
+
+@media (max-width: 359px) {
+  .outfit-create-section,
+  .outfit-create-selected-section,
+  .outfit-create-wardrobe {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+
+  .outfit-create-selected-list,
+  .outfit-create-categories {
+    margin-right: -16px;
+    margin-left: -16px;
+
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+
+  .outfit-create-action {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+
+  .outfit-create-options {
+    gap: 6px;
+  }
+
+
+  .outfit-create-grid {
+    column-gap: 8px;
+  }
 }

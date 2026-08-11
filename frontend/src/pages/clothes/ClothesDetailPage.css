@@ -1,230 +1,549 @@
-.clothes-detail {
+/* ========================================
+   VESTI — Clothing Detail
+   Mobile First
+======================================== */
+
+.clothes-detail-page {
+  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
+
+  padding-bottom:
+    calc(
+      92px
+      + env(safe-area-inset-bottom)
+    );
+
   background: var(--color-surface);
 }
 
-.clothes-detail__header {
+
+/* ========================================
+   Header
+======================================== */
+
+.clothes-detail-header {
   position: sticky;
-  z-index: 10;
+  z-index: var(--z-sticky);
+
   top: 0;
-}
 
-.clothes-detail__menu-wrap {
-  position: relative;
-}
-
-.clothes-detail__more-button {
   display: grid;
-  width: var(--space-10);
-  height: var(--space-10);
-  place-items: center;
-  border-radius: var(--radius-md);
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    48px;
+
+  align-items: center;
+
+  min-height: 60px;
+
+  padding:
+    env(safe-area-inset-top)
+    12px
+    0;
+
+  border-bottom: 1px solid var(--color-border);
+
+  background: rgb(255 255 255 / 96%);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+
+.clothes-detail-header h1 {
+  margin: 0;
+
   color: var(--color-text-primary);
-  cursor: pointer;
+
+  font-size: 16px;
+  font-weight: var(--font-weight-semibold);
+
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+
+  text-align: center;
 }
 
-.clothes-detail__more-button svg {
-  width: var(--space-6);
-  height: var(--space-6);
-}
 
-.clothes-detail__menu {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + var(--space-1));
-  right: 0;
-  width: 112px;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-}
+.clothes-detail-header__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-.clothes-detail__menu button {
-  display: block;
-  width: 100%;
-  padding: var(--space-3) var(--space-4);
+  width: 44px;
+  height: 44px;
+
   color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  text-align: left;
-  cursor: pointer;
 }
 
-.clothes-detail__menu button + button {
-  border-top: 1px solid var(--color-border);
+
+.clothes-detail-header__back svg {
+  width: 24px;
+  height: 24px;
 }
 
-.clothes-detail__menu .clothes-detail__delete {
-  color: var(--color-danger);
+
+.clothes-detail-header__spacer {
+  width: 48px;
+  height: 44px;
 }
 
-.clothes-detail__content {
-  padding-bottom: var(--space-4);
-}
 
-.clothes-detail__hero {
-  position: relative;
+/* ========================================
+   Hero Image
+======================================== */
+
+.clothes-detail-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   width: 100%;
-  aspect-ratio: 4 / 5;
+
+  aspect-ratio: 1 / 1.08;
+
   overflow: hidden;
-  background: var(--color-surface-muted);
+
+  background: #f5f4f1;
 }
 
-.clothes-detail__hero > img {
+
+.clothes-detail-hero > img {
   width: 100%;
   height: 100%;
+
   object-fit: cover;
 }
 
-.clothes-detail__image-empty {
+
+.clothes-detail-hero__empty {
   display: flex;
-  width: 100%;
-  height: 100%;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-  gap: var(--space-3);
+
+  gap: 12px;
+
   color: var(--color-text-tertiary);
-  font-size: var(--font-size-sm);
 }
 
-.clothes-detail__image-empty svg {
-  width: 48px;
-  height: 48px;
+
+.clothes-detail-hero__empty svg {
+  width: 42px;
+  height: 42px;
 }
 
-.clothes-detail__favorite {
-  position: absolute;
-  z-index: 2;
-  top: var(--space-4);
-  right: var(--space-4);
-  width: var(--space-10);
-  height: var(--space-10);
+
+.clothes-detail-hero__empty span {
+  font-size: 12px;
+  line-height: 1.4;
 }
 
-.clothes-detail__favorite svg {
-  width: var(--space-5);
-  height: var(--space-5);
-}
 
-.clothes-detail__summary,
-.clothes-detail__section {
-  padding: var(--space-6) var(--space-5);
-}
+/* ========================================
+   Main Information
+======================================== */
 
-.clothes-detail__summary {
+.clothes-detail-main {
+  padding:
+    24px
+    20px
+    28px;
+
   border-bottom: 1px solid var(--color-border);
 }
 
-.clothes-detail__summary h2 {
-  margin: 0;
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.02em;
-}
 
-.clothes-detail__summary > p {
-  margin: var(--space-1) 0 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
+.clothes-detail-main__category {
+  margin-bottom: 7px;
 
-.clothes-detail__tags,
-.clothes-detail__seasons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
+  color: var(--color-text-tertiary);
 
-.clothes-detail__tags {
-  margin-top: var(--space-4);
-}
-
-.clothes-detail__tags span,
-.clothes-detail__seasons span {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.clothes-detail__section + .clothes-detail__section {
-  border-top: 1px solid var(--color-border);
-}
-
-.clothes-detail__section > h2 {
-  margin: 0 0 var(--space-4);
-  font-size: var(--font-size-md);
+  font-size: 10px;
   font-weight: var(--font-weight-semibold);
+
+  line-height: 1.3;
+
+  letter-spacing: 0.08em;
 }
 
-.clothes-detail__memo,
-.clothes-detail__muted {
+
+.clothes-detail-main h2 {
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
 
-.clothes-detail__info-list {
-  margin: 0;
-}
-
-.clothes-detail__info-list > div {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-5);
-  padding: var(--space-2) 0;
-  font-size: var(--font-size-sm);
-}
-
-.clothes-detail__info-list dt {
-  color: var(--color-text-secondary);
-}
-
-.clothes-detail__info-list dd {
-  margin: 0;
   color: var(--color-text-primary);
-  text-align: right;
+
+  font-size: 24px;
+  font-weight: 700;
+
+  line-height: 1.25;
+  letter-spacing: -0.045em;
 }
 
-.clothes-detail__actions {
-  position: sticky;
-  z-index: 5;
-  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-5) var(--space-4);
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
+
+.clothes-detail-main__brand {
+  margin-top: 7px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 13px;
+
+  line-height: 1.4;
 }
 
-.clothes-detail__actions button {
-  height: 50px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
+
+/* ========================================
+   Section
+======================================== */
+
+.clothes-detail-section {
+  padding:
+    28px
+    20px;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+.clothes-detail-section > h3 {
+  margin:
+    0
+    0
+    14px;
+
+  color: var(--color-text-primary);
+
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
-  cursor: pointer;
+
+  line-height: 1.4;
+
+  letter-spacing: -0.025em;
 }
 
-.clothes-detail__edit-button {
-  border: 1px solid var(--color-border-strong) !important;
-  color: var(--color-accent);
+
+/* ========================================
+   Information Rows
+======================================== */
+
+.clothes-detail-info {
+  border-top: 1px solid var(--color-border);
 }
 
-.clothes-detail__outfit-button {
-  background: var(--color-accent);
-  color: var(--color-surface);
+
+.clothes-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 54px;
+
+  gap: 24px;
+
+  border-bottom: 1px solid var(--color-border);
 }
 
-.clothes-detail-empty {
-  display: grid;
-  min-height: calc(100vh - var(--bottom-nav-height));
-  place-items: center;
-  align-content: center;
+
+.clothes-detail-row__label {
+  color: var(--color-text-secondary);
+
+  font-size: 13px;
+
+  line-height: 1.4;
+}
+
+
+.clothes-detail-row__value {
+  overflow: hidden;
+
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+
+  line-height: 1.4;
+
+  text-align: right;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ========================================
+   Shortcut
+======================================== */
+
+.clothes-detail-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 58px;
+
+  gap: 20px;
+
+  padding: 0;
+
+  color: var(--color-text-primary);
+
+  text-align: left;
+}
+
+
+.clothes-detail-link > div {
+  min-width: 0;
+}
+
+
+.clothes-detail-link strong {
+  display: block;
+
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+
+  line-height: 1.4;
+}
+
+
+.clothes-detail-link span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--color-text-tertiary);
+
+  font-size: 11px;
+
+  line-height: 1.4;
+}
+
+
+.clothes-detail-link svg {
+  width: 18px;
+  height: 18px;
+
+  flex-shrink: 0;
+
+  color: var(--color-text-tertiary);
+}
+
+
+/* ========================================
+   Delete
+======================================== */
+
+.clothes-detail-danger {
+  padding:
+    28px
+    20px
+    36px;
+}
+
+
+.clothes-detail-danger button {
+  min-height: 44px;
+
+  padding: 0;
+
+  color: var(--color-danger);
+
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+
+  line-height: 1.4;
+}
+
+
+/* ========================================
+   Sticky Bottom Action
+======================================== */
+
+.clothes-detail-action {
+  position: fixed;
+  z-index: var(--z-navigation);
+
+  left: 50%;
+  bottom: 0;
+
+  width: min(100%, 430px);
+
+  padding:
+    12px
+    20px
+    calc(
+      12px
+      + env(safe-area-inset-bottom)
+    );
+
+  border-top: 1px solid var(--color-border);
+
+  background: rgb(255 255 255 / 96%);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transform: translateX(-50%);
+}
+
+
+.clothes-detail-action__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 52px;
+
+  border-radius: 12px;
+
+  color: #ffffff;
+  background: #171717;
+
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+
+  letter-spacing: -0.02em;
+
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+
+.clothes-detail-action__button:active {
+  transform: scale(0.985);
+}
+
+
+/* ========================================
+   Not Found
+======================================== */
+
+.clothes-detail-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  min-height:
+    calc(
+      100vh
+      - 120px
+    );
+
+  min-height:
+    calc(
+      100dvh
+      - 120px
+    );
+
+  padding: 40px 24px;
+
+  text-align: center;
+}
+
+
+.clothes-detail-not-found h2 {
+  margin: 0;
+
+  color: var(--color-text-primary);
+
+  font-size: 19px;
+  font-weight: var(--font-weight-semibold);
+
+  letter-spacing: -0.035em;
+}
+
+
+.clothes-detail-not-found p {
+  margin-top: 8px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+.clothes-detail-not-found button {
+  min-height: 46px;
+
+  margin-top: 24px;
+  padding: 0 20px;
+
+  border-radius: 12px;
+
+  color: #ffffff;
+  background: #171717;
+
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+}
+
+
+/* ========================================
+   Pointer Interaction
+======================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .clothes-detail-header__back:hover {
+    background: var(--color-surface-muted);
+
+    border-radius: 50%;
+  }
+
+  .clothes-detail-link:hover
+  strong {
+    text-decoration: underline;
+
+    text-underline-offset: 3px;
+  }
+
+  .clothes-detail-danger button:hover {
+    text-decoration: underline;
+
+    text-underline-offset: 3px;
+  }
+
+  .clothes-detail-action__button:hover {
+    background: #2a2a2a;
+  }
+}
+
+
+/* ========================================
+   Real Mobile
+======================================== */
+
+@media (max-width: 430px) {
+  .clothes-detail-action {
+    width: 100%;
+  }
+}
+
+
+/* ========================================
+   Small Mobile
+======================================== */
+
+@media (max-width: 359px) {
+  .clothes-detail-main,
+  .clothes-detail-section,
+  .clothes-detail-danger {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .clothes-detail-action {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .clothes-detail-main h2 {
+    font-size: 22px;
+  }
 }

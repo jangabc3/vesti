@@ -1,206 +1,774 @@
-.clothes-create {
+/* ========================================
+   VESTI — Clothing Create
+   Mobile First
+======================================== */
+
+.clothes-create-page {
+  width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
+
   background: var(--color-surface);
 }
 
-.clothes-create__header {
+
+/* ========================================
+   Header
+======================================== */
+
+.clothes-create-header {
+  position: sticky;
+  z-index: var(--z-sticky);
+
+  top: 0;
+
   display: grid;
-  grid-template-columns: var(--space-10) 1fr var(--space-10);
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    48px;
+
   align-items: center;
-  min-height: 56px;
-  padding: var(--space-2) var(--space-4);
+
+  min-height: 60px;
+
+  padding:
+    env(safe-area-inset-top)
+    12px
+    0;
+
   border-bottom: 1px solid var(--color-border);
+
+  background: rgb(255 255 255 / 96%);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
-.clothes-create__back-button {
-  display: grid;
-  width: var(--space-10);
-  height: var(--space-10);
-  place-items: center;
-  border-radius: var(--radius-md);
-  color: var(--color-text-primary);
-  cursor: pointer;
-}
 
-.clothes-create__back-button svg {
-  width: var(--space-6);
-  height: var(--space-6);
-}
-
-.clothes-create__title {
+.clothes-create-header h1 {
   margin: 0;
-  font-size: var(--font-size-lg);
+
+  color: var(--color-text-primary);
+
+  font-size: 16px;
   font-weight: var(--font-weight-semibold);
+
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+
   text-align: center;
 }
 
-.clothes-create__form {
-  padding: var(--space-6) var(--space-5) 0;
-}
 
-.clothes-create__section {
-  margin: 0 0 var(--space-8);
-}
-
-.clothes-create__image-field {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border: 1px dashed var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-muted);
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.clothes-create__file-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-.clothes-create__image-placeholder {
+.clothes-create-header__back {
   display: flex;
-  width: 100%;
-  height: 100%;
   align-items: center;
   justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  color: var(--color-text-primary);
+}
+
+
+.clothes-create-header__back svg {
+  width: 24px;
+  height: 24px;
+}
+
+
+.clothes-create-header__complete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  min-height: 44px;
+
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+}
+
+
+.clothes-create-header__complete:disabled {
+  color: var(--color-text-disabled);
+
+  opacity: 1;
+
+  cursor: default;
+}
+
+
+/* ========================================
+   Form
+======================================== */
+
+.clothes-create-form {
+  width: 100%;
+
+  padding-bottom:
+    calc(
+      96px
+      + env(safe-area-inset-bottom)
+    );
+}
+
+
+/* ========================================
+   Section
+======================================== */
+
+.clothes-create-section {
+  padding:
+    28px
+    20px;
+
+  border-bottom: 1px solid var(--color-border);
+}
+
+
+.clothes-create-photo-section {
+  padding-top: 22px;
+}
+
+
+.clothes-create-section__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+
+  line-height: 1.4;
+
+  letter-spacing: -0.025em;
+}
+
+
+.clothes-create-section__heading em {
+  margin-left: 2px;
+
+  color: var(--color-danger);
+
+  font-style: normal;
+}
+
+
+.clothes-create-section__optional {
+  color: var(--color-text-tertiary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-regular);
+}
+
+
+/* ========================================
+   Photo
+======================================== */
+
+.clothes-create-photo__input {
+  display: none;
+}
+
+
+.clothes-create-photo {
+  position: relative;
+
+  display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  aspect-ratio: 1.22 / 1;
+
+  overflow: hidden;
+
+  padding: 24px;
+
+  border: 0;
+  border-radius: 18px;
+
+  background: #f5f4f1;
+
+  color: var(--color-text-primary);
+
+  text-align: center;
 }
 
-.clothes-create__image-placeholder svg {
-  width: var(--space-8);
-  height: var(--space-8);
+
+.clothes-create-photo__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 52px;
+  height: 52px;
+
+  margin-bottom: 14px;
+
+  border-radius: 50%;
+
+  background: var(--color-surface);
+
+  color: var(--color-text-secondary);
 }
 
-.clothes-create__preview {
+
+.clothes-create-photo__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+
+.clothes-create-photo strong {
+  color: var(--color-text-primary);
+
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+
+  line-height: 1.4;
+}
+
+
+.clothes-create-photo > span:last-child {
+  max-width: 230px;
+
+  margin-top: 6px;
+
+  color: var(--color-text-tertiary);
+
+  font-size: 11px;
+  line-height: 1.55;
+
+  letter-spacing: -0.01em;
+}
+
+
+/* Selected Photo */
+
+.clothes-create-photo--selected {
+  padding: 0;
+
+  background: #f5f4f1;
+}
+
+
+.clothes-create-photo--selected > img {
   width: 100%;
   height: 100%;
+
   object-fit: cover;
 }
 
-.clothes-create__fields {
-  display: grid;
-  gap: var(--space-5);
+
+.clothes-create-photo__overlay {
+  position: absolute;
+
+  right: 12px;
+  bottom: 12px;
+
+  display: flex;
+
+  gap: 6px;
 }
 
-.clothes-create__field {
-  position: relative;
+
+.clothes-create-photo__overlay button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
+
+  padding:
+    0
+    13px;
+
+  border-radius: var(--radius-full);
+
+  color: #ffffff;
+  background: rgb(17 17 17 / 78%);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+
+.clothes-create-photo__error {
+  margin-top: 10px;
+
+  color: var(--color-danger);
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* ========================================
+   Text Fields
+======================================== */
+
+.clothes-create-fields {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
 }
 
-.clothes-create__field input,
-.clothes-create__field select,
-.clothes-create__field textarea {
+
+.clothes-create-field {
+  display: block;
+
+  padding:
+    4px
+    0
+    18px;
+}
+
+
+.clothes-create-field + .clothes-create-field {
+  padding-top: 18px;
+
+  border-top: 1px solid var(--color-border);
+}
+
+
+.clothes-create-field:last-child {
+  padding-bottom: 0;
+}
+
+
+.clothes-create-field__label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: var(--color-text-secondary);
+
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+
+  line-height: 1.4;
+}
+
+
+.clothes-create-field__label em {
+  margin-left: 2px;
+
+  color: var(--color-danger);
+
+  font-style: normal;
+}
+
+
+.clothes-create-field input {
   width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
+  height: auto;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 0;
+
+  outline: 0;
+  box-shadow: none;
+
   color: var(--color-text-primary);
-  font-size: var(--font-size-md);
+  background: transparent;
+
+  font-size: 16px;
+  font-weight: var(--font-weight-medium);
+
+  line-height: 1.5;
+
+  letter-spacing: -0.025em;
+}
+
+
+.clothes-create-field input:focus {
+  border: 0;
+
+  box-shadow: none;
+}
+
+
+.clothes-create-field input::placeholder {
+  color: var(--color-text-disabled);
+
   font-weight: var(--font-weight-regular);
 }
 
-.clothes-create__field input,
-.clothes-create__field select {
-  height: 48px;
-  padding: 0 var(--space-3);
-}
 
-.clothes-create__field textarea {
-  min-height: 120px;
-  padding: var(--space-3);
-  resize: vertical;
-}
+/* ========================================
+   Option Buttons
+======================================== */
 
-.clothes-create__field input::placeholder,
-.clothes-create__field textarea::placeholder {
-  color: var(--color-text-tertiary);
-}
-
-.clothes-create__fieldset {
-  padding: 0;
-  border: 0;
-}
-
-.clothes-create__fieldset legend {
-  margin-bottom: var(--space-3);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-}
-
-.clothes-create__chips {
+.clothes-create-options {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+
+  gap: 8px;
 }
 
-.clothes-create__chip {
-  min-width: 64px;
-  padding: var(--space-2) var(--space-4);
+
+.clothes-create-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding:
+    0
+    17px;
+
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  background: var(--color-surface);
+
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
+  background: var(--color-surface);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-medium);
+
   transition:
+    color var(--transition-fast),
     border-color var(--transition-fast),
     background-color var(--transition-fast),
-    color var(--transition-fast);
+    transform var(--transition-fast);
 }
 
-.clothes-create__chip--selected {
-  border-color: var(--color-accent);
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  font-weight: var(--font-weight-semibold);
+
+.clothes-create-option--active {
+  border-color: #171717;
+
+  color: #ffffff;
+  background: #171717;
 }
 
-.clothes-create__memo-count {
-  align-self: flex-end;
-  color: var(--color-text-tertiary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-regular);
+
+.clothes-create-option:active {
+  transform: scale(0.97);
 }
 
-.clothes-create__actions {
-  position: sticky;
-  bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
-  margin: 0 calc(var(--space-5) * -1);
-  padding: var(--space-3) var(--space-5) var(--space-4);
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
+
+/* Season */
+
+.clothes-create-options--season {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 8px;
 }
 
-.clothes-create__submit {
+
+.clothes-create-options--season
+.clothes-create-option {
   width: 100%;
-  height: 52px;
-  border-radius: var(--radius-md);
-  background: var(--color-accent);
-  color: var(--color-surface);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: opacity var(--transition-fast);
+
+  padding:
+    0
+    8px;
 }
 
-.clothes-create__submit:disabled {
-  background: var(--color-surface-muted);
+
+/* ========================================
+   Color
+======================================== */
+
+.clothes-create-color-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+
+.clothes-create-color {
+  display: flex;
+  align-items: center;
+
+  min-height: 48px;
+
+  gap: 10px;
+
+  padding:
+    0
+    13px;
+
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+
+  color: var(--color-text-secondary);
+  background: var(--color-surface);
+
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+
+  text-align: left;
+
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast);
+}
+
+
+.clothes-create-color--active {
+  border-color: var(--color-text-primary);
+
+  color: var(--color-text-primary);
+
+  background: var(--color-surface-soft);
+}
+
+
+.clothes-create-color__swatch {
+  width: 20px;
+  height: 20px;
+
+  flex-shrink: 0;
+
+  border: 1px solid rgb(0 0 0 / 8%);
+  border-radius: 50%;
+}
+
+
+/* Color Swatches */
+
+.clothes-create-color__swatch--블랙 {
+  background: #191919;
+}
+
+.clothes-create-color__swatch--화이트 {
+  background: #ffffff;
+}
+
+.clothes-create-color__swatch--그레이 {
+  background: #a9a9a6;
+}
+
+.clothes-create-color__swatch--네이비 {
+  background: #283149;
+}
+
+.clothes-create-color__swatch--베이지 {
+  background: #d9c8ae;
+}
+
+.clothes-create-color__swatch--브라운 {
+  background: #8b6a52;
+}
+
+.clothes-create-color__swatch--블루 {
+  background: #6988ad;
+}
+
+.clothes-create-color__swatch--그린 {
+  background: #70806b;
+}
+
+.clothes-create-color__swatch--레드 {
+  background: #a9534d;
+}
+
+.clothes-create-color__swatch--기타 {
+  background:
+    linear-gradient(
+      135deg,
+      #ece8e1 0%,
+      #ece8e1 33%,
+      #9da9af 33%,
+      #9da9af 66%,
+      #75675d 66%
+    );
+}
+
+
+/* ========================================
+   Summary
+======================================== */
+
+.clothes-create-summary {
+  padding:
+    24px
+    20px
+    30px;
+}
+
+
+.clothes-create-summary__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: var(--color-text-primary);
+
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+}
+
+
+.clothes-create-summary__row svg {
+  width: 18px;
+  height: 18px;
+
   color: var(--color-text-tertiary);
-  cursor: not-allowed;
+}
+
+
+.clothes-create-summary p {
+  margin-top: 8px;
+
+  color: var(--color-text-tertiary);
+
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+
+/* ========================================
+   Sticky Bottom Action
+======================================== */
+
+.clothes-create-action {
+  position: fixed;
+  z-index: var(--z-navigation);
+
+  left: 50%;
+  bottom: 0;
+
+  width: min(100%, 430px);
+
+  padding:
+    12px
+    20px
+    calc(
+      12px
+      + env(safe-area-inset-bottom)
+    );
+
+  border-top: 1px solid var(--color-border);
+
+  background: rgb(255 255 255 / 96%);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transform: translateX(-50%);
+}
+
+
+.clothes-create-action__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 52px;
+
+  border-radius: 12px;
+
+  color: #ffffff;
+  background: #171717;
+
+  font-size: 14px;
+  font-weight: var(--font-weight-semibold);
+
+  letter-spacing: -0.02em;
+
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+
+.clothes-create-action__button:disabled {
+  color: var(--color-text-tertiary);
+
+  background: #ececea;
+
+  opacity: 1;
+
+  cursor: default;
+}
+
+
+.clothes-create-action__button:not(:disabled):active {
+  transform: scale(0.985);
+}
+
+
+/* ========================================
+   Pointer Interaction
+======================================== */
+
+@media (hover: hover) and (pointer: fine) {
+  .clothes-create-option:not(.clothes-create-option--active):hover,
+  .clothes-create-color:not(.clothes-create-color--active):hover {
+    border-color: var(--color-border-strong);
+  }
+
+  .clothes-create-action__button:not(:disabled):hover {
+    background: #2a2a2a;
+  }
+}
+
+
+/* ========================================
+   Real Mobile
+======================================== */
+
+@media (max-width: 430px) {
+  .clothes-create-action {
+    width: 100%;
+  }
+}
+
+
+/* ========================================
+   Small Mobile
+======================================== */
+
+@media (max-width: 359px) {
+  .clothes-create-section {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .clothes-create-summary {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .clothes-create-action {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .clothes-create-color-list {
+    gap: 6px;
+  }
+
+  .clothes-create-option {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
 }

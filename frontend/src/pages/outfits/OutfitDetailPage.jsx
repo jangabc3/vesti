@@ -1,270 +1,443 @@
-import { useEffect, useRef, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
-import EmptyState from '@/components/common/EmptyState'
-import FavoriteButton from '@/components/common/FavoriteButton'
-import PageHeader from '@/components/common/PageHeader'
-import ToastMessage from '@/components/common/ToastMessage'
+import {
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
+
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
+
 import './OutfitDetailPage.css'
 
-const formatDate = (date) =>
-  date
-    ? new Intl.DateTimeFormat('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      }).format(new Date(date))
-    : ''
 
-function OutfitDetailPage() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const { outfitId } = useParams()
-  const menuRef = useRef(null)
-  const outfit = outfits.find((item) => String(item.id) === outfitId)
-  const includedClothes = outfit
-    ? outfit.clothesIds
-        .map((id) => clothes.find((item) => item.id === id))
-        .filter(Boolean)
-    : []
-  const [isFavorite, setIsFavorite] = useState(outfit?.favorite ?? false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [notification, setNotification] = useState(
-    location.state?.message ?? '',
+function BackIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m15 18-6-6 6-6" />
+    </svg>
   )
+}
 
-  useEffect(() => {
-    if (!isMenuOpen) return undefined
 
-    const closeMenu = (event) => {
-      if (!menuRef.current?.contains(event.target)) {
-        setIsMenuOpen(false)
-      }
-    }
+function ChevronIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+}
 
-    document.addEventListener('pointerdown', closeMenu)
-    return () => document.removeEventListener('pointerdown', closeMenu)
-  }, [isMenuOpen])
 
-  const handleWearToday = () => {
-    if (!window.confirm('이 코디를 오늘 입은 기록으로 추가하시겠습니까?')) {
-      return
-    }
-
-    navigate('/history', {
-      state: { message: '오늘의 착용 기록이 추가되었습니다.' },
-    })
-  }
-
-  const handleDelete = () => {
-    if (!window.confirm('이 코디를 삭제하시겠습니까?')) return
-
-    navigate('/outfits', {
-      replace: true,
-      state: { message: '코디가 삭제되었습니다.' },
-    })
-  }
-
-  if (!outfit) {
+function OutfitHero({
+  outfitClothes,
+}) {
+  if (outfitClothes.length === 0) {
     return (
-      <EmptyState
-        className="outfit-detail-empty"
-        title="코디를 찾을 수 없습니다"
-        description="삭제되었거나 존재하지 않는 코디입니다."
-        buttonText="코디 목록으로 돌아가기"
-        onButtonClick={() => navigate('/outfits')}
-      />
+      <div className="outfit-detail-hero__empty">
+        <span>
+          아직 등록된 옷이 없어요.
+        </span>
+      </div>
     )
   }
 
-  const previewClothes = includedClothes.slice(0, 4)
 
   return (
-    <div className="outfit-detail">
-      <ToastMessage
-        message={notification}
-        onClose={() => setNotification('')}
-      />
-      <PageHeader
-        className="outfit-detail__header"
-        title="코디 정보"
-        onBack={() => navigate(-1)}
-        action={
-          <div className="outfit-detail__menu-wrap" ref={menuRef}>
+    <div
+      className={[
+        'outfit-detail-hero__visual',
+        `outfit-detail-hero__visual--${Math.min(
+          outfitClothes.length,
+          4,
+        )}`,
+      ].join(' ')}
+    >
+      {outfitClothes
+        .slice(0, 4)
+        .map((item) => (
+          <div
+            key={item.id}
+            className="outfit-detail-hero__item"
+          >
+            <img
+              src={item.image}
+              alt={item.name}
+            />
+          </div>
+        ))}
+    </div>
+  )
+}
+
+
+function DetailRow({
+  label,
+  value,
+}) {
+  return (
+    <div className="outfit-detail-row">
+      <span className="outfit-detail-row__label">
+        {label}
+      </span>
+
+      <span className="outfit-detail-row__value">
+        {value || '정보 없음'}
+      </span>
+    </div>
+  )
+}
+
+
+function OutfitDetailPage() {
+  const navigate = useNavigate()
+  const params = useParams()
+
+
+  /*
+    실제 Router가 :outfitId를 사용하고 있으므로
+    이를 우선 사용한다.
+
+    기존 코드와의 호환성을 위해 id도 함께 처리한다.
+  */
+  const outfitId =
+    params.outfitId ??
+    params.id ??
+    params.coordinationId
+
+
+  const outfit = outfits.find(
+    (item) =>
+      String(item.id) ===
+      String(outfitId),
+  )
+
+
+  const outfitClothes = outfit
+    ? (
+        Array.isArray(
+          outfit.clothesIds,
+        )
+          ? outfit.clothesIds
+          : []
+      )
+        .map((clothingId) =>
+          clothes.find(
+            (item) =>
+              String(item.id) ===
+              String(clothingId),
+          ),
+        )
+        .filter(Boolean)
+    : []
+
+
+  const handleEdit = () => {
+    navigate(
+      `/outfits/${outfitId}/edit`,
+    )
+  }
+
+
+  const handleDelete = () => {
+    const confirmed =
+      window.confirm(
+        '이 코디를 삭제하시겠습니까?',
+      )
+
+    if (!confirmed) {
+      return
+    }
+
+    /*
+      현재는 UI 단계.
+
+      실제 API 연결 시:
+
+      DELETE /api/coordinations/{id}
+
+      성공 후:
+      navigate('/outfits')
+    */
+
+    window.alert(
+      '삭제 기능은 실제 API 연결 단계에서 연결할게요.',
+    )
+  }
+
+
+  if (!outfit) {
+    return (
+      <div className="outfit-detail-page">
+        <header className="outfit-detail-header">
           <button
             type="button"
-            className="outfit-detail__icon-button"
-            onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
-            aria-label="더보기"
-            aria-expanded={isMenuOpen}
-            aria-haspopup="menu"
+            className="outfit-detail-header__back"
+            onClick={() =>
+              navigate(-1)
+            }
+            aria-label="뒤로 가기"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <circle cx="5" cy="12" r="1.7" />
-              <circle cx="12" cy="12" r="1.7" />
-              <circle cx="19" cy="12" r="1.7" />
-            </svg>
+            <BackIcon />
           </button>
-          {isMenuOpen && (
-            <div className="outfit-detail__menu" role="menu">
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => navigate(`/outfits/${outfitId}/edit`)}
-              >
-                수정
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="outfit-detail__delete"
-                onClick={handleDelete}
-              >
-                삭제
-              </button>
-            </div>
-          )}
-          </div>
-        }
-      />
 
-      <main className="outfit-detail__content">
-        <section className="outfit-detail__hero">
-          {previewClothes.length > 0 ? (
-            <div
-              className={`outfit-detail__preview outfit-detail__preview--${previewClothes.length}`}
-            >
-              {previewClothes.map((item, index) => (
-                <div key={item.id} className="outfit-detail__preview-item">
-                  <img src={item.image} alt={item.name} />
-                  {index === 3 && includedClothes.length > 4 && (
-                    <span>+{includedClothes.length - 4}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="outfit-detail__preview-empty">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="m12 3-9 5 9 5 9-5-9-5Z" />
-                <path d="m3 12 9 5 9-5M3 16l9 5 9-5" />
-              </svg>
-              <span>코디 이미지가 없습니다.</span>
-            </div>
-          )}
-          <FavoriteButton
-            className={`outfit-detail__favorite${isFavorite ? ' outfit-detail__favorite--active' : ''}`}
-            active={isFavorite}
-            onClick={() => setIsFavorite((current) => !current)}
-            ariaLabel={`즐겨찾기 ${isFavorite ? '해제' : '추가'}`}
+          <h1>
+            코디 상세
+          </h1>
+
+          <span
+            className="outfit-detail-header__spacer"
+            aria-hidden="true"
           />
-        </section>
+        </header>
 
-        <section className="outfit-detail__summary">
-          <h2>{outfit.name}</h2>
-          <div className="outfit-detail__tags">
-            <span>{outfit.occasion}</span>
-            <span>{outfit.season}</span>
-          </div>
-        </section>
 
-        <section className="outfit-detail__section">
-          <h2>코디 정보</h2>
-          <dl className="outfit-detail__info-list">
-            <div>
-              <dt>등록일</dt>
-              <dd>{formatDate(outfit.createdAt)}</dd>
-            </div>
-            <div>
-              <dt>착용 횟수</dt>
-              <dd>{outfit.wearCount ?? 0}회</dd>
-            </div>
-            <div>
-              <dt>최근 착용일</dt>
-              <dd>
-                {outfit.lastWornAt
-                  ? formatDate(outfit.lastWornAt)
-                  : '아직 착용 기록이 없습니다.'}
-              </dd>
-            </div>
-            <div>
-              <dt>포함된 옷</dt>
-              <dd>{includedClothes.length}개</dd>
-            </div>
-          </dl>
-        </section>
+        <div className="outfit-detail-not-found">
+          <h2>
+            코디를 찾을 수 없어요.
+          </h2>
 
-        <section className="outfit-detail__section">
-          <h2>메모</h2>
-          <p className="outfit-detail__memo">
-            {outfit.memo || '작성된 메모가 없습니다.'}
+          <p>
+            삭제되었거나 존재하지 않는
+            코디예요.
           </p>
-        </section>
 
-        <section className="outfit-detail__section">
-          <h2>포함된 옷</h2>
-          {includedClothes.length > 0 ? (
-            <div className="outfit-detail__clothes-list">
-              {includedClothes.map((item) => (
+          <button
+            type="button"
+            onClick={() =>
+              navigate('/outfits')
+            }
+          >
+            코디 목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+
+  return (
+    <div className="outfit-detail-page">
+
+      {/* Header */}
+      <header className="outfit-detail-header">
+        <button
+          type="button"
+          className="outfit-detail-header__back"
+          onClick={() =>
+            navigate(-1)
+          }
+          aria-label="뒤로 가기"
+        >
+          <BackIcon />
+        </button>
+
+        <h1>
+          코디 상세
+        </h1>
+
+        <span
+          className="outfit-detail-header__spacer"
+          aria-hidden="true"
+        />
+      </header>
+
+
+      {/* Hero */}
+      <section className="outfit-detail-hero">
+        <OutfitHero
+          outfitClothes={
+            outfitClothes
+          }
+        />
+      </section>
+
+
+      {/* Main */}
+      <section className="outfit-detail-main">
+        <span className="outfit-detail-main__eyebrow">
+          OUTFIT
+        </span>
+
+        <h2>
+          {outfit.name}
+        </h2>
+
+        <p>
+          {[
+            outfit.occasion,
+            outfit.season,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </p>
+      </section>
+
+
+      {/* Information */}
+      <section className="outfit-detail-section">
+        <h3>
+          코디 정보
+        </h3>
+
+        <div className="outfit-detail-info">
+          <DetailRow
+            label="상황"
+            value={
+              outfit.occasion
+            }
+          />
+
+          <DetailRow
+            label="계절"
+            value={
+              outfit.season
+            }
+          />
+
+          <DetailRow
+            label="구성"
+            value={`옷 ${outfitClothes.length}개`}
+          />
+        </div>
+      </section>
+
+
+      {/* Clothes */}
+      <section className="outfit-detail-section outfit-detail-clothes-section">
+        <div className="outfit-detail-section__heading">
+          <div>
+            <h3>
+              구성한 옷
+            </h3>
+
+            <span>
+              {outfitClothes.length}개
+            </span>
+          </div>
+        </div>
+
+
+        {outfitClothes.length > 0 ? (
+          <div className="outfit-detail-clothes">
+            {outfitClothes.map(
+              (item) => (
                 <button
                   key={item.id}
                   type="button"
-                  className="outfit-detail__clothes-card"
-                  onClick={() => navigate(`/clothes/${item.id}`)}
+                  className="outfit-detail-clothing"
+                  onClick={() =>
+                    navigate(
+                      `/clothes/${item.id}`,
+                    )
+                  }
                 >
-                  <img src={item.image} alt={item.name} />
-                  <span className="outfit-detail__clothes-info">
-                    <strong>{item.name}</strong>
-                    <span>{item.brand}</span>
-                    <small>{item.category} · {item.color}</small>
-                  </span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="m9 18 6-6-6-6" />
-                  </svg>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <p className="outfit-detail__empty-clothes">
-              코디에 포함된 옷이 없습니다.
-            </p>
-          )}
-        </section>
-      </main>
+                  <div className="outfit-detail-clothing__image">
+                    {item.image ? (
+                      <img
+                        src={
+                          item.image
+                        }
+                        alt={
+                          item.name
+                        }
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="outfit-detail-clothing__empty">
+                        이미지 없음
+                      </div>
+                    )}
+                  </div>
 
-      <div className="outfit-detail__actions">
+                  <div className="outfit-detail-clothing__info">
+                    <strong>
+                      {item.name}
+                    </strong>
+
+                    <span>
+                      {[
+                        item.brand,
+                        item.color,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  </div>
+                </button>
+              ),
+            )}
+          </div>
+        ) : (
+          <div className="outfit-detail-clothes-empty">
+            <p>
+              이 코디에 등록된 옷이
+              없어요.
+            </p>
+          </div>
+        )}
+      </section>
+
+
+      {/* Outfit List */}
+      <section className="outfit-detail-section">
         <button
           type="button"
-          className="outfit-detail__wear-button"
-          onClick={handleWearToday}
+          className="outfit-detail-link"
+          onClick={() =>
+            navigate('/outfits')
+          }
         >
-          오늘 입기
+          <div>
+            <strong>
+              내 코디
+            </strong>
+
+            <span>
+              저장한 다른 코디 둘러보기
+            </span>
+          </div>
+
+          <ChevronIcon />
         </button>
+      </section>
+
+
+      {/* Delete */}
+      <section className="outfit-detail-danger">
         <button
           type="button"
-          className="outfit-detail__edit-button"
-          onClick={() => navigate(`/outfits/${outfitId}/edit`)}
+          onClick={
+            handleDelete
+          }
+        >
+          코디 삭제하기
+        </button>
+      </section>
+
+
+      {/* Bottom Action */}
+      <div className="outfit-detail-action">
+        <button
+          type="button"
+          className="outfit-detail-action__button"
+          onClick={
+            handleEdit
+          }
         >
           수정하기
         </button>
@@ -272,5 +445,6 @@ function OutfitDetailPage() {
     </div>
   )
 }
+
 
 export default OutfitDetailPage

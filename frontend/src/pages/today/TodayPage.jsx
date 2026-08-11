@@ -1,22 +1,27 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+
 import ToastMessage from '@/components/common/ToastMessage'
+
 import { clothes } from '@/mocks/clothes'
 import { outfits } from '@/mocks/outfits'
 import { todayData } from '@/mocks/today'
+
 import './TodayPage.css'
+
 
 const getWeatherMessage = (temperature) => {
   if (temperature >= 28) {
-    return '가볍고 통풍이 잘되는 옷을 추천해요.'
+    return '가볍고 통풍이 잘 되는 옷이 좋아요.'
   }
 
   if (temperature >= 20) {
-    return '얇은 겉옷을 준비하면 좋아요.'
+    return '얇은 겉옷을 하나 챙기면 좋아요.'
   }
 
-  return '따뜻한 아우터를 챙겨주세요.'
+  return '따뜻하게 입고 외출하세요.'
 }
+
 
 const getRecommendedOutfit = (temperature) => {
   const recommendedSeasons =
@@ -27,105 +32,131 @@ const getRecommendedOutfit = (temperature) => {
         : ['겨울']
 
   return (
-    outfits.find((outfit) => recommendedSeasons.includes(outfit.season)) ??
-    outfits[0]
+    outfits.find((outfit) =>
+      recommendedSeasons.includes(outfit.season),
+    ) ?? outfits[0]
   )
 }
 
-const formatDate = (date, includeWeekday = false) =>
+
+const formatToday = (date) =>
   new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
     month: 'long',
     day: 'numeric',
-    ...(includeWeekday && { weekday: 'long' }),
+    weekday: 'long',
   }).format(date)
 
-function OutfitPreview({ outfit }) {
-  const previewClothes = outfit.clothesIds
+
+const getGreeting = () => {
+  const hour = new Date().getHours()
+
+  if (hour < 12) {
+    return '좋은 아침이에요'
+  }
+
+  if (hour < 18) {
+    return '좋은 오후예요'
+  }
+
+  return '좋은 저녁이에요'
+}
+
+
+function OutfitVisual({ outfit }) {
+  const outfitClothes = outfit.clothesIds
     .map((id) => clothes.find((item) => item.id === id))
     .filter(Boolean)
     .slice(0, 4)
 
-  if (previewClothes.length === 0) {
+  if (outfitClothes.length === 0) {
     return (
-      <div className="today-outfit__preview today-outfit__preview--empty">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m12 3-9 5 9 5 9-5-9-5Z" />
-          <path d="m3 12 9 5 9-5M3 16l9 5 9-5" />
-        </svg>
-        <span>코디 이미지가 없습니다.</span>
+      <div className="today-look__empty">
+        <span>추천 코디를 준비하고 있어요.</span>
       </div>
     )
   }
 
   return (
     <div
-      className={`today-outfit__preview today-outfit__preview--${previewClothes.length}`}
+      className={`today-look__visual today-look__visual--${Math.min(
+        outfitClothes.length,
+        4,
+      )}`}
     >
-      {previewClothes.map((item) => (
-        <img key={item.id} src={item.image} alt="" />
+      {outfitClothes.map((item) => (
+        <div
+          key={item.id}
+          className="today-look__visual-item"
+        >
+          <img
+            src={item.image}
+            alt={item.name}
+          />
+        </div>
       ))}
     </div>
   )
 }
 
+
 function TodayPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { weather } = todayData
-  const initialRecommendation = getRecommendedOutfit(weather.temperature)
-  const [recommendedOutfitId, setRecommendedOutfitId] = useState(
-    initialRecommendation?.id ?? null,
-  )
-  const [notification, setNotification] = useState(
-    location.state?.message ?? '',
-  )
 
-  const currentDate = new Date()
+  const { weather } = todayData
+
+  const initialRecommendation =
+    getRecommendedOutfit(weather.temperature)
+
+  const [recommendedOutfitId, setRecommendedOutfitId] =
+    useState(initialRecommendation?.id ?? null)
+
+  const [notification, setNotification] =
+    useState(location.state?.message ?? '')
+
+  const today = new Date()
+
   const recommendedOutfit =
-    outfits.find((outfit) => outfit.id === recommendedOutfitId) ?? outfits[0]
-  const recentClothes = [...clothes]
-    .sort((a, b) => {
-      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
-      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
-      return bTime - aTime
-    })
-    .slice(0, 5)
-  const recentlyWornOutfits = [...outfits]
-    .filter((outfit) => outfit.lastWornAt)
-    .sort(
-      (a, b) =>
-        new Date(b.lastWornAt).getTime() - new Date(a.lastWornAt).getTime(),
-    )
-    .slice(0, 3)
+    outfits.find(
+      (outfit) => outfit.id === recommendedOutfitId,
+    ) ?? outfits[0]
+
+  const recentClothes = [...clothes].slice(0, 5)
+
 
   const showAnotherOutfit = () => {
-    if (outfits.length <= 1) return
+    if (outfits.length <= 1) {
+      return
+    }
 
     const currentIndex = outfits.findIndex(
-      (outfit) => outfit.id === recommendedOutfit?.id,
+      (outfit) =>
+        outfit.id === recommendedOutfit?.id,
     )
-    const nextOutfit = outfits[(currentIndex + 1) % outfits.length]
+
+    const nextOutfit =
+      outfits[(currentIndex + 1) % outfits.length]
+
     setRecommendedOutfitId(nextOutfit.id)
   }
 
+
   const handleWearToday = () => {
-    if (!window.confirm('이 코디를 오늘 입은 기록으로 추가하시겠습니까?')) {
+    const confirmed = window.confirm(
+      '이 코디를 오늘 입은 기록으로 추가하시겠습니까?',
+    )
+
+    if (!confirmed) {
       return
     }
 
     navigate('/history', {
-      state: { message: '오늘의 착용 기록이 추가되었습니다.' },
+      state: {
+        message: '오늘의 착용 기록이 추가되었습니다.',
+      },
     })
   }
+
 
   return (
     <div className="today-page">
@@ -133,152 +164,237 @@ function TodayPage() {
         message={notification}
         onClose={() => setNotification('')}
       />
-      <header className="today-page__header">
-        <p className="today-page__date">{formatDate(currentDate, true)}</p>
-        <h1>좋은 아침이에요</h1>
-        <p className="today-page__subtitle">오늘 입을 옷을 골라볼까요?</p>
+
+
+      {/* Header */}
+      <header className="today-header">
+        <p className="today-header__date">
+          {formatToday(today)}
+        </p>
+
+        <h1>
+          {getGreeting()}
+        </h1>
+
+        <p className="today-header__description">
+          오늘 입을 옷을 함께 골라볼까요?
+        </p>
       </header>
 
-      <section className="today-page__weather" aria-labelledby="weather-title">
-        <div className="today-page__section-heading">
-          <h2 id="weather-title">오늘의 날씨</h2>
-          <span>{weather.location}</span>
-        </div>
-        <div className="today-weather__main">
-          <div>
-            <strong>{weather.temperature}°</strong>
-            <span>{weather.condition}</span>
+
+      {/* Weather */}
+      <section
+        className="today-weather"
+        aria-label="오늘의 날씨"
+      >
+        <div className="today-weather__top">
+          <div className="today-weather__location">
+            <span
+              className="today-weather__location-icon"
+              aria-hidden="true"
+            />
+
+            <span>
+              {weather.location}
+            </span>
           </div>
-          <dl>
-            <div>
-              <dt>최고·최저</dt>
-              <dd>{weather.high}° / {weather.low}°</dd>
-            </div>
-            <div>
-              <dt>강수 확률</dt>
-              <dd>{weather.precipitation}%</dd>
-            </div>
-          </dl>
+
+          <span className="today-weather__condition">
+            {weather.condition}
+          </span>
         </div>
-        <p className="today-weather__message">
-          {getWeatherMessage(weather.temperature)}
-        </p>
+
+
+        <div className="today-weather__temperature">
+          <strong>
+            {weather.temperature}°
+          </strong>
+
+          <div className="today-weather__detail">
+            <span>
+              최고 {weather.high}°
+            </span>
+
+            <span>
+              최저 {weather.low}°
+            </span>
+          </div>
+        </div>
+
+
+        <div className="today-weather__message">
+          <p>
+            {getWeatherMessage(weather.temperature)}
+          </p>
+
+          <span>
+            강수확률 {weather.precipitation}%
+          </span>
+        </div>
       </section>
 
-      <section className="today-page__section" aria-labelledby="recommendation-title">
-        <div className="today-page__section-heading">
-          <h2 id="recommendation-title">오늘의 추천 코디</h2>
-          <span>{recommendedOutfit?.season}</span>
+
+      {/* Recommended Outfit */}
+      <section
+        className="today-look"
+        aria-labelledby="today-look-title"
+      >
+        <div className="today-section-heading">
+          <div>
+            <span className="today-section-heading__eyebrow">
+              TODAY&apos;S LOOK
+            </span>
+
+            <h2 id="today-look-title">
+              오늘의 추천
+            </h2>
+          </div>
+
+          <span className="today-section-heading__meta">
+            {recommendedOutfit?.season}
+          </span>
         </div>
+
+
         {recommendedOutfit ? (
           <>
-            <article
-              className="today-outfit"
-              role="link"
-              tabIndex={0}
-              onClick={() => navigate(`/outfits/${recommendedOutfit.id}`)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  navigate(`/outfits/${recommendedOutfit.id}`)
-                }
-              }}
+            <button
+              type="button"
+              className="today-look__image-button"
+              onClick={() =>
+                navigate(
+                  `/outfits/${recommendedOutfit.id}`,
+                )
+              }
+              aria-label={`${recommendedOutfit.name} 상세 보기`}
             >
-              <OutfitPreview outfit={recommendedOutfit} />
-              <div className="today-outfit__content">
+              <OutfitVisual
+                outfit={recommendedOutfit}
+              />
+            </button>
+
+
+            <div className="today-look__info">
+              <div className="today-look__title-row">
                 <div>
-                  <h3>{recommendedOutfit.name}</h3>
-                  {recommendedOutfit.favorite && (
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-label="즐겨찾기"
-                    >
-                      <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z" />
-                    </svg>
-                  )}
+                  <h3>
+                    {recommendedOutfit.name}
+                  </h3>
+
+                  <p>
+                    {recommendedOutfit.occasion}
+                    {' · '}
+                    {recommendedOutfit.season}
+                  </p>
                 </div>
-                <p>{recommendedOutfit.occasion} · {recommendedOutfit.season}</p>
-                <span>옷 {recommendedOutfit.clothesIds.length}개</span>
               </div>
-            </article>
-            <div className="today-outfit__actions">
-              <button type="button" onClick={showAnotherOutfit}>
-                다른 코디 보기
-              </button>
-              <button type="button" onClick={handleWearToday}>
-                오늘 입기
-              </button>
+
+
+              <div className="today-look__reason">
+                <span>
+                  추천 이유
+                </span>
+
+                <p>
+                  {weather.temperature}°의 오늘 날씨에 맞춰
+                  가볍고 편하게 입기 좋은 코디를 골랐어요.
+                </p>
+              </div>
             </div>
+
+
+            <button
+              type="button"
+              className="today-look__primary-action"
+              onClick={handleWearToday}
+            >
+              오늘 입기
+            </button>
+
+
+            <button
+              type="button"
+              className="today-look__secondary-action"
+              onClick={showAnotherOutfit}
+            >
+              <span>
+                다른 코디 추천받기
+              </span>
+
+              <span aria-hidden="true">
+                →
+              </span>
+            </button>
           </>
         ) : (
-          <p className="today-page__empty">추천할 코디가 없습니다.</p>
+          <div className="today-look__empty-state">
+            <p>
+              아직 추천할 수 있는 코디가 없어요.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => navigate('/outfits/new')}
+            >
+              첫 코디 만들기
+            </button>
+          </div>
         )}
       </section>
 
-      <section className="today-page__section" aria-labelledby="recent-clothes-title">
-        <div className="today-page__section-heading">
-          <h2 id="recent-clothes-title">최근 등록한 옷</h2>
+
+      {/* Recently Added */}
+      <section
+        className="today-recent"
+        aria-labelledby="recent-clothes-title"
+      >
+        <div className="today-section-heading">
+          <div>
+            <span className="today-section-heading__eyebrow">
+              WARDROBE
+            </span>
+
+            <h2 id="recent-clothes-title">
+              최근 등록한 옷
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            className="today-section-heading__link"
+            onClick={() => navigate('/closet')}
+          >
+            전체보기
+          </button>
         </div>
-        <div className="today-clothes__list">
+
+
+        <div className="today-recent__list">
           {recentClothes.map((item) => (
             <button
               key={item.id}
               type="button"
-              className="today-clothes__card"
-              onClick={() => navigate(`/clothes/${item.id}`)}
+              className="today-recent__item"
+              onClick={() =>
+                navigate(`/clothes/${item.id}`)
+              }
             >
-              <img src={item.image} alt={item.name} />
-              <strong>{item.name}</strong>
-              <span>{item.category}</span>
+              <div className="today-recent__image">
+                <img
+                  src={item.image}
+                  alt={item.name}
+                />
+              </div>
+
+              <strong>
+                {item.name}
+              </strong>
+
+              <span>
+                {item.color}
+              </span>
             </button>
           ))}
-        </div>
-      </section>
-
-      <section className="today-page__section" aria-labelledby="recent-outfits-title">
-        <div className="today-page__section-heading">
-          <h2 id="recent-outfits-title">최근 입은 코디</h2>
-        </div>
-        {recentlyWornOutfits.length > 0 ? (
-          <div className="today-recent-outfits">
-            {recentlyWornOutfits.map((outfit) => (
-              <button
-                key={outfit.id}
-                type="button"
-                onClick={() => navigate(`/outfits/${outfit.id}`)}
-              >
-                <span>
-                  <strong>{outfit.name}</strong>
-                  <small>{outfit.occasion} · {outfit.season}</small>
-                </span>
-                <time dateTime={outfit.lastWornAt}>
-                  {formatDate(new Date(outfit.lastWornAt))}
-                </time>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <p className="today-page__empty">아직 착용 기록이 없습니다.</p>
-        )}
-      </section>
-
-      <section className="today-page__section" aria-labelledby="quick-actions-title">
-        <div className="today-page__section-heading">
-          <h2 id="quick-actions-title">빠른 실행</h2>
-        </div>
-        <div className="today-quick-actions">
-          <button type="button" onClick={() => navigate('/clothes/new')}>
-            <span>+</span>
-            옷 등록
-          </button>
-          <button type="button" onClick={() => navigate('/outfits/new')}>
-            <span>+</span>
-            코디 만들기
-          </button>
-          <button type="button" onClick={() => navigate('/history')}>
-            <span>↗</span>
-            착용 기록 보기
-          </button>
         </div>
       </section>
     </div>

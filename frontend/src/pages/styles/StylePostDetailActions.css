@@ -1,0 +1,302 @@
+/* ========================================
+   VESTI
+   Style Post Actions
+======================================== */
+
+
+/* ========================================
+   Action Sheet Backdrop
+======================================== */
+
+.style-post-actions-backdrop {
+  position: fixed;
+
+  z-index: 150;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: center;
+
+  background:
+    rgb(0 0 0 / 48%);
+}
+
+
+/* ========================================
+   Action Sheet
+======================================== */
+
+.style-post-actions-sheet {
+  width:
+    min(
+      100%,
+      430px
+    );
+
+  padding:
+    9px
+    16px
+    calc(
+      15px
+      +
+      env(
+        safe-area-inset-bottom
+      )
+    );
+
+  border-radius:
+    22px
+    22px
+    0
+    0;
+
+  background: #ffffff;
+}
+
+
+.style-post-actions-sheet__handle {
+  width: 37px;
+  height: 4px;
+
+  margin:
+    1px
+    auto
+    18px;
+
+  border-radius: 999px;
+
+  background: #dedbd7;
+}
+
+
+.style-post-actions-sheet__item {
+  display: grid;
+
+  grid-template-columns:
+    31px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  width: 100%;
+  min-height: 55px;
+
+  gap: 8px;
+
+  padding:
+    0
+    7px;
+
+  border: 0;
+  border-bottom:
+    1px
+    solid
+    #eeeeec;
+
+  color: #171717;
+
+  background: #ffffff;
+
+  text-align: left;
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+
+.style-post-actions-sheet__item
+svg {
+  width: 19px;
+  height: 19px;
+}
+
+
+.style-post-actions-sheet__item--danger {
+  color: #d64d54;
+}
+
+
+.style-post-actions-sheet__cancel {
+  width: 100%;
+  min-height: 49px;
+
+  margin-top: 10px;
+
+  border: 0;
+  border-radius: 8px;
+
+  color: #45413d;
+
+  background: #f5f5f4;
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+
+/* ========================================
+   Delete Backdrop
+======================================== */
+
+.style-post-delete-backdrop {
+  position: fixed;
+
+  z-index: 170;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    24px;
+
+  background:
+    rgb(0 0 0 / 52%);
+}
+
+
+/* ========================================
+   Delete Dialog
+======================================== */
+
+.style-post-delete-dialog {
+  width:
+    min(
+      100%,
+      330px
+    );
+
+  padding:
+    25px
+    21px
+    18px;
+
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0
+    20px
+    60px
+    rgb(0 0 0 / 18%);
+
+  text-align: center;
+}
+
+
+.style-post-delete-dialog
+h2 {
+  margin: 0;
+
+  color: #171717;
+
+  font-size: 16px;
+  font-weight: 740;
+
+  letter-spacing: -0.035em;
+}
+
+
+.style-post-delete-dialog
+p {
+  margin-top: 8px;
+
+  color: #8d8882;
+
+  font-size: 9px;
+
+  line-height: 1.6;
+}
+
+
+.style-post-delete-dialog
+> div {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+
+  gap: 7px;
+
+  margin-top: 21px;
+}
+
+
+.style-post-delete-dialog
+button {
+  min-height: 45px;
+
+  border: 0;
+  border-radius: 7px;
+
+  color: #393632;
+
+  background: #f3f3f2;
+
+  font-size: 10px;
+  font-weight: 680;
+}
+
+
+.style-post-delete-dialog__delete {
+  color: #ffffff !important;
+
+  background: #171717 !important;
+}
+
+
+.style-post-delete-dialog
+button:disabled {
+  opacity: 0.55;
+
+  cursor: default;
+}
+
+
+/* ========================================
+   Interaction
+======================================== */
+
+.style-post-actions-sheet
+button,
+.style-post-delete-dialog
+button {
+  font-family: inherit;
+
+  cursor: pointer;
+
+  -webkit-tap-highlight-color:
+    transparent;
+}
+
+
+.style-post-actions-sheet
+button:focus-visible,
+.style-post-delete-dialog
+button:focus-visible {
+  outline:
+    2px
+    solid
+    #171717;
+
+  outline-offset: 2px;
+}
+
+
+@media (max-width: 430px) {
+
+  .style-post-actions-sheet {
+    width: 100%;
+  }
+
+}

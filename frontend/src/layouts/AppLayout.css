@@ -1,14 +1,77 @@
-.app-layout {
+/* ========================================
+   VESTI — Mobile App Shell
+======================================== */
+
+.app-frame {
   width: 100%;
-  max-width: var(--app-max-width);
   min-height: 100vh;
+  min-height: 100dvh;
+
+  background: #f3f3f1;
+}
+
+
+.app-shell {
+  position: relative;
+
+  width: 100%;
+  max-width: 430px;
+
+  min-height: 100vh;
+  min-height: 100dvh;
+
   margin: 0 auto;
+
+  overflow-x: hidden;
+
   background: var(--color-surface);
 }
 
-.app-layout__content {
+
+/* ========================================
+   Main
+======================================== */
+
+.app-main {
+  width: 100%;
+
   min-height: 100vh;
-  padding-bottom: calc(
-    var(--bottom-nav-height) + env(safe-area-inset-bottom)
-  );
+  min-height: 100dvh;
+
+  padding-bottom:
+    calc(
+      var(--bottom-nav-height)
+      + env(safe-area-inset-bottom)
+      + 12px
+    );
+
+  background: var(--color-surface);
+}
+
+
+/*
+  등록 / 수정처럼 하나의 작업에
+  집중하는 화면에서는 Bottom Navigation이 없으므로
+  하단 Navigation 여백도 제거한다.
+*/
+
+.app-main--focus {
+  padding-bottom: 0;
+}
+
+
+/* ========================================
+   Real Mobile
+======================================== */
+
+@media (max-width: 430px) {
+  .app-frame {
+    background: var(--color-surface);
+  }
+
+  .app-shell {
+    max-width: none;
+
+    margin: 0;
+  }
 }

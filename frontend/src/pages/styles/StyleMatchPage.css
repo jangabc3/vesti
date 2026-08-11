@@ -1,0 +1,874 @@
+/* ========================================
+   VESTI
+   Try With My Wardrobe
+======================================== */
+
+.style-match-page-v2 {
+  width: 100%;
+
+  min-height: 100vh;
+
+  padding-bottom: 100px;
+
+  color: #171717;
+
+  background: #ffffff;
+}
+
+/* ========================================
+   Header
+======================================== */
+
+.style-match-v2-header {
+  position: sticky;
+  z-index: 40;
+
+  top: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    44px
+    minmax(0, 1fr)
+    44px;
+
+  align-items: center;
+
+  min-height: 58px;
+
+  padding: 0 10px;
+
+  border-bottom: 1px solid #eeeeec;
+
+  background: rgb(255 255 255 / 96%);
+
+  backdrop-filter: blur(20px);
+
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.style-match-v2-header button {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  height: 44px;
+
+  padding: 0;
+
+  border: 0;
+
+  color: #171717;
+
+  background: transparent;
+}
+
+.style-match-v2-header button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.style-match-v2-header > strong {
+  font-size: 12px;
+  font-weight: 700;
+
+  text-align: center;
+}
+
+/* ========================================
+   Reference
+======================================== */
+
+.style-match-reference-v2 {
+  padding: 22px 17px;
+
+  border-bottom: 8px solid #f6f6f5;
+}
+
+.style-match-reference-v2__label {
+  display: block;
+
+  margin-bottom: 11px;
+
+  color: #77726d;
+
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.style-match-reference-v2__content {
+  display: grid;
+
+  grid-template-columns:
+    76px
+    minmax(0, 1fr)
+    22px;
+
+  align-items: center;
+
+  width: 100%;
+
+  gap: 13px;
+
+  padding: 0;
+
+  border: 0;
+
+  color: #171717;
+
+  background: transparent;
+
+  text-align: left;
+}
+
+.style-match-reference-v2__image {
+  width: 76px;
+  height: 94px;
+
+  overflow: hidden;
+
+  border-radius: 5px;
+
+  background: #eeeeec;
+}
+
+.style-match-reference-v2__image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.style-match-reference-v2__content > div:nth-child(2) {
+  min-width: 0;
+}
+
+.style-match-reference-v2__content strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: #171717;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  line-height: 1.45;
+
+  text-overflow: ellipsis;
+
+  display: -webkit-box;
+
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.style-match-reference-v2__content p {
+  margin-top: 6px;
+
+  color: #908b85;
+
+  font-size: 9px;
+}
+
+.style-match-reference-v2__content > svg {
+  width: 17px;
+  height: 17px;
+
+  color: #aaa59f;
+}
+
+/* ========================================
+   Intro
+======================================== */
+
+.style-match-intro-v2 {
+  padding: 31px 18px 30px;
+
+  border-bottom: 1px solid #ecebe8;
+}
+
+.style-match-intro-v2 h1 {
+  max-width: 330px;
+
+  margin: 0;
+
+  color: #151515;
+
+  font-size: 25px;
+  font-weight: 760;
+
+  line-height: 1.34;
+
+  letter-spacing: -0.055em;
+}
+
+.style-match-intro-v2 p {
+  max-width: 335px;
+
+  margin-top: 13px;
+
+  color: #77726c;
+
+  font-size: 10px;
+
+  line-height: 1.7;
+}
+
+.style-match-intro-v2 p strong {
+  color: #171717;
+
+  font-weight: 750;
+}
+
+/* ========================================
+   Section heading
+======================================== */
+
+.style-match-section-heading {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 18px;
+
+  margin-bottom: 5px;
+}
+
+.style-match-section-heading h2 {
+  margin: 0;
+
+  color: #171717;
+
+  font-size: 18px;
+  font-weight: 740;
+
+  letter-spacing: -0.045em;
+}
+
+.style-match-section-heading > span {
+  color: #96918b;
+
+  font-size: 9px;
+}
+
+.style-match-section-heading > div p {
+  margin-top: 5px;
+
+  color: #918c86;
+
+  font-size: 9px;
+}
+
+/* ========================================
+   Wardrobe
+======================================== */
+
+.style-match-wardrobe {
+  padding: 27px 17px 0;
+}
+
+/* ========================================
+   Piece
+======================================== */
+
+.style-match-piece {
+  padding: 26px 0 28px;
+
+  border-bottom: 1px solid #e9e8e5;
+}
+
+.style-match-piece__heading {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-bottom: 14px;
+}
+
+.style-match-piece__heading h2 {
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 720;
+}
+
+.style-match-piece__heading > span {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  color: #5e6c58;
+
+  font-size: 8px;
+  font-weight: 650;
+}
+
+.style-match-piece__heading > span svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ========================================
+   Comparison
+======================================== */
+
+.style-match-piece__comparison {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+.style-match-piece-card {
+  min-width: 0;
+}
+
+.style-match-piece-card > span {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #98938d;
+
+  font-size: 8px;
+}
+
+.style-match-piece-card--mine > span {
+  color: #4f5d4c;
+
+  font-weight: 700;
+}
+
+.style-match-piece-card__image {
+  width: 100%;
+
+  aspect-ratio: 1;
+
+  overflow: hidden;
+
+  border-radius: 5px;
+
+  background: #f0efed;
+}
+
+.style-match-piece-card__image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.style-match-piece-card > strong {
+  display: block;
+
+  margin-top: 9px;
+
+  overflow: hidden;
+
+  color: #171717;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.style-match-piece-card > p {
+  margin-top: 4px;
+
+  color: #98938d;
+
+  font-size: 8px;
+}
+
+/* ========================================
+   Missing
+======================================== */
+
+.style-match-missing {
+  padding: 17px;
+
+  border-radius: 9px;
+
+  background: #f7f7f6;
+}
+
+.style-match-missing__reference > span {
+  color: #96918b;
+
+  font-size: 8px;
+}
+
+.style-match-missing__reference > div {
+  display: grid;
+
+  grid-template-columns:
+    73px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 8px;
+}
+
+.style-match-missing__reference img {
+  width: 73px;
+  height: 82px;
+
+  border-radius: 5px;
+
+  object-fit: cover;
+
+  background: #eeeeec;
+}
+
+.style-match-missing__reference strong {
+  display: block;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.style-match-missing__reference p {
+  margin-top: 4px;
+
+  color: #96918b;
+
+  font-size: 8px;
+}
+
+/* Missing message */
+
+.style-match-missing__message {
+  margin-top: 17px;
+
+  padding-top: 17px;
+
+  border-top: 1px solid #e3e2df;
+}
+
+.style-match-missing__message > strong {
+  display: block;
+
+  max-width: 280px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  line-height: 1.5;
+}
+
+.style-match-missing__message > p {
+  max-width: 300px;
+
+  margin-top: 6px;
+
+  color: #85807a;
+
+  font-size: 9px;
+
+  line-height: 1.6;
+}
+
+/* Similar suggestion */
+
+.style-match-missing__suggestion {
+  display: grid;
+
+  grid-template-columns:
+    62px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 16px;
+
+  padding: 10px;
+
+  border: 1px solid #e2e0dc;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+}
+
+.style-match-missing__suggestion img {
+  width: 62px;
+  height: 68px;
+
+  border-radius: 4px;
+
+  object-fit: cover;
+}
+
+.style-match-missing__suggestion span {
+  display: block;
+
+  color: #6c7895;
+
+  font-size: 7px;
+  font-weight: 700;
+}
+
+.style-match-missing__suggestion strong {
+  display: block;
+
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  font-size: 10px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.style-match-missing__suggestion p {
+  margin-top: 3px;
+
+  color: #99948e;
+
+  font-size: 8px;
+}
+
+.style-match-missing__message > button {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  min-height: 43px;
+
+  margin-top: 14px;
+
+  padding: 0 13px;
+
+  border: 1px solid #d7d4d0;
+
+  border-radius: 6px;
+
+  color: #171717;
+
+  background: #ffffff;
+
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.style-match-missing__message > button svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ========================================
+   Suggested Mode
+======================================== */
+
+.style-match-suggested {
+  padding: 27px 17px 10px;
+}
+
+.style-match-suggested__list {
+  margin-top: 16px;
+}
+
+.style-match-suggested-piece {
+  display: grid;
+
+  grid-template-columns:
+    100px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 14px;
+
+  padding: 14px 0;
+
+  border-bottom: 1px solid #e9e8e5;
+}
+
+.style-match-suggested-piece__image {
+  width: 100px;
+  height: 115px;
+
+  overflow: hidden;
+
+  border-radius: 5px;
+
+  background: #eeeeec;
+}
+
+.style-match-suggested-piece__image img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+.style-match-suggested-piece__info > span {
+  color: #8e8983;
+
+  font-size: 8px;
+}
+
+.style-match-suggested-piece__info > strong {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.style-match-suggested-piece__info > p {
+  margin-top: 4px;
+
+  color: #99948e;
+
+  font-size: 8px;
+}
+
+.style-match-suggested-piece__info button {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 13px;
+
+  padding: 0;
+
+  border: 0;
+
+  color: #494540;
+
+  background: transparent;
+
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.style-match-suggested-piece__info button svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ========================================
+   Guide
+======================================== */
+
+.style-match-guide {
+  margin-top: 12px;
+
+  padding: 31px 18px 38px;
+
+  border-top: 8px solid #f6f6f5;
+}
+
+.style-match-guide h2 {
+  max-width: 280px;
+
+  margin: 0;
+
+  font-size: 18px;
+  font-weight: 730;
+
+  line-height: 1.45;
+
+  letter-spacing: -0.045em;
+}
+
+.style-match-guide p {
+  max-width: 310px;
+
+  margin-top: 8px;
+
+  color: #89847e;
+
+  font-size: 9px;
+
+  line-height: 1.7;
+}
+
+/* ========================================
+   Bottom CTA
+======================================== */
+
+.style-match-bottom {
+  position: fixed;
+
+  z-index: 50;
+
+  left: 50%;
+  bottom: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    82px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  width: min(100%, 430px);
+
+  gap: 12px;
+
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+
+  border-top: 1px solid #e5e3df;
+
+  background: rgb(255 255 255 / 96%);
+
+  backdrop-filter: blur(20px);
+
+  -webkit-backdrop-filter: blur(20px);
+
+  transform: translateX(-50%);
+}
+
+.style-match-bottom > div {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.style-match-bottom strong {
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.style-match-bottom span {
+  margin-top: 2px;
+
+  color: #98938d;
+
+  font-size: 7px;
+}
+
+.style-match-bottom > button {
+  min-height: 49px;
+
+  border: 0;
+  border-radius: 7px;
+
+  color: #ffffff;
+
+  background: #171717;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ========================================
+   Not Found
+======================================== */
+
+.style-match-not-found {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 100vh;
+
+  padding: 30px;
+
+  text-align: center;
+}
+
+.style-match-not-found h1 {
+  font-size: 18px;
+}
+
+.style-match-not-found p {
+  margin-top: 7px;
+
+  color: #96918b;
+
+  font-size: 10px;
+}
+
+.style-match-not-found button {
+  min-height: 43px;
+
+  margin-top: 20px;
+
+  padding: 0 17px;
+
+  border: 0;
+  border-radius: 999px;
+
+  color: #ffffff;
+
+  background: #171717;
+
+  font-size: 10px;
+}
+
+/* ========================================
+   Interaction
+======================================== */
+
+.style-match-page-v2 button {
+  font-family: inherit;
+
+  cursor: pointer;
+
+  -webkit-tap-highlight-color: transparent;
+}
+
+.style-match-page-v2 button:focus-visible {
+  outline: 2px solid #171717;
+
+  outline-offset: 2px;
+}
+
+/* ========================================
+   Mobile
+======================================== */
+
+@media (max-width: 430px) {
+  .style-match-bottom {
+    width: 100%;
+  }
+}
+
+@media (max-width: 359px) {
+  .style-match-reference-v2,
+  .style-match-intro-v2,
+  .style-match-wardrobe,
+  .style-match-suggested,
+  .style-match-guide {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .style-match-intro-v2 h1 {
+    font-size: 23px;
+  }
+
+  .style-match-missing {
+    padding: 14px;
+  }
+}
