@@ -1,17 +1,13 @@
 package com.vesti.backend.dto.response;
 
-import java.time.LocalDateTime;
-
 import com.vesti.backend.entity.User;
 
 import lombok.Getter;
 
 @Getter
-public class UserResponse {
+public class UserFollowUserResponse {
 
     private final Long id;
-
-    private final String email;
 
     private final String username;
 
@@ -21,20 +17,11 @@ public class UserResponse {
 
     private final String bio;
 
-    private final LocalDateTime createdAt;
-
-    private final LocalDateTime updatedAt;
-
-    public UserResponse(User user) {
+    public UserFollowUserResponse(
+            User user) {
 
         this.id = user.getId();
 
-        this.email = user.getEmail();
-
-        /*
-         * 기존 DB 사용자처럼 username이 없는 경우에도
-         * 프론트에서 null이 내려가지 않도록 fallback 처리.
-         */
         this.username = resolveUsername(user);
 
         this.displayName = resolveDisplayName(user);
@@ -42,13 +29,10 @@ public class UserResponse {
         this.profileImageUrl = user.getProfileImageUrl();
 
         this.bio = user.getBio();
-
-        this.createdAt = user.getCreatedAt();
-
-        this.updatedAt = user.getUpdatedAt();
     }
 
-    private String resolveUsername(User user) {
+    private String resolveUsername(
+            User user) {
 
         if (user.getUsername() != null
                 && !user.getUsername().isBlank()) {
@@ -59,7 +43,8 @@ public class UserResponse {
         return "user" + user.getId();
     }
 
-    private String resolveDisplayName(User user) {
+    private String resolveDisplayName(
+            User user) {
 
         if (user.getDisplayName() != null
                 && !user.getDisplayName().isBlank()) {

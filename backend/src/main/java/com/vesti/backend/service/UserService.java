@@ -24,21 +24,33 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
+
     private final PasswordEncoder passwordEncoder;
+
     private final JwtProvider jwtProvider;
+
     private final CurrentUserProvider currentUserProvider;
 
     // 회원가입
     @Transactional
-    public UserResponse signup(UserSignupRequest request) {
+    public UserResponse signup(
+            UserSignupRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
+
             throw new DuplicateEmailException();
         }
 
+        String username = createUniqueUsername(
+                request.getEmail());
+
         User user = User.builder()
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(
+                        passwordEncoder.encode(
+                                request.getPassword()))
+                .username(username)
+                .displayName(username)
                 .build();
 
         User savedUser = userRepository.save(user);
@@ -48,10 +60,13 @@ public class UserService {
 
     // 로그인
     @Transactional(readOnly = true)
-    public LoginResponse login(UserLoginRequest request) {
+    public LoginResponse login(
+            UserLoginRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(InvalidLoginException::new);
+        User user = userRepository.findByEmail(
+                request.getEmail())
+                .orElseThrow(
+                        InvalidLoginException::new);
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
@@ -60,7 +75,8 @@ public class UserService {
             throw new InvalidLoginException();
         }
 
-        String token = jwtProvider.generateToken(user.getEmail());
+        String token = jwtProvider.generateToken(
+                user.getEmail());
 
         return new LoginResponse(
                 user.getId(),
@@ -79,7 +95,8 @@ public class UserService {
 
     // 비밀번호 변경
     @Transactional
-    public void changePassword(ChangePasswordRequest request) {
+    public void changePassword(
+            ChangePasswordRequest request) {
 
         User user = currentUserProvider.getCurrentUser();
 
@@ -91,6 +108,76 @@ public class UserService {
         }
 
         user.changePassword(
-                passwordEncoder.encode(request.getNewPassword()));
+                passwordEncoder.encode(
+                        request.getNewPassword()));
+    }
+
+    /*
+     * 이메일을 기반으로 기본 username 생성
+     *
+     * example:
+     *
+     * jangabc3@gmail.com
+     * ↓
+     * jangabc3
+     *
+     * 이미 존재하면
+     *
+     * jangabc3
+     * jangabc31
+     * jangabc32
+     * ...
+     */
+    private String createUniqueUsername(
+            String email) {
+
+        String emailPrefix = email
+                .substring(
+                        0,
+                        email.indexOf("@"))
+                .toLowerCase();
+
+        String baseUsername = emailPrefix
+                .replaceAll(
+                        "[^a-z0-9_]",
+                        "");
+
+        if (baseUsername.isBlank()) {
+
+            baseUsername = "vesti";
+        }
+
+        /*
+         * DB 컬럼 최대 길이가 30자이므로
+         * 숫자 suffix 공간까지 고려해서
+         * 기본 username은 24자로 제한한다.
+         */
+        if (baseUsername.length() > 24) {
+
+            baseUsername = baseUsername.substring(
+                    0,
+                    24);
+        }
+
+        if (!userRepository.existsByUsername(
+                baseUsername)) {
+
+            return baseUsername;
+        }
+
+        int suffix = 1;
+
+        while (true) {
+
+            String candidate = baseUsername + suffix;
+
+            if (!userRepository.existsByUsername(
+                    candidate)) {
+
+                return candidate;
+            }
+
+            suffix++;
+        }
     }
 }

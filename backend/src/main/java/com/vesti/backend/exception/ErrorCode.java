@@ -30,6 +30,11 @@ public enum ErrorCode {
                         "CURRENT_PASSWORD_MISMATCH",
                         "현재 비밀번호가 일치하지 않습니다."),
 
+        CANNOT_FOLLOW_SELF(
+                        HttpStatus.BAD_REQUEST,
+                        "CANNOT_FOLLOW_SELF",
+                        "자기 자신을 팔로우할 수 없습니다."),
+
         // Clothing
         CLOTHING_NOT_FOUND(
                         HttpStatus.NOT_FOUND,
@@ -93,6 +98,28 @@ public enum ErrorCode {
                         "INVALID_DATE_RANGE",
                         "시작 날짜는 종료 날짜보다 늦을 수 없습니다."),
 
+        // Style Post
+        STYLE_POST_NOT_FOUND(
+                        HttpStatus.NOT_FOUND,
+                        "STYLE_POST_NOT_FOUND",
+                        "스타일 게시물을 찾을 수 없습니다."),
+
+        STYLE_POST_ACCESS_DENIED(
+                        HttpStatus.FORBIDDEN,
+                        "STYLE_POST_ACCESS_DENIED",
+                        "해당 스타일 게시물을 수정하거나 삭제할 권한이 없습니다."),
+
+        // Style Post Comment
+        STYLE_POST_COMMENT_NOT_FOUND(
+                        HttpStatus.NOT_FOUND,
+                        "STYLE_POST_COMMENT_NOT_FOUND",
+                        "댓글을 찾을 수 없습니다."),
+
+        STYLE_POST_COMMENT_ACCESS_DENIED(
+                        HttpStatus.FORBIDDEN,
+                        "STYLE_POST_COMMENT_ACCESS_DENIED",
+                        "해당 댓글을 삭제할 권한이 없습니다."),
+
         // Common
         INVALID_INPUT_VALUE(
                         HttpStatus.BAD_REQUEST,
@@ -105,6 +132,8 @@ public enum ErrorCode {
                         "서버 내부 오류가 발생했습니다.");
 
         private final HttpStatus status;
+
         private final String code;
+
         private final String message;
 }
