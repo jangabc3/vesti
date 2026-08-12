@@ -12,12 +12,16 @@ public class CoordinationResponse {
     private final Long id;
     private final String name;
     private final String description;
+    private final String occasion;
+    private final String season;
     private final LocalDateTime createdAt;
 
     public CoordinationResponse(Coordination coordination) {
         this.id = coordination.getId();
         this.name = coordination.getName();
         this.description = coordination.getDescription();
+        this.occasion = coordination.getOccasion();
+        this.season = coordination.getSeason();
         this.createdAt = coordination.getCreatedAt();
     }
 }

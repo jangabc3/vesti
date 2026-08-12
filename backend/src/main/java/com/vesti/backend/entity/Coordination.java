@@ -2,6 +2,7 @@ package com.vesti.backend.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -33,6 +34,12 @@ public class Coordination {
 
     private String description;
 
+    @Column(length = 30)
+    private String occasion;
+
+    @Column(length = 20)
+    private String season;
+
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -44,9 +51,15 @@ public class Coordination {
         this.createdAt = LocalDateTime.now();
     }
 
-    // 코디 정보 수정
-    public void update(String name, String description) {
+    public void update(
+            String name,
+            String description,
+            String occasion,
+            String season) {
+
         this.name = name;
         this.description = description;
+        this.occasion = occasion;
+        this.season = season;
     }
 }

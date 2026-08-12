@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { getMyProfile } from "@/api/authApi";
-
+import { getClothes } from "@/api/clothingApi";
+import { getCoordinations } from "@/api/coordinationApi";
 import { getUserStylePosts } from "@/api/stylePostApi";
-
 import { getMyFollowStatus } from "@/api/userFollowApi";
 
 import "./MyPage.css";
@@ -76,7 +76,6 @@ function InfoIcon() {
       <circle cx="12" cy="12" r="9" />
 
       <path d="M12 11v6" />
-
       <path d="M12 7.5h.01" />
     </svg>
   );
@@ -94,9 +93,7 @@ function LogoutIcon() {
       aria-hidden="true"
     >
       <path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4" />
-
       <path d="m15 8 4 4-4 4" />
-
       <path d="M9 12h10" />
     </svg>
   );
@@ -181,6 +178,10 @@ function MyPage() {
 
   const [followingCount, setFollowingCount] = useState(0);
 
+  const [clothingCount, setClothingCount] = useState(0);
+
+  const [outfitCount, setOutfitCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
 
   const [loadError, setLoadError] = useState(false);
@@ -194,9 +195,6 @@ function MyPage() {
       setLoadError(false);
 
       try {
-        /*
-         * 1. 로그인 사용자 조회
-         */
         const myProfile = await getMyProfile();
 
         if (ignore) {
@@ -205,10 +203,7 @@ function MyPage() {
 
         setCurrentUser(myProfile);
 
-        /*
-         * 2. 내 게시물 + Follow 통계
-         */
-        const [postResult, followResult] = await Promise.allSettled([
+        const results = await Promise.allSettled([
           getUserStylePosts(myProfile.username, {
             page: 0,
             size: 1,
@@ -216,40 +211,43 @@ function MyPage() {
           }),
 
           getMyFollowStatus(myProfile.username),
+
+          getClothes({
+            page: 0,
+            size: 1,
+            sort: "createdAt,desc",
+          }),
+
+          getCoordinations(),
         ]);
 
         if (ignore) {
           return;
         }
 
-        if (postResult.status === "fulfilled") {
-          setPostCount(
-            postResult.value?.totalElements ??
-              postResult.value?.content?.length ??
-              0,
-          );
-        } else {
-          setPostCount(0);
+        const [postResult, followResult, clothesResult, outfitsResult] =
+          results;
 
-          console.error(
-            "내 게시물 수를 불러오지 못했습니다.",
-            postResult.reason,
-          );
+        if (postResult.status === "fulfilled") {
+          setPostCount(postResult.value?.totalElements ?? 0);
         }
 
         if (followResult.status === "fulfilled") {
           setFollowerCount(followResult.value?.followerCount ?? 0);
 
           setFollowingCount(followResult.value?.followingCount ?? 0);
-        } else {
-          setFollowerCount(0);
+        }
 
-          setFollowingCount(0);
-
-          console.error(
-            "팔로우 정보를 불러오지 못했습니다.",
-            followResult.reason,
+        if (clothesResult.status === "fulfilled") {
+          setClothingCount(
+            clothesResult.value?.totalElements ??
+              clothesResult.value?.content?.length ??
+              0,
           );
+        }
+
+        if (outfitsResult.status === "fulfilled") {
+          setOutfitCount(outfitsResult.value?.length ?? 0);
         }
       } catch (error) {
         console.error("마이 페이지 정보를 불러오지 못했습니다.", error);
@@ -273,43 +271,11 @@ function MyPage() {
     };
   }, []);
 
-  const handleMyInfo = () => {
-    if (!currentUser) {
-      return;
-    }
-
-    navigate(`/users/${currentUser.username}`);
-  };
-
-  const handlePasswordChange = () => {
-    window.alert("비밀번호 변경 화면은 다음 계정 설정 단계에서 연결할게요.");
-  };
-
-  const handleLogout = () => {
-    const confirmed = window.confirm("로그아웃하시겠습니까?");
-
-    if (!confirmed) {
-      return;
-    }
-
-    /*
-     * 아직 LoginPage가 없기 때문에
-     * 토큰을 바로 삭제하면 앱의 다른
-     * 인증 API가 전부 403이 된다.
-     *
-     * 로그인 화면 구현 시 실제 로그아웃으로
-     * 교체한다.
-     */
-    window.alert("로그인 화면을 만든 뒤 실제 로그아웃과 연결할게요.");
-  };
-
   if (loading) {
     return (
       <div className="my-page">
         <div className="my-state">
           <strong>내 정보를 불러오고 있어요.</strong>
-
-          <p>로그인 사용자 정보를 확인하는 중입니다.</p>
         </div>
       </div>
     );
@@ -320,27 +286,13 @@ function MyPage() {
       <div className="my-page">
         <div className="my-state">
           <strong>내 정보를 불러오지 못했어요.</strong>
-
-          <p>백엔드 서버와 로그인 상태를 확인해주세요.</p>
-
-          <button type="button" onClick={() => window.location.reload()}>
-            다시 불러오기
-          </button>
         </div>
       </div>
     );
   }
 
-  const displayName = currentUser.displayName || currentUser.username;
-
-  const bio = currentUser.bio?.trim();
-
   return (
     <div className="my-page">
-      {/* =================================
-          Header
-      ================================= */}
-
       <header className="my-header">
         <span className="my-header__eyebrow">MY</span>
 
@@ -349,17 +301,13 @@ function MyPage() {
         <p>내 스타일과 계정을 한곳에서 관리하세요.</p>
       </header>
 
-      {/* =================================
-          Profile
-      ================================= */}
-
       <section className="my-profile">
         <ProfileAvatar user={currentUser} />
 
         <div className="my-profile__content">
           <span className="my-profile__label">MY PROFILE</span>
 
-          <h2>{displayName}</h2>
+          <h2>{currentUser.displayName || currentUser.username}</h2>
 
           <p>@{currentUser.username}</p>
         </div>
@@ -367,56 +315,42 @@ function MyPage() {
         <button
           type="button"
           className="my-profile__button"
-          onClick={handleMyInfo}
-          aria-label="내 프로필 보기"
+          onClick={() => navigate(`/users/${currentUser.username}`)}
         >
           <ChevronRightIcon />
         </button>
       </section>
 
-      {/* =================================
-          Social
-      ================================= */}
-
       <section className="my-social">
-        <button type="button" onClick={handleMyInfo}>
+        <button
+          type="button"
+          onClick={() => navigate(`/users/${currentUser.username}`)}
+        >
           <strong>{formatCount(postCount)}</strong>
 
           <span>게시물</span>
         </button>
 
-        <button type="button" onClick={handleMyInfo}>
+        <button type="button">
           <strong>{formatCount(followerCount)}</strong>
 
           <span>팔로워</span>
         </button>
 
-        <button type="button" onClick={handleMyInfo}>
+        <button type="button">
           <strong>{formatCount(followingCount)}</strong>
 
           <span>팔로잉</span>
         </button>
       </section>
 
-      {/* =================================
-          Bio
-      ================================= */}
-
-      {bio && (
+      {currentUser.bio && (
         <section className="my-bio">
           <span>ABOUT</span>
 
-          <p>{bio}</p>
+          <p>{currentUser.bio}</p>
         </section>
       )}
-
-      {/* =================================
-          VESTI Summary
-
-          실제 Clothing / Coordination /
-          CoordinationRecord 연결 전이므로
-          가짜 숫자는 표시하지 않는다.
-      ================================= */}
 
       <section className="my-summary">
         <div className="my-section-heading">
@@ -429,7 +363,7 @@ function MyPage() {
             className="my-summary__item"
             onClick={() => navigate("/closet")}
           >
-            <strong>—</strong>
+            <strong>{clothingCount}</strong>
 
             <span>등록한 옷</span>
           </button>
@@ -439,7 +373,7 @@ function MyPage() {
             className="my-summary__item"
             onClick={() => navigate("/outfits")}
           >
-            <strong>—</strong>
+            <strong>{outfitCount}</strong>
 
             <span>저장한 코디</span>
           </button>
@@ -456,13 +390,9 @@ function MyPage() {
         </div>
 
         <p className="my-summary__notice">
-          옷장과 착용 기록은 다음 데이터 연결 단계에서 실제 개수로 표시됩니다.
+          착용 기록은 다음 단계에서 실제 데이터와 연결됩니다.
         </p>
       </section>
-
-      {/* =================================
-          Account
-      ================================= */}
 
       <section className="my-section">
         <div className="my-section-heading">
@@ -474,21 +404,21 @@ function MyPage() {
             icon={<UserIcon />}
             title="내 정보"
             description={currentUser.email}
-            onClick={handleMyInfo}
+            onClick={() => navigate(`/users/${currentUser.username}`)}
           />
 
           <MenuRow
             icon={<LockIcon />}
             title="비밀번호 변경"
             description="계정 비밀번호를 변경해요."
-            onClick={handlePasswordChange}
+            onClick={() =>
+              window.alert(
+                "비밀번호 변경 화면은 다음 계정 설정 단계에서 연결할게요.",
+              )
+            }
           />
         </div>
       </section>
-
-      {/* =================================
-          Service
-      ================================= */}
 
       <section className="my-section">
         <div className="my-section-heading">
@@ -505,12 +435,13 @@ function MyPage() {
         </div>
       </section>
 
-      {/* =================================
-          Logout
-      ================================= */}
-
       <section className="my-logout">
-        <button type="button" onClick={handleLogout}>
+        <button
+          type="button"
+          onClick={() =>
+            window.alert("로그인 화면을 만든 뒤 실제 로그아웃과 연결할게요.")
+          }
+        >
           <LogoutIcon />
 
           <span>로그아웃</span>

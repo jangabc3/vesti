@@ -37,7 +37,6 @@ public class CoordinationService {
         private final CoordinationClothingRepository coordinationClothingRepository;
         private final CurrentUserProvider currentUserProvider;
 
-        // 코디 등록
         @Transactional
         public CoordinationResponse createCoordination(
                         CoordinationCreateRequest request) {
@@ -48,6 +47,8 @@ public class CoordinationService {
                                 .user(user)
                                 .name(request.getName())
                                 .description(request.getDescription())
+                                .occasion(request.getOccasion())
+                                .season(request.getSeason())
                                 .build();
 
                 Coordination savedCoordination = coordinationRepository.save(coordination);
@@ -55,7 +56,6 @@ public class CoordinationService {
                 return new CoordinationResponse(savedCoordination);
         }
 
-        // 내 코디 목록 조회
         public List<CoordinationResponse> getAllCoordinations() {
 
                 User user = currentUserProvider.getCurrentUser();
@@ -67,7 +67,6 @@ public class CoordinationService {
                                 .toList();
         }
 
-        // 코디 상세 조회
         public CoordinationDetailResponse getCoordinationById(
                         Long coordinationId) {
 
@@ -85,12 +84,13 @@ public class CoordinationService {
                                 .id(coordination.getId())
                                 .name(coordination.getName())
                                 .description(coordination.getDescription())
+                                .occasion(coordination.getOccasion())
+                                .season(coordination.getSeason())
                                 .createdAt(coordination.getCreatedAt())
                                 .clothes(clothes)
                                 .build();
         }
 
-        // 코디 수정
         @Transactional
         public CoordinationResponse updateCoordination(
                         Long coordinationId,
@@ -100,12 +100,13 @@ public class CoordinationService {
 
                 coordination.update(
                                 request.getName(),
-                                request.getDescription());
+                                request.getDescription(),
+                                request.getOccasion(),
+                                request.getSeason());
 
                 return new CoordinationResponse(coordination);
         }
 
-        // 코디 삭제
         @Transactional
         public void deleteCoordination(
                         Long coordinationId) {
@@ -121,7 +122,6 @@ public class CoordinationService {
                 coordinationRepository.delete(coordination);
         }
 
-        // 코디에 옷 추가
         @Transactional
         public CoordinationResponse addClothingToCoordination(
                         Long coordinationId,
@@ -129,13 +129,13 @@ public class CoordinationService {
 
                 Coordination coordination = getMyCoordination(coordinationId);
 
-                Clothing clothing = clothingRepository.findById(clothingId)
+                Clothing clothing = clothingRepository
+                                .findById(clothingId)
                                 .orElseThrow(
                                                 ClothingNotFoundException::new);
 
                 User user = currentUserProvider.getCurrentUser();
 
-                // 현재 사용자의 옷인지 확인
                 if (clothing.getUser() == null
                                 || !clothing.getUser()
                                                 .getId()
@@ -150,7 +150,6 @@ public class CoordinationService {
                                                 clothing)
                                 .isPresent();
 
-                // 같은 옷 중복 추가 방지
                 if (alreadyExists) {
                         throw new DuplicateCoordinationClothingException();
                 }
@@ -166,7 +165,6 @@ public class CoordinationService {
                 return new CoordinationResponse(coordination);
         }
 
-        // 코디에서 옷 제거
         @Transactional
         public void removeClothingFromCoordination(
                         Long coordinationId,
@@ -174,13 +172,13 @@ public class CoordinationService {
 
                 Coordination coordination = getMyCoordination(coordinationId);
 
-                Clothing clothing = clothingRepository.findById(clothingId)
+                Clothing clothing = clothingRepository
+                                .findById(clothingId)
                                 .orElseThrow(
                                                 ClothingNotFoundException::new);
 
                 User user = currentUserProvider.getCurrentUser();
 
-                // 현재 사용자의 옷인지 확인
                 if (clothing.getUser() == null
                                 || !clothing.getUser()
                                                 .getId()
@@ -200,7 +198,6 @@ public class CoordinationService {
                                 .delete(coordinationClothing);
         }
 
-        // 현재 사용자의 코디 조회 및 소유권 확인
         private Coordination getMyCoordination(
                         Long coordinationId) {
 

@@ -11,10 +11,16 @@ import lombok.Getter;
 public class CoordinationDetailResponse {
 
     private Long id;
+
     private String name;
+
     private String description;
+
+    private String occasion;
+
+    private String season;
+
     private LocalDateTime createdAt;
 
-    // 코디에 포함된 옷 목록
     private List<ClothingResponse> clothes;
 }

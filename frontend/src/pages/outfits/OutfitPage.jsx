@@ -1,34 +1,14 @@
-import {
-  useMemo,
-  useState,
-} from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from "react";
 
-import { clothes } from '@/mocks/clothes'
-import { outfits } from '@/mocks/outfits'
+import { useNavigate } from "react-router-dom";
 
-import './OutfitPage.css'
+import { getCoordination, getCoordinations } from "@/api/coordinationApi";
 
+import "./OutfitPage.css";
 
-const occasions = [
-  '전체',
-  '일상',
-  '출근',
-  '학교',
-  '데이트',
-  '운동',
-  '여행',
-]
+const occasions = ["전체", "일상", "출근", "학교", "데이트", "운동", "여행"];
 
-
-const seasons = [
-  '전체',
-  '봄',
-  '여름',
-  '가을',
-  '겨울',
-]
-
+const seasons = ["전체", "봄", "여름", "가을", "겨울"];
 
 function SearchIcon() {
   return (
@@ -41,17 +21,12 @@ function SearchIcon() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <circle
-        cx="11"
-        cy="11"
-        r="6.5"
-      />
+      <circle cx="11" cy="11" r="6.5" />
 
       <path d="m16 16 4 4" />
     </svg>
-  )
+  );
 }
-
 
 function PlusIcon() {
   return (
@@ -65,262 +40,183 @@ function PlusIcon() {
     >
       <path d="M12 5v14M5 12h14" />
     </svg>
-  )
+  );
 }
 
+function OutfitImage({ item }) {
+  const [failed, setFailed] = useState(false);
 
-function HeartIcon({
-  filled = false,
-}) {
+  if (!item?.image || failed) {
+    return (
+      <div className="outfit-card__empty-image">
+        <span>이미지 없음</span>
+      </div>
+    );
+  }
+
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill={filled ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" />
-    </svg>
-  )
+    <img
+      src={item.image}
+      alt={item.name}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
-
-function OutfitPreview({
-  outfit,
-}) {
-  const outfitClothes = (
-    Array.isArray(outfit.clothesIds)
-      ? outfit.clothesIds
-      : []
-  )
-    .map((clothingId) =>
-      clothes.find(
-        (item) =>
-          item.id === clothingId,
-      ),
-    )
-    .filter(Boolean)
-    .slice(0, 4)
-
+function OutfitPreview({ outfit }) {
+  const outfitClothes = Array.isArray(outfit.clothes)
+    ? outfit.clothes.slice(0, 4)
+    : [];
 
   if (outfitClothes.length === 0) {
     return (
       <div className="outfit-card__empty-image">
-        <span>
-          코디 이미지
-        </span>
+        <span>등록된 옷 없음</span>
       </div>
-    )
+    );
   }
-
 
   return (
     <div
       className={[
-        'outfit-card__visual',
-        `outfit-card__visual--${Math.min(
-          outfitClothes.length,
-          4,
-        )}`,
-      ].join(' ')}
+        "outfit-card__visual",
+        `outfit-card__visual--${Math.min(outfitClothes.length, 4)}`,
+      ].join(" ")}
     >
       {outfitClothes.map((item) => (
-        <div
-          key={item.id}
-          className="outfit-card__visual-item"
-        >
-          <img
-            src={item.image}
-            alt={item.name}
-            loading="lazy"
-          />
+        <div key={item.id} className="outfit-card__visual-item">
+          <OutfitImage item={item} />
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-
 function OutfitPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [searchTerm, setSearchTerm] =
-    useState('')
+  const [outfits, setOutfits] = useState([]);
 
-  const [
-    selectedOccasion,
-    setSelectedOccasion,
-  ] = useState('전체')
+  const [loading, setLoading] = useState(true);
 
-  const [
-    selectedSeason,
-    setSelectedSeason,
-  ] = useState('전체')
+  const [loadError, setLoadError] = useState(false);
 
-  const [
-    showFavoritesOnly,
-    setShowFavoritesOnly,
-  ] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const [
-    favoriteIds,
-    setFavoriteIds,
-  ] = useState(
-    () =>
-      new Set(
-        outfits
-          .filter(
-            (outfit) =>
-              outfit.favorite,
-          )
-          .map(
-            (outfit) =>
-              outfit.id,
-          ),
-      ),
-  )
+  const [selectedOccasion, setSelectedOccasion] = useState("전체");
 
+  const [selectedSeason, setSelectedSeason] = useState("전체");
 
-  const filteredOutfits =
-    useMemo(() => {
-      const keyword =
-        searchTerm
-          .trim()
-          .toLowerCase()
+  useEffect(() => {
+    let ignore = false;
 
-      return outfits.filter(
-        (outfit) => {
-          const matchesSearch =
-            keyword.length === 0 ||
-            outfit.name
-              ?.toLowerCase()
-              .includes(keyword) ||
-            outfit.occasion
-              ?.toLowerCase()
-              .includes(keyword) ||
-            outfit.season
-              ?.toLowerCase()
-              .includes(keyword)
+    async function loadOutfits() {
+      setLoading(true);
 
-          const matchesOccasion =
-            selectedOccasion === '전체' ||
-            outfit.occasion ===
-              selectedOccasion
+      setLoadError(false);
 
-          const matchesSeason =
-            selectedSeason === '전체' ||
-            outfit.season ===
-              selectedSeason
+      try {
+        const basicOutfits = await getCoordinations();
 
-          const matchesFavorite =
-            !showFavoritesOnly ||
-            favoriteIds.has(
-              outfit.id,
-            )
+        /*
+         * 목록 응답에는 clothes가 없으므로
+         * 각 코디 상세를 조회해서 미리보기에
+         * 필요한 실제 옷 데이터를 가져온다.
+         */
+        const results = await Promise.allSettled(
+          basicOutfits.map((outfit) => getCoordination(outfit.id)),
+        );
 
-          return (
-            matchesSearch &&
-            matchesOccasion &&
-            matchesSeason &&
-            matchesFavorite
-          )
-        },
-      )
-    }, [
-      searchTerm,
-      selectedOccasion,
-      selectedSeason,
-      showFavoritesOnly,
-      favoriteIds,
-    ])
-
-
-  const toggleFavorite = (
-    event,
-    outfitId,
-  ) => {
-    event.stopPropagation()
-
-    setFavoriteIds(
-      (currentIds) => {
-        const nextIds =
-          new Set(currentIds)
-
-        if (
-          nextIds.has(
-            outfitId,
-          )
-        ) {
-          nextIds.delete(
-            outfitId,
-          )
-        } else {
-          nextIds.add(
-            outfitId,
-          )
+        if (ignore) {
+          return;
         }
 
-        return nextIds
-      },
-    )
-  }
+        const detailed = results.map((result, index) =>
+          result.status === "fulfilled" ? result.value : basicOutfits[index],
+        );
 
+        setOutfits(detailed.filter(Boolean));
+      } catch (error) {
+        console.error("코디 목록을 불러오지 못했습니다.", error);
+
+        if (!ignore) {
+          setOutfits([]);
+
+          setLoadError(true);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadOutfits();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const filteredOutfits = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    return outfits.filter((outfit) => {
+      const matchesSearch =
+        keyword.length === 0 ||
+        [outfit.name, outfit.description, outfit.occasion, outfit.season]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .includes(keyword);
+
+      const matchesOccasion =
+        selectedOccasion === "전체" || outfit.occasion === selectedOccasion;
+
+      const matchesSeason =
+        selectedSeason === "전체" || outfit.season === selectedSeason;
+
+      return matchesSearch && matchesOccasion && matchesSeason;
+    });
+  }, [outfits, searchTerm, selectedOccasion, selectedSeason]);
 
   const resetFilters = () => {
-    setSearchTerm('')
-    setSelectedOccasion('전체')
-    setSelectedSeason('전체')
-    setShowFavoritesOnly(false)
-  }
+    setSearchTerm("");
 
+    setSelectedOccasion("전체");
+
+    setSelectedSeason("전체");
+  };
 
   return (
     <div className="outfits-page">
-
-      {/* Header */}
       <header className="outfits-header">
         <div className="outfits-header__content">
-          <span className="outfits-header__eyebrow">
-            OUTFITS
-          </span>
+          <span className="outfits-header__eyebrow">OUTFITS</span>
 
-          <h1>
-            코디
-          </h1>
+          <h1>코디</h1>
 
-          <p>
-            저장한 코디 {outfits.length}개
-          </p>
+          <p>저장한 코디 {loading ? "..." : `${outfits.length}개`}</p>
         </div>
 
         <button
           type="button"
           className="outfits-header__add"
-          onClick={() =>
-            navigate('/outfits/new')
-          }
+          onClick={() => navigate("/outfits/new")}
           aria-label="코디 만들기"
         >
           <PlusIcon />
         </button>
       </header>
 
-
-      {/* Search */}
       <div className="outfits-search">
         <SearchIcon />
 
         <input
           type="search"
           value={searchTerm}
-          onChange={(event) =>
-            setSearchTerm(
-              event.target.value,
-            )
-          }
+          onChange={(event) => setSearchTerm(event.target.value)}
           placeholder="코디 이름 검색"
           aria-label="코디 검색"
         />
@@ -329,9 +225,7 @@ function OutfitPage() {
           <button
             type="button"
             className="outfits-search__clear"
-            onClick={() =>
-              setSearchTerm('')
-            }
+            onClick={() => setSearchTerm("")}
             aria-label="검색어 지우기"
           >
             ×
@@ -339,219 +233,101 @@ function OutfitPage() {
         )}
       </div>
 
-
-      {/* Occasion */}
       <section className="outfits-filter-section">
-        <span className="outfits-filter-section__label">
-          상황
-        </span>
+        <span className="outfits-filter-section__label">상황</span>
 
         <div className="outfits-filter-scroll">
-          {occasions.map(
-            (occasion) => (
-              <button
-                key={occasion}
-                type="button"
-                className={[
-                  'outfits-filter',
-                  selectedOccasion ===
-                  occasion
-                    ? 'outfits-filter--active'
-                    : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() =>
-                  setSelectedOccasion(
-                    occasion,
-                  )
-                }
-                aria-pressed={
-                  selectedOccasion ===
-                  occasion
-                }
-              >
-                {occasion}
-              </button>
-            ),
-          )}
+          {occasions.map((occasion) => (
+            <button
+              key={occasion}
+              type="button"
+              className={[
+                "outfits-filter",
+
+                selectedOccasion === occasion ? "outfits-filter--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => setSelectedOccasion(occasion)}
+            >
+              {occasion}
+            </button>
+          ))}
         </div>
       </section>
 
-
-      {/* Season */}
       <section className="outfits-season-section">
         <div className="outfits-season">
-          {seasons.map(
-            (season) => (
-              <button
-                key={season}
-                type="button"
-                className={[
-                  'outfits-season__item',
-                  selectedSeason ===
-                  season
-                    ? 'outfits-season__item--active'
-                    : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() =>
-                  setSelectedSeason(
-                    season,
-                  )
-                }
-                aria-pressed={
-                  selectedSeason ===
-                  season
-                }
-              >
-                {season}
-              </button>
-            ),
-          )}
+          {seasons.map((season) => (
+            <button
+              key={season}
+              type="button"
+              className={[
+                "outfits-season__item",
+
+                selectedSeason === season ? "outfits-season__item--active" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => setSelectedSeason(season)}
+            >
+              {season}
+            </button>
+          ))}
         </div>
       </section>
 
-
-      {/* Result Header */}
       <div className="outfits-result-header">
         <div className="outfits-result-header__count">
-          <strong>
-            {showFavoritesOnly
-              ? '즐겨찾는 코디'
-              : '모든 코디'}
-          </strong>
+          <strong>모든 코디</strong>
 
-          <span>
-            {filteredOutfits.length}
-          </span>
+          <span>{filteredOutfits.length}</span>
         </div>
-
-        <button
-          type="button"
-          className={[
-            'outfits-favorite-filter',
-            showFavoritesOnly
-              ? 'outfits-favorite-filter--active'
-              : '',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          onClick={() =>
-            setShowFavoritesOnly(
-              (current) =>
-                !current,
-            )
-          }
-          aria-pressed={
-            showFavoritesOnly
-          }
-        >
-          <HeartIcon
-            filled={
-              showFavoritesOnly
-            }
-          />
-
-          <span>
-            즐겨찾기
-          </span>
-        </button>
       </div>
 
+      {loading ? (
+        <div className="outfits-empty">
+          <h2>코디를 불러오고 있어요.</h2>
 
-      {/* Outfit Grid */}
-      {filteredOutfits.length > 0 ? (
+          <p>저장한 코디를 확인하는 중입니다.</p>
+        </div>
+      ) : loadError ? (
+        <div className="outfits-empty">
+          <h2>코디를 불러오지 못했어요.</h2>
+
+          <p>서버와 로그인 상태를 확인해주세요.</p>
+        </div>
+      ) : filteredOutfits.length > 0 ? (
         <div className="outfits-grid">
-          {filteredOutfits.map(
-            (outfit) => {
-              const isFavorite =
-                favoriteIds.has(
-                  outfit.id,
-                )
+          {filteredOutfits.map((outfit) => {
+            const clothesCount = Array.isArray(outfit.clothes)
+              ? outfit.clothes.length
+              : 0;
 
-              const clothesCount =
-                Array.isArray(
-                  outfit.clothesIds,
-                )
-                  ? outfit
-                      .clothesIds
-                      .length
-                  : 0
+            return (
+              <article
+                key={outfit.id}
+                className="outfit-card"
+                onClick={() => navigate(`/outfits/${outfit.id}`)}
+              >
+                <div className="outfit-card__image">
+                  <OutfitPreview outfit={outfit} />
+                </div>
 
-              return (
-                <article
-                  key={outfit.id}
-                  className="outfit-card"
-                  onClick={() =>
-                    navigate(
-                      `/outfits/${outfit.id}`,
-                    )
-                  }
-                >
-                  <div className="outfit-card__image">
-                    <OutfitPreview
-                      outfit={
-                        outfit
-                      }
-                    />
+                <div className="outfit-card__info">
+                  <h2>{outfit.name}</h2>
 
-                    <button
-                      type="button"
-                      className={[
-                        'outfit-card__favorite',
-                        isFavorite
-                          ? 'outfit-card__favorite--active'
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      onClick={(
-                        event,
-                      ) =>
-                        toggleFavorite(
-                          event,
-                          outfit.id,
-                        )
-                      }
-                      aria-label={
-                        isFavorite
-                          ? '즐겨찾기 해제'
-                          : '즐겨찾기 추가'
-                      }
-                    >
-                      <HeartIcon
-                        filled={
-                          isFavorite
-                        }
-                      />
-                    </button>
-                  </div>
+                  <p>
+                    {[outfit.occasion, outfit.season]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
 
-
-                  <div className="outfit-card__info">
-                    <h2>
-                      {outfit.name}
-                    </h2>
-
-                    <p>
-                      {[
-                        outfit.occasion,
-                        outfit.season,
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </p>
-
-                    <span>
-                      옷 {clothesCount}개
-                    </span>
-                  </div>
-                </article>
-              )
-            },
-          )}
+                  <span>옷 {clothesCount}개</span>
+                </div>
+              </article>
+            );
+          })}
         </div>
       ) : (
         <div className="outfits-empty">
@@ -560,25 +336,30 @@ function OutfitPage() {
           </div>
 
           <h2>
-            조건에 맞는 코디가 없어요.
+            {outfits.length === 0
+              ? "아직 저장한 코디가 없어요."
+              : "조건에 맞는 코디가 없어요."}
           </h2>
 
           <p>
-            다른 조건으로 찾아보거나
-            새로운 코디를 만들어보세요.
+            {outfits.length === 0
+              ? "내 옷으로 첫 번째 코디를 만들어보세요."
+              : "다른 조건으로 찾아보세요."}
           </p>
 
-          <button
-            type="button"
-            onClick={resetFilters}
-          >
-            필터 초기화
-          </button>
+          {outfits.length === 0 ? (
+            <button type="button" onClick={() => navigate("/outfits/new")}>
+              코디 만들기
+            </button>
+          ) : (
+            <button type="button" onClick={resetFilters}>
+              필터 초기화
+            </button>
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }
 
-
-export default OutfitPage
+export default OutfitPage;

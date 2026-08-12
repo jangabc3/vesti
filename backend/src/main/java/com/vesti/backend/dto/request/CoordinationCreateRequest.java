@@ -12,4 +12,10 @@ public class CoordinationCreateRequest {
     private String name;
 
     private String description;
+
+    @NotBlank(message = "상황은 필수입니다.")
+    private String occasion;
+
+    @NotBlank(message = "계절은 필수입니다.")
+    private String season;
 }
