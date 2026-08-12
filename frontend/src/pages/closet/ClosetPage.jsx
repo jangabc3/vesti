@@ -2,9 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import { getMySavedStylePosts } from "@/api/stylePostSaveApi";
+import { getClothes } from "@/api/clothingApi";
 
-import { clothes } from "@/mocks/clothes";
+import { getMySavedStylePosts } from "@/api/stylePostSaveApi";
 
 import "./ClosetPage.css";
 
@@ -28,6 +28,7 @@ const categories = [
   "상의",
   "하의",
   "아우터",
+  "원피스",
   "신발",
   "가방",
   "액세서리",
@@ -116,6 +117,27 @@ function ClothesEmptyIcon() {
   );
 }
 
+function ClothingImage({ item }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!item?.image || failed) {
+    return (
+      <div className="closet-item__image-empty">
+        <span>이미지 없음</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={item.image}
+      alt={item.name}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function SavedPostImage({ post }) {
   const [failed, setFailed] = useState(false);
 
@@ -163,7 +185,20 @@ function ClosetPage() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
 
   /*
-   * 실제 DB Saved 게시물
+   * ========================================
+   * 실제 DB Pieces
+   * ========================================
+   */
+  const [clothingItems, setClothingItems] = useState([]);
+
+  const [clothesLoading, setClothesLoading] = useState(true);
+
+  const [clothesError, setClothesError] = useState(false);
+
+  /*
+   * ========================================
+   * 실제 DB Saved
+   * ========================================
    */
   const [savedPosts, setSavedPosts] = useState([]);
 
@@ -171,23 +206,75 @@ function ClosetPage() {
 
   const [savedError, setSavedError] = useState(false);
 
-  const filteredClothes = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+  /*
+   * ========================================
+   * Pieces 조회
+   * ========================================
+   */
+  async function loadClothes() {
+    setClothesLoading(true);
 
-    return clothes.filter((item) => {
+    setClothesError(false);
+
+    try {
+      const page = await getClothes({
+        page: 0,
+        size: 100,
+        sort: "createdAt,desc",
+      });
+
+      setClothingItems(page.content ?? []);
+    } catch (error) {
+      console.error("옷 목록을 불러오지 못했습니다.", error);
+
+      setClothingItems([]);
+
+      setClothesError(true);
+    } finally {
+      setClothesLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadClothes();
+  }, []);
+
+  /*
+   * Pieces 검색 / 카테고리 필터
+   *
+   * 백엔드에는 name 검색 API가 아직 없기 때문에
+   * 현재는 로그인 사용자의 옷을 받아온 뒤
+   * 화면에서 검색한다.
+   */
+  const filteredClothes = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    return clothingItems.filter((item) => {
       const matchesCategory =
-        selectedCategory === "전체" || item.category === selectedCategory;
+        selectedCategory === "전체" || item.categoryLabel === selectedCategory;
+
+      const searchableText = [
+        item.name,
+        item.color,
+        item.season,
+        item.categoryLabel,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
       const matchesSearch =
-        normalizedSearchTerm.length === 0 ||
-        item.name?.toLowerCase().includes(normalizedSearchTerm) ||
-        item.brand?.toLowerCase().includes(normalizedSearchTerm) ||
-        item.color?.toLowerCase().includes(normalizedSearchTerm);
+        keyword.length === 0 || searchableText.includes(keyword);
 
       return matchesCategory && matchesSearch;
     });
-  }, [searchTerm, selectedCategory]);
+  }, [clothingItems, searchTerm, selectedCategory]);
 
+  /*
+   * ========================================
+   * Saved 조회
+   * ========================================
+   */
   async function loadSavedPosts() {
     setSavedLoading(true);
 
@@ -212,10 +299,6 @@ function ClosetPage() {
     }
   }
 
-  /*
-   * Saved 탭에 진입하면
-   * 항상 서버의 최신 저장 상태를 다시 가져온다.
-   */
   useEffect(() => {
     if (activeTab !== "saved") {
       return;
@@ -229,10 +312,6 @@ function ClosetPage() {
   };
 
   const handleTabChange = (tabId) => {
-    /*
-     * Looks는 기존 Outfit
-     * 화면을 그대로 사용한다.
-     */
     if (tabId === "looks") {
       navigate("/outfits");
 
@@ -240,14 +319,28 @@ function ClosetPage() {
     }
 
     setActiveTab(tabId);
+
+    /*
+     * 다른 화면에서 옷을 추가/수정한 뒤
+     * 다시 Pieces를 눌렀을 때
+     * 최신 DB 상태를 다시 조회한다.
+     */
+    if (tabId === "pieces") {
+      loadClothes();
+    }
   };
 
-  const headerDescription =
-    activeTab === "saved"
-      ? savedLoading
-        ? "저장한 스타일 불러오는 중"
-        : `저장한 스타일 ${savedPosts.length}개`
-      : `내 옷 ${clothes.length}벌`;
+  let headerDescription;
+
+  if (activeTab === "saved") {
+    headerDescription = savedLoading
+      ? "저장한 스타일 불러오는 중"
+      : `저장한 스타일 ${savedPosts.length}개`;
+  } else if (clothesLoading) {
+    headerDescription = "내 옷 불러오는 중";
+  } else {
+    headerDescription = `내 옷 ${clothingItems.length}벌`;
+  }
 
   return (
     <div className="closet-page">
@@ -313,7 +406,7 @@ function ClosetPage() {
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="옷 이름이나 브랜드 검색"
+              placeholder="옷 이름이나 색상 검색"
               aria-label="옷 검색"
             />
 
@@ -361,7 +454,35 @@ function ClosetPage() {
             <span>{filteredClothes.length}</span>
           </div>
 
-          {filteredClothes.length > 0 ? (
+          {clothesLoading ? (
+            <div className="closet-empty">
+              <div className="closet-empty__icon">
+                <ClothesEmptyIcon />
+              </div>
+
+              <h2>내 옷을 불러오고 있어요.</h2>
+
+              <p>등록한 옷을 확인하는 중입니다.</p>
+            </div>
+          ) : clothesError ? (
+            <div className="closet-empty">
+              <div className="closet-empty__icon">
+                <ClothesEmptyIcon />
+              </div>
+
+              <h2>옷장을 불러오지 못했어요.</h2>
+
+              <p>백엔드 서버와 로그인 상태를 확인해주세요.</p>
+
+              <button
+                type="button"
+                className="closet-empty__action"
+                onClick={loadClothes}
+              >
+                다시 불러오기
+              </button>
+            </div>
+          ) : filteredClothes.length > 0 ? (
             <div className="closet-grid">
               {filteredClothes.map((item) => (
                 <button
@@ -372,23 +493,19 @@ function ClosetPage() {
                   aria-label={`${item.name} 상세 보기`}
                 >
                   <div className="closet-item__image">
-                    {item.image ? (
-                      <img src={item.image} alt={item.name} loading="lazy" />
-                    ) : (
-                      <div className="closet-item__image-empty">
-                        <span>이미지 없음</span>
-                      </div>
-                    )}
+                    <ClothingImage item={item} />
                   </div>
 
                   <div className="closet-item__info">
                     <strong>{item.name}</strong>
 
-                    {item.brand && (
-                      <span className="closet-item__brand">{item.brand}</span>
-                    )}
+                    <span className="closet-item__brand">
+                      {item.categoryLabel}
+                    </span>
 
-                    <span className="closet-item__meta">{item.color}</span>
+                    <span className="closet-item__meta">
+                      {[item.color, item.season].filter(Boolean).join(" · ")}
+                    </span>
                   </div>
                 </button>
               ))}
@@ -400,16 +517,18 @@ function ClosetPage() {
               </div>
 
               <h2>
-                {searchTerm ? "검색 결과가 없어요" : "아직 등록된 옷이 없어요"}
+                {searchTerm || selectedCategory !== "전체"
+                  ? "조건에 맞는 옷이 없어요"
+                  : "아직 등록된 옷이 없어요"}
               </h2>
 
               <p>
-                {searchTerm
+                {searchTerm || selectedCategory !== "전체"
                   ? "다른 검색어나 카테고리로 찾아보세요."
                   : "첫 번째 옷을 등록하고 나만의 옷장을 만들어보세요."}
               </p>
 
-              {!searchTerm && (
+              {!searchTerm && selectedCategory === "전체" && (
                 <button
                   type="button"
                   className="closet-empty__action"
