@@ -4,9 +4,8 @@ import apiClient from "@/api/apiClient";
  * 백엔드 StylePostResponse를
  * 현재 프론트 Community UI가 사용하는 형태로 변환한다.
  *
- * 지금 프론트는 아직 Mock 기반 구조를 사용하기 때문에
- * API 교체를 한 번에 하지 않고 Adapter를 두어서
- * 기존 UI를 최대한 유지한다.
+ * 기존 Community UI 구조를 최대한 유지하기 위해
+ * Adapter 역할을 한다.
  */
 export function mapStylePost(post) {
   if (!post) {
@@ -147,6 +146,33 @@ export async function updateStylePost(
 
 export async function deleteStylePost(stylePostId) {
   await apiClient.delete(`/api/style-posts/${stylePostId}`);
+}
+
+/*
+ * Today의 인기 스타일 정렬에 사용한다.
+ *
+ * 백엔드:
+ * GET /api/style-posts/{stylePostId}/likes/me
+ *
+ * 응답 예:
+ * {
+ *   stylePostId: 2,
+ *   liked: true,
+ *   likeCount: 10
+ * }
+ */
+export async function getStylePostLikeSummary(stylePostId) {
+  const response = await apiClient.get(
+    `/api/style-posts/${stylePostId}/likes/me`,
+  );
+
+  return {
+    stylePostId: response.data?.stylePostId ?? stylePostId,
+
+    liked: Boolean(response.data?.liked),
+
+    likeCount: Number(response.data?.likeCount ?? 0),
+  };
 }
 
 function formatTimeAgo(createdAt) {
