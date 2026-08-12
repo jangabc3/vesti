@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getMyProfile } from "@/api/authApi";
 import { getClothes } from "@/api/clothingApi";
 import { getCoordinations } from "@/api/coordinationApi";
+import { getAllCoordinationRecords } from "@/api/coordinationRecordApi";
 import { getUserStylePosts } from "@/api/stylePostApi";
 import { getMyFollowStatus } from "@/api/userFollowApi";
 
@@ -38,7 +39,6 @@ function UserIcon() {
       aria-hidden="true"
     >
       <circle cx="12" cy="8" r="3.5" />
-
       <path d="M5 21a7 7 0 0 1 14 0" />
     </svg>
   );
@@ -74,7 +74,6 @@ function InfoIcon() {
       aria-hidden="true"
     >
       <circle cx="12" cy="12" r="9" />
-
       <path d="M12 11v6" />
       <path d="M12 7.5h.01" />
     </svg>
@@ -182,6 +181,8 @@ function MyPage() {
 
   const [outfitCount, setOutfitCount] = useState(0);
 
+  const [recordCount, setRecordCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
 
   const [loadError, setLoadError] = useState(false);
@@ -219,14 +220,21 @@ function MyPage() {
           }),
 
           getCoordinations(),
+
+          getAllCoordinationRecords(),
         ]);
 
         if (ignore) {
           return;
         }
 
-        const [postResult, followResult, clothesResult, outfitsResult] =
-          results;
+        const [
+          postResult,
+          followResult,
+          clothesResult,
+          outfitsResult,
+          recordsResult,
+        ] = results;
 
         if (postResult.status === "fulfilled") {
           setPostCount(postResult.value?.totalElements ?? 0);
@@ -248,6 +256,10 @@ function MyPage() {
 
         if (outfitsResult.status === "fulfilled") {
           setOutfitCount(outfitsResult.value?.length ?? 0);
+        }
+
+        if (recordsResult.status === "fulfilled") {
+          setRecordCount(recordsResult.value?.length ?? 0);
         }
       } catch (error) {
         console.error("마이 페이지 정보를 불러오지 못했습니다.", error);
@@ -316,6 +328,7 @@ function MyPage() {
           type="button"
           className="my-profile__button"
           onClick={() => navigate(`/users/${currentUser.username}`)}
+          aria-label="내 프로필 보기"
         >
           <ChevronRightIcon />
         </button>
@@ -383,15 +396,11 @@ function MyPage() {
             className="my-summary__item"
             onClick={() => navigate("/history")}
           >
-            <strong>—</strong>
+            <strong>{recordCount}</strong>
 
             <span>착용 기록</span>
           </button>
         </div>
-
-        <p className="my-summary__notice">
-          착용 기록은 다음 단계에서 실제 데이터와 연결됩니다.
-        </p>
       </section>
 
       <section className="my-section">
