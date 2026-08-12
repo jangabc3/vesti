@@ -2,6 +2,8 @@ package com.vesti.backend.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,6 +12,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+        private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
         // ========================================
         // 1. DTO 입력값 검증 실패
@@ -24,7 +28,9 @@ public class GlobalExceptionHandler {
                 ErrorResponse response = ErrorResponse.of(
                                 errorCode,
                                 request.getRequestURI(),
-                                exception.getBindingResult().getFieldErrors());
+                                exception
+                                                .getBindingResult()
+                                                .getFieldErrors());
 
                 return ResponseEntity
                                 .status(errorCode.getStatus())
@@ -76,6 +82,11 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ErrorResponse> handleException(
                         Exception exception,
                         HttpServletRequest request) {
+
+                log.error(
+                                "예상하지 못한 서버 오류가 발생했습니다. path={}",
+                                request.getRequestURI(),
+                                exception);
 
                 ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 
