@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 
-import { clothes } from "@/mocks/clothes";
+import { getMySavedStylePosts } from "@/api/stylePostSaveApi";
 
-import { getSavedStylePosts } from "@/mocks/community";
+import { clothes } from "@/mocks/clothes";
 
 import "./ClosetPage.css";
 
@@ -109,9 +110,47 @@ function ClothesEmptyIcon() {
       aria-hidden="true"
     >
       <path d="M17 13c0-4 2.7-7 7-7s7 3 7 7c0 3-1.4 5-4 6.5" />
+
       <path d="m24 19-14 10v12h28V29L24 19Z" />
     </svg>
   );
+}
+
+function SavedPostImage({ post }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!post?.image || failed) {
+    return (
+      <div className="closet-saved-card__image-empty">
+        <span>이미지 준비 중</span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={post.image}
+      alt={post.title}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function CreatorAvatar({ author }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!author?.avatar || failed) {
+    const source = author?.displayName || author?.username || "V";
+
+    return (
+      <span className="closet-saved-card__avatar-fallback">
+        {source.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
+  return <img src={author.avatar} alt="" onError={() => setFailed(true)} />;
 }
 
 function ClosetPage() {
@@ -124,11 +163,13 @@ function ClosetPage() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
 
   /*
-    Saved 탭으로 들어올 때마다
-    localStorage의 최신 저장 상태를 다시 읽을 수 있도록
-    탭 변경 시 갱신한다.
-  */
-  const [savedPosts, setSavedPosts] = useState(() => getSavedStylePosts());
+   * 실제 DB Saved 게시물
+   */
+  const [savedPosts, setSavedPosts] = useState([]);
+
+  const [savedLoading, setSavedLoading] = useState(false);
+
+  const [savedError, setSavedError] = useState(false);
 
   const filteredClothes = useMemo(() => {
     const normalizedSearchTerm = searchTerm.trim().toLowerCase();
@@ -147,23 +188,55 @@ function ClosetPage() {
     });
   }, [searchTerm, selectedCategory]);
 
+  async function loadSavedPosts() {
+    setSavedLoading(true);
+
+    setSavedError(false);
+
+    try {
+      const page = await getMySavedStylePosts({
+        page: 0,
+        size: 50,
+        sort: "createdAt,desc",
+      });
+
+      setSavedPosts(page.content ?? []);
+    } catch (error) {
+      console.error("저장한 스타일을 불러오지 못했습니다.", error);
+
+      setSavedPosts([]);
+
+      setSavedError(true);
+    } finally {
+      setSavedLoading(false);
+    }
+  }
+
+  /*
+   * Saved 탭에 진입하면
+   * 항상 서버의 최신 저장 상태를 다시 가져온다.
+   */
+  useEffect(() => {
+    if (activeTab !== "saved") {
+      return;
+    }
+
+    loadSavedPosts();
+  }, [activeTab]);
+
   const handleCreateClothing = () => {
     navigate("/clothes/new");
   };
 
   const handleTabChange = (tabId) => {
     /*
-      Looks는 이미 별도 Outfit 화면이 있으므로
-      기존 /outfits 기능을 재사용한다.
-    */
+     * Looks는 기존 Outfit
+     * 화면을 그대로 사용한다.
+     */
     if (tabId === "looks") {
       navigate("/outfits");
 
       return;
-    }
-
-    if (tabId === "saved") {
-      setSavedPosts(getSavedStylePosts());
     }
 
     setActiveTab(tabId);
@@ -171,7 +244,9 @@ function ClosetPage() {
 
   const headerDescription =
     activeTab === "saved"
-      ? `저장한 스타일 ${savedPosts.length}개`
+      ? savedLoading
+        ? "저장한 스타일 불러오는 중"
+        : `저장한 스타일 ${savedPosts.length}개`
       : `내 옷 ${clothes.length}벌`;
 
   return (
@@ -231,8 +306,6 @@ function ClosetPage() {
 
       {activeTab === "pieces" && (
         <>
-          {/* Search */}
-
           <div className="closet-search">
             <SearchIcon />
 
@@ -255,8 +328,6 @@ function ClosetPage() {
               </button>
             )}
           </div>
-
-          {/* Category */}
 
           <nav className="closet-categories" aria-label="옷 카테고리">
             {categories.map((category) => {
@@ -282,8 +353,6 @@ function ClosetPage() {
             })}
           </nav>
 
-          {/* Result Header */}
-
           <div className="closet-result-header">
             <span>
               {selectedCategory === "전체" ? "모든 옷" : selectedCategory}
@@ -291,8 +360,6 @@ function ClosetPage() {
 
             <span>{filteredClothes.length}</span>
           </div>
-
-          {/* Clothes */}
 
           {filteredClothes.length > 0 ? (
             <div className="closet-grid">
@@ -362,7 +429,31 @@ function ClosetPage() {
 
       {activeTab === "saved" && (
         <section className="closet-saved">
-          {savedPosts.length > 0 ? (
+          {savedLoading ? (
+            <div className="closet-saved-empty">
+              <div className="closet-saved-empty__icon">
+                <BookmarkIcon />
+              </div>
+
+              <h2>저장한 스타일을 불러오고 있어요.</h2>
+
+              <p>잠시만 기다려주세요.</p>
+            </div>
+          ) : savedError ? (
+            <div className="closet-saved-empty">
+              <div className="closet-saved-empty__icon">
+                <SavedEmptyIcon />
+              </div>
+
+              <h2>저장한 스타일을 불러오지 못했어요.</h2>
+
+              <p>백엔드 서버와 로그인 상태를 확인해주세요.</p>
+
+              <button type="button" onClick={loadSavedPosts}>
+                다시 불러오기
+              </button>
+            </div>
+          ) : savedPosts.length > 0 ? (
             <>
               <div className="closet-saved__heading">
                 <div>
@@ -382,7 +473,7 @@ function ClosetPage() {
                       className="closet-saved-card__photo"
                       onClick={() => navigate(`/styles/${post.id}`)}
                     >
-                      <img src={post.image} alt={post.title} loading="lazy" />
+                      <SavedPostImage post={post} />
 
                       <span className="closet-saved-card__bookmark">
                         <BookmarkIcon />
@@ -394,7 +485,7 @@ function ClosetPage() {
                       className="closet-saved-card__creator"
                       onClick={() => navigate(`/users/${post.author.username}`)}
                     >
-                      <img src={post.author.avatar} alt="" />
+                      <CreatorAvatar author={post.author} />
 
                       <span>@{post.author.username}</span>
                     </button>

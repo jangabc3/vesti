@@ -1,21 +1,24 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import {
-  CURRENT_COMMUNITY_USER,
-  getCommunityUser,
-  getLikedStylePostIds,
-  getStylePostLikeCount,
-  getUserStylePosts,
-  toggleStylePostLike,
-} from "@/mocks/community";
+import { getMyProfile } from "@/api/authApi";
+
+import { getUserStylePosts } from "@/api/stylePostApi";
 
 import {
-  getCommunityUserFollowerCount,
-  isUserFollowed,
-  toggleUserFollow,
-} from "@/mocks/communityFollow";
+  getMyStylePostLikeStatus,
+  likeStylePost,
+  unlikeStylePost,
+} from "@/api/stylePostLikeApi";
+
+import { getPublicUser } from "@/api/userApi";
+
+import {
+  followUser,
+  getMyFollowStatus,
+  unfollowUser,
+} from "@/api/userFollowApi";
 
 import "./PublicProfilePage.css";
 
@@ -39,9 +42,7 @@ function MoreIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <circle cx="5" cy="12" r="1.4" />
-
       <circle cx="12" cy="12" r="1.4" />
-
       <circle cx="19" cy="12" r="1.4" />
     </svg>
   );
@@ -59,9 +60,7 @@ function ShareIcon() {
       aria-hidden="true"
     >
       <circle cx="18" cy="5" r="2.4" />
-
       <circle cx="6" cy="12" r="2.4" />
-
       <circle cx="18" cy="19" r="2.4" />
 
       <path d="m8.2 10.8 7.5-4.3" />
@@ -109,13 +108,75 @@ function HeartIcon({ filled = false }) {
 }
 
 function formatCount(value) {
-  if (value >= 1000) {
-    const formatted = (value / 1000).toFixed(1);
+  const number = Number(value ?? 0);
 
-    return `${formatted.replace(".0", "")}K`;
+  if (number >= 1000) {
+    const formatted = (number / 1000).toFixed(1);
+
+    return formatted.replace(".0", "") + "K";
   }
 
-  return String(value);
+  return String(number);
+}
+
+function getInitials(user) {
+  const source = user?.displayName || user?.username || "V";
+
+  return source.trim().charAt(0).toUpperCase();
+}
+
+function ProfileImage({ user }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!user?.profileImageUrl || failed) {
+    return (
+      <div className="public-profile-identity__fallback" aria-hidden="true">
+        {getInitials(user)}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={user.profileImageUrl}
+      alt={`${user.displayName} 프로필`}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function PostImage({ post }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!post?.image || failed) {
+    return (
+      <div
+        aria-label={post?.title ?? ""}
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: "150px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#f3f2f0",
+          color: "#aaa59f",
+          fontSize: "10px",
+        }}
+      >
+        이미지 준비 중
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={post.image}
+      alt={post.title}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 function PublicProfilePage() {
@@ -123,17 +184,131 @@ function PublicProfilePage() {
 
   const { username } = useParams();
 
-  const user = getCommunityUser(username);
+  const [user, setUser] = useState(null);
 
-  const posts = useMemo(() => getUserStylePosts(username), [username]);
+  const [posts, setPosts] = useState([]);
 
-  const [following, setFollowing] = useState(() => isUserFollowed(username));
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const [likedPostIds, setLikedPostIds] = useState(
-    () => new Set(getLikedStylePostIds()),
-  );
+  const [following, setFollowing] = useState(false);
 
-  if (!user) {
+  const [followerCount, setFollowerCount] = useState(0);
+
+  const [followingCount, setFollowingCount] = useState(0);
+
+  const [likeState, setLikeState] = useState({});
+
+  const [likePendingIds, setLikePendingIds] = useState(() => new Set());
+
+  const [followPending, setFollowPending] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadProfile() {
+      setLoading(true);
+      setLoadError(false);
+
+      try {
+        const [userData, myProfile, postPage, followData] = await Promise.all([
+          getPublicUser(username),
+
+          getMyProfile(),
+
+          getUserStylePosts(username, {
+            page: 0,
+            size: 50,
+            sort: "createdAt,desc",
+          }),
+
+          getMyFollowStatus(username),
+        ]);
+
+        if (ignore) {
+          return;
+        }
+
+        const postData = postPage.content ?? [];
+
+        setUser(userData);
+
+        setCurrentUser(myProfile);
+
+        setPosts(postData);
+
+        setFollowing(Boolean(followData?.following));
+
+        setFollowerCount(followData?.followerCount ?? 0);
+
+        setFollowingCount(followData?.followingCount ?? 0);
+
+        const likeResults = await Promise.allSettled(
+          postData.map((post) => getMyStylePostLikeStatus(post.id)),
+        );
+
+        if (ignore) {
+          return;
+        }
+
+        const nextLikeState = {};
+
+        postData.forEach((post, index) => {
+          const result = likeResults[index];
+
+          if (result.status === "fulfilled") {
+            nextLikeState[String(post.id)] = {
+              liked: Boolean(result.value?.liked),
+
+              likeCount: result.value?.likeCount ?? 0,
+            };
+          } else {
+            nextLikeState[String(post.id)] = {
+              liked: false,
+              likeCount: 0,
+            };
+          }
+        });
+
+        setLikeState(nextLikeState);
+      } catch (error) {
+        console.error("공개 프로필을 불러오지 못했습니다.", error);
+
+        if (!ignore) {
+          setUser(null);
+          setPosts([]);
+          setLoadError(true);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProfile();
+
+    return () => {
+      ignore = true;
+    };
+  }, [username]);
+
+  if (loading) {
+    return (
+      <div className="public-profile-not-found">
+        <span>VESTI</span>
+
+        <h1>프로필을 불러오고 있어요.</h1>
+
+        <p>사용자 정보를 확인하는 중입니다.</p>
+      </div>
+    );
+  }
+
+  if (loadError || !user) {
     return (
       <div className="public-profile-not-found">
         <span>VESTI</span>
@@ -150,49 +325,84 @@ function PublicProfilePage() {
   }
 
   const isMine =
-    String(user.username) === String(CURRENT_COMMUNITY_USER.username);
+    currentUser?.id != null &&
+    user.id != null &&
+    String(currentUser.id) === String(user.id);
 
-  const followerCount = getCommunityUserFollowerCount(user);
-
-  /* ========================================
-     Follow
-  ======================================== */
-
-  const handleToggleFollow = () => {
-    if (isMine) {
+  const handleToggleFollow = async () => {
+    if (isMine || followPending) {
       return;
     }
 
-    const result = toggleUserFollow(user.username);
+    setFollowPending(true);
 
-    setFollowing(result.following);
+    try {
+      const result = following
+        ? await unfollowUser(user.username)
+        : await followUser(user.username);
+
+      setFollowing(Boolean(result.following));
+
+      setFollowerCount(result.followerCount ?? 0);
+
+      setFollowingCount(result.followingCount ?? 0);
+    } catch (error) {
+      console.error("팔로우 처리에 실패했습니다.", error);
+
+      window.alert("팔로우 처리에 실패했어요.");
+    } finally {
+      setFollowPending(false);
+    }
   };
 
-  /* ========================================
-     Post Like
-  ======================================== */
+  const togglePostLike = async (postId) => {
+    const key = String(postId);
 
-  const togglePostLike = (postId) => {
-    const result = toggleStylePostLike(postId);
+    if (likePendingIds.has(key)) {
+      return;
+    }
 
-    setLikedPostIds((current) => {
-      const next = new Set(current);
+    const current = likeState[key] ?? {
+      liked: false,
+      likeCount: 0,
+    };
 
-      const key = String(postId);
+    setLikePendingIds((previous) => {
+      const next = new Set(previous);
 
-      if (result.liked) {
-        next.add(key);
-      } else {
-        next.delete(key);
-      }
+      next.add(key);
 
       return next;
     });
-  };
 
-  /* ========================================
-     Share
-  ======================================== */
+    try {
+      const result = current.liked
+        ? await unlikeStylePost(postId)
+        : await likeStylePost(postId);
+
+      setLikeState((previous) => ({
+        ...previous,
+
+        [key]: {
+          liked: Boolean(result.liked),
+
+          likeCount: result.likeCount ?? 0,
+        },
+      }));
+    } catch (error) {
+      console.error("좋아요 처리에 실패했습니다.", error);
+
+      window.alert("좋아요 처리에 실패했어요.");
+    } finally {
+      setLikePendingIds((previous) => {
+        const next = new Set(previous);
+
+        next.delete(key);
+
+        return next;
+      });
+    }
+  };
 
   const handleShare = async () => {
     const shareData = {
@@ -207,7 +417,7 @@ function PublicProfilePage() {
       try {
         await navigator.share(shareData);
       } catch {
-        // 사용자가 공유창을 닫은 경우
+        // 공유창 취소
       }
 
       return;
@@ -218,16 +428,12 @@ function PublicProfilePage() {
 
       window.alert("프로필 링크를 복사했어요.");
     } catch {
-      window.alert("공유 기능은 추후 연결할게요.");
+      window.alert("공유 기능을 사용할 수 없어요.");
     }
   };
 
   return (
     <div className="public-profile-page">
-      {/* =================================
-          Header
-      ================================= */}
-
       <header className="public-profile-header">
         <button
           type="button"
@@ -244,13 +450,9 @@ function PublicProfilePage() {
         </button>
       </header>
 
-      {/* =================================
-          Profile
-      ================================= */}
-
       <section className="public-profile-hero">
         <div className="public-profile-identity">
-          <img src={user.avatar} alt={`${user.displayName} 프로필`} />
+          <ProfileImage user={user} />
 
           <div>
             <h1>{user.displayName}</h1>
@@ -273,7 +475,7 @@ function PublicProfilePage() {
           </button>
 
           <button type="button">
-            <strong>{formatCount(user.following)}</strong>
+            <strong>{formatCount(followingCount)}</strong>
 
             <span>팔로잉</span>
           </button>
@@ -281,24 +483,11 @@ function PublicProfilePage() {
 
         {user.bio && <p className="public-profile-bio">{user.bio}</p>}
 
-        {Array.isArray(user.styleTags) && user.styleTags.length > 0 && (
-          <div className="public-profile-tags">
-            {user.styleTags.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => navigate("/discover")}
-              >
-                #{tag}
-              </button>
-            ))}
-          </div>
-        )}
-
         <div className="public-profile-actions">
           {!isMine && (
             <button
               type="button"
+              disabled={followPending}
               className={
                 following
                   ? "public-profile-follow public-profile-follow--active"
@@ -306,7 +495,7 @@ function PublicProfilePage() {
               }
               onClick={handleToggleFollow}
             >
-              {following ? "팔로잉" : "팔로우"}
+              {followPending ? "처리 중" : following ? "팔로잉" : "팔로우"}
             </button>
           )}
 
@@ -321,10 +510,6 @@ function PublicProfilePage() {
         </div>
       </section>
 
-      {/* =================================
-          Posts Tab
-      ================================= */}
-
       <nav className="public-profile-tabs">
         <button
           type="button"
@@ -336,14 +521,15 @@ function PublicProfilePage() {
         </button>
       </nav>
 
-      {/* =================================
-          Posts
-      ================================= */}
-
       {posts.length > 0 ? (
         <section className="public-profile-grid">
           {posts.map((post) => {
-            const liked = likedPostIds.has(String(post.id));
+            const key = String(post.id);
+
+            const like = likeState[key] ?? {
+              liked: false,
+              likeCount: 0,
+            };
 
             return (
               <article key={post.id} className="public-profile-post">
@@ -352,19 +538,21 @@ function PublicProfilePage() {
                   className="public-profile-post__photo"
                   onClick={() => navigate(`/styles/${post.id}`)}
                 >
-                  <img src={post.image} alt={post.title} loading="lazy" />
+                  <PostImage post={post} />
                 </button>
 
                 <button
                   type="button"
+                  disabled={likePendingIds.has(key)}
                   className={
-                    liked
+                    like.liked
                       ? "public-profile-post__heart public-profile-post__heart--active"
                       : "public-profile-post__heart"
                   }
                   onClick={() => togglePostLike(post.id)}
+                  aria-label={like.liked ? "좋아요 취소" : "좋아요"}
                 >
-                  <HeartIcon filled={liked} />
+                  <HeartIcon filled={like.liked} />
                 </button>
               </article>
             );

@@ -1,31 +1,31 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+
+import { getMyProfile } from "@/api/authApi";
+
+import {
+  deleteStylePost,
+  getStylePost,
+  getStylePosts,
+  getUserStylePosts,
+} from "@/api/stylePostApi";
+
+import {
+  getMyStylePostLikeStatus,
+  likeStylePost,
+  unlikeStylePost,
+} from "@/api/stylePostLikeApi";
+
+import {
+  getMyStylePostSaveStatus,
+  saveStylePost,
+  unsaveStylePost,
+} from "@/api/stylePostSaveApi";
+
+import { getStylePostComments } from "@/api/stylePostCommentApi";
 
 import StylePostCommentsSheet from "@/components/community/StylePostCommentsSheet";
-
-import {
-  deleteLocalStylePost,
-  getStylePost,
-  getStylePostLikeCount,
-  isStylePostLiked,
-  isStylePostSaved,
-  stylePosts,
-  toggleStylePostLike,
-  toggleStylePostSave,
-} from "@/mocks/community";
-
-import {
-  clearLocalStylePostComments,
-  getStylePostCommentCount,
-} from "@/mocks/communityComments";
-
-import { isUserFollowed, toggleUserFollow } from "@/mocks/communityFollow";
-
-import {
-  getCommerceProductRows,
-  getStyleCommerceItems,
-} from "@/mocks/styleCommerce";
 
 import "./StylePostDetailPage.css";
 import "./StylePostDetailActions.css";
@@ -118,41 +118,9 @@ function ShareIcon() {
       <circle cx="18" cy="5" r="2.4" />
       <circle cx="6" cy="12" r="2.4" />
       <circle cx="18" cy="19" r="2.4" />
+
       <path d="m8.2 10.8 7.5-4.3" />
       <path d="m8.2 13.2 7.5 4.3" />
-    </svg>
-  );
-}
-
-function ChevronDownIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m7 9 5 5 5-5" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 6 12 12" />
-      <path d="m18 6-12 12" />
     </svg>
   );
 }
@@ -224,102 +192,214 @@ function EyeOffIcon() {
     >
       <path d="m3 3 18 18" />
       <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+
       <path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c5.5 0 9 5 9 8a9.8 9.8 0 0 1-2.1 3.8" />
+
       <path d="M6.6 6.6C4.3 8.1 3 10.3 3 12c0 3 3.5 8 9 8a9.7 9.7 0 0 0 3.4-.6" />
     </svg>
   );
 }
 
 function formatCount(value) {
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
+  const number = Number(value ?? 0);
+
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1)}K`;
   }
 
-  return value;
+  return number;
 }
 
-function formatPrice(value) {
-  if (!value) {
-    return null;
+function getInitials(user) {
+  const source = user?.displayName || user?.username || "V";
+
+  return source.trim().charAt(0).toUpperCase();
+}
+
+function StyleImage({ src, alt = "", className = "" }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div
+        className={className}
+        aria-label={alt}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%",
+          minHeight: "180px",
+          background: "#f3f2f0",
+          color: "#aaa59f",
+          fontSize: "11px",
+          fontWeight: 600,
+        }}
+      >
+        이미지를 준비 중이에요
+      </div>
+    );
   }
 
-  return `${value.toLocaleString("ko-KR")}원`;
+  return (
+    <img
+      className={className}
+      src={src}
+      alt={alt}
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 function StylePostDetailPage() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const { styleId } = useParams();
 
-  const post = getStylePost(styleId);
+  const [post, setPost] = useState(null);
 
-  const [liked, setLiked] = useState(() => isStylePostLiked(styleId));
-  const [saved, setSaved] = useState(() => isStylePostSaved(styleId));
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const [following, setFollowing] = useState(() =>
-    post ? isUserFollowed(post.author.username) : false,
-  );
+  const [loading, setLoading] = useState(true);
 
-  const [productsOpen, setProductsOpen] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+
+  const [liked, setLiked] = useState(false);
+
+  const [likeCount, setLikeCount] = useState(0);
+
+  const [likePending, setLikePending] = useState(false);
+
+  const [saved, setSaved] = useState(false);
+
+  const [savePending, setSavePending] = useState(false);
+
   const [commentsOpen, setCommentsOpen] = useState(false);
+
   const [actionsOpen, setActionsOpen] = useState(false);
+
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
   const [deleting, setDeleting] = useState(false);
 
-  const [productLikedIds, setProductLikedIds] = useState(new Set());
+  const [commentCount, setCommentCount] = useState(0);
 
-  const [commentCount, setCommentCount] = useState(() =>
-    getStylePostCommentCount(post),
-  );
+  const [creatorPosts, setCreatorPosts] = useState([]);
 
-  const commerceItems = useMemo(() => getStyleCommerceItems(post), [post]);
-
-  const commerceRows = useMemo(
-    () => getCommerceProductRows(commerceItems),
-    [commerceItems],
-  );
-
-  const hasSimilarProducts = commerceItems.some(
-    (item) => item.source === "similar",
-  );
-
-  const modalOpen =
-    productsOpen || commentsOpen || actionsOpen || deleteConfirmOpen;
+  const [otherPosts, setOtherPosts] = useState([]);
 
   useEffect(() => {
-    setLiked(isStylePostLiked(styleId));
+    let ignore = false;
 
-    setSaved(isStylePostSaved(styleId));
+    async function loadDetail() {
+      setLoading(true);
 
-    setFollowing(post ? isUserFollowed(post.author.username) : false);
+      setLoadError(false);
 
-    setCommentCount(getStylePostCommentCount(post));
+      try {
+        const [postData, myProfile, likeData, saveData, comments] =
+          await Promise.all([
+            getStylePost(styleId),
 
-    setCommentsOpen(false);
-    setProductsOpen(false);
-    setActionsOpen(false);
-    setDeleteConfirmOpen(false);
-  }, [styleId, post]);
+            getMyProfile(),
 
-  useEffect(() => {
-    if (!location.state?.openComments) {
-      return;
+            getMyStylePostLikeStatus(styleId),
+
+            getMyStylePostSaveStatus(styleId),
+
+            getStylePostComments(styleId),
+          ]);
+
+        if (ignore) {
+          return;
+        }
+
+        setPost(postData);
+
+        setCurrentUser(myProfile);
+
+        setLiked(Boolean(likeData?.liked));
+
+        setLikeCount(likeData?.likeCount ?? 0);
+
+        setSaved(Boolean(saveData?.saved));
+
+        setCommentCount(comments.length);
+
+        try {
+          const creatorPage = await getUserStylePosts(
+            postData.author.username,
+            {
+              page: 0,
+              size: 7,
+              sort: "createdAt,desc",
+            },
+          );
+
+          if (!ignore) {
+            setCreatorPosts(
+              (creatorPage.content ?? [])
+                .filter((item) => String(item.id) !== String(postData.id))
+                .slice(0, 6),
+            );
+          }
+        } catch (error) {
+          console.error("작성자의 다른 게시물을 불러오지 못했습니다.", error);
+
+          if (!ignore) {
+            setCreatorPosts([]);
+          }
+        }
+
+        try {
+          const allPage = await getStylePosts({
+            page: 0,
+            size: 12,
+            sort: "createdAt,desc",
+          });
+
+          if (!ignore) {
+            setOtherPosts(
+              (allPage.content ?? [])
+                .filter(
+                  (item) =>
+                    String(item.id) !== String(postData.id) &&
+                    item.author.username !== postData.author.username,
+                )
+                .slice(0, 6),
+            );
+          }
+        } catch (error) {
+          console.error("다른 스타일을 불러오지 못했습니다.", error);
+
+          if (!ignore) {
+            setOtherPosts([]);
+          }
+        }
+      } catch (error) {
+        console.error("스타일 게시물 상세 조회에 실패했습니다.", error);
+
+        if (!ignore) {
+          setPost(null);
+
+          setLoadError(true);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
     }
 
-    setCommentsOpen(true);
+    loadDetail();
 
-    navigate(`${location.pathname}${location.search}${location.hash}`, {
-      replace: true,
-      state: null,
-    });
-  }, [
-    location.hash,
-    location.pathname,
-    location.search,
-    location.state,
-    navigate,
-  ]);
+    return () => {
+      ignore = true;
+    };
+  }, [styleId]);
+
+  const modalOpen = commentsOpen || actionsOpen || deleteConfirmOpen;
 
   useEffect(() => {
     if (!modalOpen) {
@@ -335,7 +415,17 @@ function StylePostDetailPage() {
     };
   }, [modalOpen]);
 
-  if (!post) {
+  if (loading) {
+    return (
+      <div className="style-post-not-found">
+        <h1>스타일을 불러오고 있어요.</h1>
+
+        <p>실제 VESTI 게시물을 가져오는 중입니다.</p>
+      </div>
+    );
+  }
+
+  if (loadError || !post) {
     return (
       <div className="style-post-not-found">
         <h1>게시물을 찾을 수 없어요.</h1>
@@ -349,9 +439,13 @@ function StylePostDetailPage() {
     );
   }
 
-  const isMine = post.isMine === true;
+  const isMine =
+    currentUser?.id != null &&
+    post.author?.id != null &&
+    String(currentUser.id) === String(post.author.id);
 
   const cleanTitle = post.title?.trim() ?? "";
+
   const cleanCaption = post.caption?.trim() ?? "";
 
   const shouldShowTitle =
@@ -359,55 +453,62 @@ function StylePostDetailPage() {
     cleanTitle !== cleanCaption &&
     cleanTitle !== "오늘의 스타일";
 
-  const creatorPosts = stylePosts
-    .filter(
-      (item) =>
-        item.author.username === post.author.username &&
-        String(item.id) !== String(post.id),
-    )
-    .slice(0, 6);
-
-  const otherPosts = stylePosts
-    .filter(
-      (item) =>
-        String(item.id) !== String(post.id) &&
-        item.author.username !== post.author.username,
-    )
-    .slice(0, 6);
-
   const morePosts =
     creatorPosts.length >= 3
       ? creatorPosts
-      : [...creatorPosts, ...otherPosts].slice(0, 6);
+      : [...creatorPosts, ...otherPosts]
+          .filter(
+            (item, index, array) =>
+              array.findIndex(
+                (candidate) => String(candidate.id) === String(item.id),
+              ) === index,
+          )
+          .slice(0, 6);
 
-  const handleToggleFollow = () => {
-    if (isMine) {
+  const handleToggleLike = async () => {
+    if (likePending) {
       return;
     }
 
-    const result = toggleUserFollow(post.author.username);
+    setLikePending(true);
 
-    setFollowing(result.following);
+    try {
+      const result = liked
+        ? await unlikeStylePost(post.id)
+        : await likeStylePost(post.id);
+
+      setLiked(Boolean(result.liked));
+
+      setLikeCount(result.likeCount ?? 0);
+    } catch (error) {
+      console.error("좋아요 처리에 실패했습니다.", error);
+
+      window.alert("좋아요 처리에 실패했어요.");
+    } finally {
+      setLikePending(false);
+    }
   };
 
-  const handleToggleLike = () => {
-    const result = toggleStylePostLike(post.id);
+  const handleToggleSave = async () => {
+    if (savePending) {
+      return;
+    }
 
-    setLiked(result.liked);
-  };
+    setSavePending(true);
 
-  const handleToggleSave = () => {
-    const nextSaved = toggleStylePostSave(post.id);
+    try {
+      const result = saved
+        ? await unsaveStylePost(post.id)
+        : await saveStylePost(post.id);
 
-    setSaved(nextSaved);
-  };
+      setSaved(Boolean(result.saved));
+    } catch (error) {
+      console.error("저장 처리에 실패했습니다.", error);
 
-  const openComments = () => {
-    setCommentsOpen(true);
-  };
-
-  const closeComments = () => {
-    setCommentsOpen(false);
+      window.alert("게시물 저장에 실패했어요.");
+    } finally {
+      setSavePending(false);
+    }
   };
 
   const handleShare = async () => {
@@ -415,7 +516,9 @@ function StylePostDetailPage() {
       try {
         await navigator.share({
           title: post.title,
+
           text: post.caption,
+
           url: window.location.href,
         });
       } catch {
@@ -430,26 +533,8 @@ function StylePostDetailPage() {
 
       window.alert("게시물 링크를 복사했어요.");
     } catch {
-      window.alert("공유 기능은 추후 연결할게요.");
+      window.alert("공유 기능을 사용할 수 없어요.");
     }
-  };
-
-  const toggleProductLike = (productId) => {
-    setProductLikedIds((current) => {
-      const next = new Set(current);
-
-      if (next.has(productId)) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
-
-      return next;
-    });
-  };
-
-  const openProduct = () => {
-    window.alert("상품 상세 또는 외부 쇼핑 링크는 다음 단계에서 연결할게요.");
   };
 
   const handleEdit = () => {
@@ -464,36 +549,34 @@ function StylePostDetailPage() {
     setDeleteConfirmOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (deleting) {
       return;
     }
 
     setDeleting(true);
 
-    const deleted = deleteLocalStylePost(post.id);
+    try {
+      await deleteStylePost(post.id);
 
-    if (!deleted) {
-      setDeleting(false);
+      navigate("/discover", {
+        replace: true,
+      });
+    } catch (error) {
+      console.error("게시물 삭제에 실패했습니다.", error);
 
       setDeleteConfirmOpen(false);
 
       window.alert("게시물을 삭제하지 못했어요.");
-
-      return;
+    } finally {
+      setDeleting(false);
     }
-
-    clearLocalStylePostComments(post.id);
-
-    navigate("/discover", {
-      replace: true,
-    });
   };
 
   const handleReport = () => {
     setActionsOpen(false);
 
-    window.alert("신고 기능은 백엔드 연결 단계에서 구현할게요.");
+    window.alert("신고 기능은 이후 단계에서 연결할게요.");
   };
 
   const handleNotInterested = () => {
@@ -532,91 +615,42 @@ function StylePostDetailPage() {
           className="style-post-creator__profile"
           onClick={() => navigate(`/users/${post.author.username}`)}
         >
-          <img
-            src={post.author.avatar}
-            alt={`${post.author.displayName} 프로필`}
-          />
+          {post.author.avatar ? (
+            <img
+              src={post.author.avatar}
+              alt={`${post.author.displayName} 프로필`}
+            />
+          ) : (
+            <div className="style-post-comment-input__avatar">
+              {getInitials(post.author)}
+            </div>
+          )}
 
           <div>
             <strong>{post.author.displayName}</strong>
 
             <span>
               @{post.author.username}
-              {" · "}
-              {post.timeAgo}
+              {post.timeAgo && (
+                <>
+                  {" · "}
+                  {post.timeAgo}
+                </>
+              )}
             </span>
           </div>
         </button>
-
-        {!isMine && (
-          <button
-            type="button"
-            className={
-              following
-                ? "style-post-follow style-post-follow--active"
-                : "style-post-follow"
-            }
-            onClick={handleToggleFollow}
-          >
-            {following ? "팔로잉" : "팔로우"}
-          </button>
-        )}
       </section>
 
       <section className="style-post-photo">
-        <img src={post.image} alt={post.title} />
+        <StyleImage src={post.image} alt={post.title} />
       </section>
-
-      {commerceItems.length > 0 && (
-        <section className="style-post-products-preview">
-          <div className="style-post-products-preview__rail">
-            {commerceItems.slice(0, 3).map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="style-post-product-preview-card"
-                onClick={openProduct}
-              >
-                <img src={item.product.image} alt={item.product.name} />
-
-                <div>
-                  <span
-                    className={
-                      item.source === "tagged"
-                        ? "style-post-product-preview-card__source"
-                        : "style-post-product-preview-card__source style-post-product-preview-card__source--similar"
-                    }
-                  >
-                    {item.source === "tagged" ? "태그한 상품" : "비슷한 상품"}
-                  </span>
-
-                  <strong>{item.product.brand}</strong>
-
-                  <p>{item.product.name}</p>
-
-                  {item.product.price && (
-                    <b>{formatPrice(item.product.price)}</b>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="style-post-products-preview__open"
-            onClick={() => setProductsOpen(true)}
-            aria-label="스타일 상품 모두 보기"
-          >
-            <ChevronDownIcon />
-          </button>
-        </section>
-      )}
 
       <section className="style-post-social">
         <div className="style-post-social__left">
           <button
             type="button"
+            disabled={likePending}
             className={
               liked
                 ? "style-post-social__button style-post-social__button--liked"
@@ -631,7 +665,7 @@ function StylePostDetailPage() {
           <button
             type="button"
             className="style-post-social__button"
-            onClick={openComments}
+            onClick={() => setCommentsOpen(true)}
             aria-label="댓글"
           >
             <CommentIcon />
@@ -649,6 +683,7 @@ function StylePostDetailPage() {
 
         <button
           type="button"
+          disabled={savePending}
           className={
             saved
               ? "style-post-social__button style-post-social__button--saved"
@@ -663,9 +698,9 @@ function StylePostDetailPage() {
 
       <section className="style-post-content">
         <div className="style-post-content__engagement">
-          <strong>좋아요 {formatCount(getStylePostLikeCount(post))}개</strong>
+          <strong>좋아요 {formatCount(likeCount)}개</strong>
 
-          <button type="button" onClick={openComments}>
+          <button type="button" onClick={() => setCommentsOpen(true)}>
             댓글 {commentCount}개
           </button>
         </div>
@@ -676,24 +711,28 @@ function StylePostDetailPage() {
           <p className="style-post-content__caption">{post.caption}</p>
         )}
 
-        <div className="style-post-tags">
-          {post.tags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => navigate("/discover")}
-            >
-              #{tag}
-            </button>
-          ))}
-        </div>
+        {post.tags.length > 0 && (
+          <div className="style-post-tags">
+            {post.tags.map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => navigate("/discover")}
+              >
+                #{tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         <button
           type="button"
           className="style-post-comment-input"
-          onClick={openComments}
+          onClick={() => setCommentsOpen(true)}
         >
-          <div className="style-post-comment-input__avatar">V</div>
+          <div className="style-post-comment-input__avatar">
+            {getInitials(currentUser)}
+          </div>
 
           <span>댓글을 남겨보세요.</span>
         </button>
@@ -742,7 +781,7 @@ function StylePostDetailPage() {
                 type="button"
                 onClick={() => navigate(`/styles/${item.id}`)}
               >
-                <img src={item.image} alt={item.title} />
+                <StyleImage src={item.image} alt={item.title} />
               </button>
             ))}
           </div>
@@ -752,96 +791,9 @@ function StylePostDetailPage() {
       <StylePostCommentsSheet
         post={post}
         open={commentsOpen}
-        onClose={closeComments}
-        onCommentCountChange={setCommentCount}
+        onClose={() => setCommentsOpen(false)}
+        onCountChange={setCommentCount}
       />
-
-      {productsOpen && (
-        <div
-          className="style-product-sheet-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              setProductsOpen(false);
-            }
-          }}
-        >
-          <section className="style-product-sheet">
-            <header className="style-product-sheet__header">
-              <div>
-                <h2>스타일 상품</h2>
-
-                <span>{commerceRows.length}개</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setProductsOpen(false)}
-                aria-label="닫기"
-              >
-                <CloseIcon />
-              </button>
-            </header>
-
-            {hasSimilarProducts && (
-              <div className="style-product-sheet__notice">
-                <strong>일부 상품은 비슷한 상품이에요.</strong>
-
-                <p>
-                  작성자가 상품 정보를 태그하지 않은 아이템은 사진과 스타일을
-                  기준으로 비슷한 상품을 보여줘요.
-                </p>
-              </div>
-            )}
-
-            <div className="style-product-sheet__list">
-              {commerceRows.map((product) => (
-                <article key={product.rowId} className="style-product-row">
-                  <button
-                    type="button"
-                    className="style-product-row__main"
-                    onClick={openProduct}
-                  >
-                    <img src={product.image} alt={product.name} />
-
-                    <div>
-                      <span
-                        className={
-                          product.source === "tagged"
-                            ? "style-product-row__source"
-                            : "style-product-row__source style-product-row__source--similar"
-                        }
-                      >
-                        {product.sourceLabel}
-                        {" · "}
-                        {product.category}
-                      </span>
-
-                      <strong>{product.brand}</strong>
-
-                      <p>{product.name}</p>
-
-                      {product.price && <b>{formatPrice(product.price)}</b>}
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      productLikedIds.has(product.rowId)
-                        ? "style-product-row__heart style-product-row__heart--active"
-                        : "style-product-row__heart"
-                    }
-                    onClick={() => toggleProductLike(product.rowId)}
-                    aria-label="상품 좋아요"
-                  >
-                    <HeartIcon filled={productLikedIds.has(product.rowId)} />
-                  </button>
-                </article>
-              ))}
-            </div>
-          </section>
-        </div>
-      )}
 
       {actionsOpen && (
         <div
@@ -863,6 +815,7 @@ function StylePostDetailPage() {
                   onClick={handleEdit}
                 >
                   <EditIcon />
+
                   <span>게시물 수정</span>
                 </button>
 
@@ -872,6 +825,7 @@ function StylePostDetailPage() {
                   onClick={openDeleteConfirm}
                 >
                   <TrashIcon />
+
                   <span>게시물 삭제</span>
                 </button>
               </>
@@ -883,6 +837,7 @@ function StylePostDetailPage() {
                   onClick={handleNotInterested}
                 >
                   <EyeOffIcon />
+
                   <span>관심 없음</span>
                 </button>
 
@@ -892,6 +847,7 @@ function StylePostDetailPage() {
                   onClick={handleReport}
                 >
                   <FlagIcon />
+
                   <span>신고하기</span>
                 </button>
               </>

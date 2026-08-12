@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { getMyProfile } from "@/api/authApi";
 
 import {
-  createLocalStylePostComment,
-  deleteLocalStylePostComment,
-  getLocalStylePostComments,
-  getStylePostCommentCount,
-  getStylePostCommentPreviews,
-} from "@/mocks/communityComments";
+  createStylePostComment,
+  deleteStylePostComment,
+  getStylePostComments,
+} from "@/api/stylePostCommentApi";
 
 import "./StylePostCommentsSheet.css";
 
@@ -30,101 +30,189 @@ function CloseIcon() {
 function MoreIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <circle cx="5" cy="12" r="1.3" />
-
-      <circle cx="12" cy="12" r="1.3" />
-
-      <circle cx="19" cy="12" r="1.3" />
+      <circle cx="5" cy="12" r="1.4" />
+      <circle cx="12" cy="12" r="1.4" />
+      <circle cx="19" cy="12" r="1.4" />
     </svg>
   );
 }
 
-function StylePostCommentsSheet({ post, open, onClose, onCommentCountChange }) {
-  const [localComments, setLocalComments] = useState([]);
+function formatCommentTime(comment) {
+  if (!comment.createdAt) {
+    return "";
+  }
 
-  const [commentInput, setCommentInput] = useState("");
+  const createdAt = new Date(comment.createdAt).getTime();
 
-  const [activeMenuId, setActiveMenuId] = useState(null);
+  if (Number.isNaN(createdAt)) {
+    return "";
+  }
 
-  const previewComments = useMemo(
-    () => getStylePostCommentPreviews(post),
-    [post],
-  );
+  const diffMs = Math.max(0, Date.now() - createdAt);
 
-  const visibleComments = useMemo(
-    () => [...localComments, ...previewComments],
-    [localComments, previewComments],
-  );
+  const diffMinutes = Math.floor(diffMs / 60000);
 
-  const totalCommentCount = Number(post?.comments ?? 0) + localComments.length;
+  if (diffMinutes < 1) {
+    return "방금 전";
+  }
 
-  const remainingCommentCount = Math.max(
-    0,
-    totalCommentCount - visibleComments.length,
-  );
+  if (diffMinutes < 60) {
+    return `${diffMinutes}분 전`;
+  }
 
-  const canSubmit = commentInput.trim().length > 0;
+  const diffHours = Math.floor(diffMinutes / 60);
+
+  if (diffHours < 24) {
+    return `${diffHours}시간 전`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+
+  return `${diffDays}일 전`;
+}
+
+function getInitials(user) {
+  const source = user?.displayName || user?.username || "V";
+
+  return source.trim().charAt(0).toUpperCase();
+}
+
+function StylePostCommentsSheet({ post, open, onClose, onCountChange }) {
+  const inputRef = useRef(null);
+
+  const [commentText, setCommentText] = useState("");
+
+  const [comments, setComments] = useState([]);
+
+  const [currentUser, setCurrentUser] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const [deletingId, setDeletingId] = useState(null);
+
+  const [activeCommentMenuId, setActiveCommentMenuId] = useState(null);
 
   useEffect(() => {
     if (!open || !post) {
       return;
     }
 
-    const comments = getLocalStylePostComments(post.id);
+    let ignore = false;
 
-    setLocalComments(comments);
+    async function loadComments() {
+      setLoading(true);
 
-    setCommentInput("");
+      setActiveCommentMenuId(null);
 
-    setActiveMenuId(null);
+      try {
+        const [commentData, myProfile] = await Promise.all([
+          getStylePostComments(post.id),
+          getMyProfile(),
+        ]);
 
-    onCommentCountChange?.(getStylePostCommentCount(post));
-  }, [open, post, onCommentCountChange]);
+        if (ignore) {
+          return;
+        }
+
+        setComments(commentData);
+
+        setCurrentUser(myProfile);
+
+        onCountChange?.(commentData.length);
+      } catch (error) {
+        console.error("댓글을 불러오지 못했습니다.", error);
+
+        if (!ignore) {
+          setComments([]);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadComments();
+
+    const timer = window.setTimeout(() => {
+      inputRef.current?.focus();
+    }, 180);
+
+    return () => {
+      ignore = true;
+
+      window.clearTimeout(timer);
+    };
+  }, [open, post, onCountChange]);
 
   if (!open || !post) {
     return null;
   }
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const totalCount = comments.length;
 
-    if (!canSubmit) {
+  const publishComment = async () => {
+    const normalized = commentText.trim();
+
+    if (!normalized || submitting) {
       return;
     }
 
-    const newComment = createLocalStylePostComment(post.id, commentInput);
+    setSubmitting(true);
 
-    if (!newComment) {
-      return;
+    try {
+      const created = await createStylePostComment(post.id, normalized);
+
+      const nextComments = [...comments, created];
+
+      setComments(nextComments);
+
+      setCommentText("");
+
+      setActiveCommentMenuId(null);
+
+      onCountChange?.(nextComments.length);
+
+      window.setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    } catch (error) {
+      console.error("댓글 작성에 실패했습니다.", error);
+
+      window.alert("댓글을 등록하지 못했어요.");
+    } finally {
+      setSubmitting(false);
     }
-
-    const nextComments = [newComment, ...localComments];
-
-    setLocalComments(nextComments);
-
-    setCommentInput("");
-
-    setActiveMenuId(null);
-
-    onCommentCountChange?.(Number(post.comments ?? 0) + nextComments.length);
   };
 
-  const handleDelete = (commentId) => {
-    const deleted = deleteLocalStylePostComment(post.id, commentId);
-
-    if (!deleted) {
+  const handleDeleteComment = async (commentId) => {
+    if (deletingId !== null) {
       return;
     }
 
-    const nextComments = localComments.filter(
-      (comment) => String(comment.id) !== String(commentId),
-    );
+    setDeletingId(commentId);
 
-    setLocalComments(nextComments);
+    try {
+      await deleteStylePostComment(commentId);
 
-    setActiveMenuId(null);
+      const nextComments = comments.filter(
+        (comment) => String(comment.id) !== String(commentId),
+      );
 
-    onCommentCountChange?.(Number(post.comments ?? 0) + nextComments.length);
+      setComments(nextComments);
+
+      setActiveCommentMenuId(null);
+
+      onCountChange?.(nextComments.length);
+    } catch (error) {
+      console.error("댓글 삭제에 실패했습니다.", error);
+
+      window.alert("댓글을 삭제하지 못했어요.");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -142,13 +230,11 @@ function StylePostCommentsSheet({ post, open, onClose, onCommentCountChange }) {
         aria-modal="true"
         aria-label="댓글"
       >
-        {/* Header */}
-
         <header className="style-comments-header">
           <div>
             <h2>댓글</h2>
 
-            <span>{totalCommentCount}</span>
+            <span>{totalCount}</span>
           </div>
 
           <button type="button" onClick={onClose} aria-label="댓글 닫기">
@@ -156,89 +242,132 @@ function StylePostCommentsSheet({ post, open, onClose, onCommentCountChange }) {
           </button>
         </header>
 
-        {/* Comments */}
-
         <div className="style-comments-list">
-          {visibleComments.length > 0 ? (
-            <>
-              {visibleComments.map((comment) => (
+          {loading ? (
+            <div className="style-comments-empty">
+              <strong>댓글을 불러오고 있어요.</strong>
+
+              <p>잠시만 기다려주세요.</p>
+            </div>
+          ) : comments.length > 0 ? (
+            comments.map((comment) => {
+              const menuOpen = activeCommentMenuId === comment.id;
+
+              const isMine =
+                currentUser?.id != null &&
+                comment.author?.id != null &&
+                String(currentUser.id) === String(comment.author.id);
+
+              return (
                 <article key={comment.id} className="style-comment">
-                  <img src={comment.author.avatar} alt="" />
+                  {comment.author?.avatar ? (
+                    <img
+                      src={comment.author.avatar}
+                      alt={`${comment.author.displayName} 프로필`}
+                    />
+                  ) : (
+                    <div className="style-comments-form__avatar">
+                      {getInitials(comment.author)}
+                    </div>
+                  )}
 
                   <div className="style-comment__body">
                     <div className="style-comment__meta">
                       <strong>@{comment.author.username}</strong>
 
-                      <span>{comment.timeAgo}</span>
+                      <span>{formatCommentTime(comment)}</span>
                     </div>
 
                     <p>{comment.content}</p>
                   </div>
 
-                  {comment.isMine && (
+                  {isMine ? (
                     <div className="style-comment__menu">
                       <button
                         type="button"
                         className="style-comment__menu-button"
                         onClick={() =>
-                          setActiveMenuId((current) =>
+                          setActiveCommentMenuId((current) =>
                             current === comment.id ? null : comment.id,
                           )
                         }
-                        aria-label="댓글 메뉴"
+                        aria-label="내 댓글 메뉴"
                       >
                         <MoreIcon />
                       </button>
 
-                      {activeMenuId === comment.id && (
+                      {menuOpen && (
                         <div className="style-comment__menu-popup">
                           <button
                             type="button"
-                            onClick={() => handleDelete(comment.id)}
+                            disabled={deletingId === comment.id}
+                            onClick={() => handleDeleteComment(comment.id)}
                           >
-                            댓글 삭제
+                            {deletingId === comment.id
+                              ? "삭제 중..."
+                              : "댓글 삭제"}
                           </button>
                         </div>
                       )}
                     </div>
+                  ) : (
+                    <div />
                   )}
                 </article>
-              ))}
-
-              {remainingCommentCount > 0 && (
-                <div className="style-comments-more-count">
-                  외 {remainingCommentCount}
-                  개의 댓글
-                </div>
-              )}
-            </>
+              );
+            })
           ) : (
             <div className="style-comments-empty">
-              <strong>아직 댓글이 없어요.</strong>
+              <strong>첫 댓글을 남겨보세요.</strong>
 
-              <p>이 스타일에 첫 번째 댓글을 남겨보세요.</p>
+              <p>이 스타일에 대한 생각이나 궁금한 점을 이야기해보세요.</p>
             </div>
           )}
         </div>
 
-        {/* Input */}
-
-        <form className="style-comments-form" onSubmit={handleSubmit}>
-          <div className="style-comments-form__avatar">V</div>
+        <footer className="style-comments-form">
+          {currentUser?.profileImageUrl ? (
+            <img
+              src={currentUser.profileImageUrl}
+              alt=""
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <div className="style-comments-form__avatar">
+              {getInitials(currentUser)}
+            </div>
+          )}
 
           <input
+            ref={inputRef}
             type="text"
-            value={commentInput}
-            onChange={(event) => setCommentInput(event.target.value)}
-            maxLength={200}
+            maxLength={500}
+            value={commentText}
+            onChange={(event) => setCommentText(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+
+                publishComment();
+              }
+            }}
             placeholder="댓글을 입력하세요..."
             aria-label="댓글 입력"
           />
 
-          <button type="submit" disabled={!canSubmit}>
-            게시
+          <button
+            type="button"
+            disabled={!commentText.trim() || submitting}
+            onClick={publishComment}
+          >
+            {submitting ? "등록 중" : "게시"}
           </button>
-        </form>
+        </footer>
       </section>
     </div>
   );

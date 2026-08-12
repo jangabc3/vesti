@@ -15,7 +15,6 @@
   background: #ffffff;
 }
 
-
 /* ========================================
    Header
 ======================================== */
@@ -37,28 +36,18 @@
 
   min-height: 60px;
 
-  padding:
-    0
-    10px;
+  padding: 0 10px;
 
-  border-bottom:
-    1px
-    solid
-    #efefed;
+  border-bottom: 1px solid #efefed;
 
-  background:
-    rgb(255 255 255 / 96%);
+  background: rgb(255 255 255 / 96%);
 
-  backdrop-filter:
-    blur(20px);
+  backdrop-filter: blur(20px);
 
-  -webkit-backdrop-filter:
-    blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-
-.public-profile-header
-button {
+.public-profile-header button {
   display: flex;
 
   align-items: center;
@@ -76,16 +65,12 @@ button {
   background: transparent;
 }
 
-
-.public-profile-header
-svg {
+.public-profile-header svg {
   width: 22px;
   height: 22px;
 }
 
-
-.public-profile-header
-> strong {
+.public-profile-header > strong {
   overflow: hidden;
 
   font-size: 12px;
@@ -97,18 +82,13 @@ svg {
   white-space: nowrap;
 }
 
-
 /* ========================================
    Profile Hero
 ======================================== */
 
 .public-profile-hero {
-  padding:
-    24px
-    18px
-    22px;
+  padding: 24px 18px 22px;
 }
-
 
 .public-profile-identity {
   display: flex;
@@ -118,33 +98,24 @@ svg {
   gap: 15px;
 }
 
-
-.public-profile-identity
-> img {
+.public-profile-identity > img {
   width: 78px;
   height: 78px;
 
   flex-shrink: 0;
 
-  border:
-    1px
-    solid
-    #e8e6e2;
+  border: 1px solid #e8e6e2;
 
   border-radius: 50%;
 
   object-fit: cover;
 }
 
-
-.public-profile-identity
-> div {
+.public-profile-identity > div {
   min-width: 0;
 }
 
-
-.public-profile-identity
-h1 {
+.public-profile-identity h1 {
   overflow: hidden;
 
   margin: 0;
@@ -160,9 +131,7 @@ h1 {
   white-space: nowrap;
 }
 
-
-.public-profile-identity
-span {
+.public-profile-identity span {
   display: block;
 
   margin-top: 5px;
@@ -172,7 +141,6 @@ span {
   font-size: 10px;
 }
 
-
 /* ========================================
    Stats
 ======================================== */
@@ -180,20 +148,13 @@ span {
 .public-profile-stats {
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   margin-top: 25px;
 }
 
-
-.public-profile-stats
-> div,
-.public-profile-stats
-> button {
+.public-profile-stats > div,
+.public-profile-stats > button {
   display: flex;
 
   flex-direction: column;
@@ -206,41 +167,31 @@ span {
   padding: 0;
 
   border: 0;
-  border-right:
-    1px
-    solid
-    #eeeeec;
+  border-right: 1px solid #eeeeec;
 
   color: #171717;
 
   background: transparent;
 }
 
-
-.public-profile-stats
-> :last-child {
+.public-profile-stats > :last-child {
   border-right: 0;
 }
 
-
-.public-profile-stats
-strong {
+.public-profile-stats strong {
   font-size: 17px;
   font-weight: 750;
 
   line-height: 1;
 }
 
-
-.public-profile-stats
-span {
+.public-profile-stats span {
   margin-top: 7px;
 
   color: #77726c;
 
   font-size: 9px;
 }
-
 
 /* ========================================
    Bio
@@ -260,7 +211,6 @@ span {
   letter-spacing: -0.015em;
 }
 
-
 /* ========================================
    Tags
 ======================================== */
@@ -270,16 +220,12 @@ span {
 
   flex-wrap: wrap;
 
-  gap:
-    5px
-    9px;
+  gap: 5px 9px;
 
   margin-top: 11px;
 }
 
-
-.public-profile-tags
-button {
+.public-profile-tags button {
   padding: 0;
 
   border: 0;
@@ -291,7 +237,6 @@ button {
   font-size: 9px;
   font-weight: 500;
 }
-
 
 /* ========================================
    Actions
@@ -309,14 +254,10 @@ button {
   margin-top: 22px;
 }
 
-
 .public-profile-follow {
   min-height: 44px;
 
-  border:
-    1px
-    solid
-    #171717;
+  border: 1px solid #171717;
 
   border-radius: 7px;
 
@@ -328,7 +269,6 @@ button {
   font-weight: 700;
 }
 
-
 .public-profile-follow--active {
   border-color: #d8d5d1;
 
@@ -336,7 +276,6 @@ button {
 
   background: #ffffff;
 }
-
 
 .public-profile-share {
   display: flex;
@@ -349,10 +288,7 @@ button {
 
   padding: 0;
 
-  border:
-    1px
-    solid
-    #d8d5d1;
+  border: 1px solid #d8d5d1;
 
   border-radius: 7px;
 
@@ -361,13 +297,10 @@ button {
   background: #ffffff;
 }
 
-
-.public-profile-share
-svg {
+.public-profile-share svg {
   width: 19px;
   height: 19px;
 }
-
 
 /* ========================================
    Tabs
@@ -380,17 +313,10 @@ svg {
 
   min-height: 51px;
 
-  border-top:
-    8px
-    solid
-    #f6f6f5;
+  border-top: 8px solid #f6f6f5;
 
-  border-bottom:
-    1px
-    solid
-    #e9e8e5;
+  border-bottom: 1px solid #e9e8e5;
 }
-
 
 .public-profile-tabs__item {
   position: relative;
@@ -418,20 +344,16 @@ svg {
   font-size: 10px;
 }
 
-
-.public-profile-tabs__item
-svg {
+.public-profile-tabs__item svg {
   width: 17px;
   height: 17px;
 }
-
 
 .public-profile-tabs__item--active {
   color: #171717;
 
   font-weight: 700;
 }
-
 
 .public-profile-tabs__item--active::after {
   position: absolute;
@@ -444,9 +366,8 @@ svg {
 
   background: #171717;
 
-  content: '';
+  content: "";
 }
-
 
 /* ========================================
    Post Grid
@@ -455,17 +376,12 @@ svg {
 .public-profile-grid {
   display: grid;
 
-  grid-template-columns:
-    repeat(
-      3,
-      minmax(0, 1fr)
-    );
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
   gap: 2px;
 
   width: 100%;
 }
-
 
 .public-profile-post {
   position: relative;
@@ -476,7 +392,6 @@ svg {
 
   background: #eeeeec;
 }
-
 
 .public-profile-post__photo {
   display: block;
@@ -491,9 +406,7 @@ svg {
   background: transparent;
 }
 
-
-.public-profile-post__photo
-img {
+.public-profile-post__photo img {
   display: block;
 
   width: 100%;
@@ -501,7 +414,6 @@ img {
 
   object-fit: cover;
 }
-
 
 /* ========================================
    Post Heart
@@ -528,37 +440,23 @@ img {
 
   color: #ffffff;
 
-  background:
-    rgb(20 20 20 / 15%);
+  background: rgb(20 20 20 / 15%);
 
-  backdrop-filter:
-    blur(5px);
+  backdrop-filter: blur(5px);
 
-  -webkit-backdrop-filter:
-    blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
-
-.public-profile-post__heart
-svg {
+.public-profile-post__heart svg {
   width: 18px;
   height: 18px;
 
-  filter:
-    drop-shadow(
-      0
-      1px
-      2px
-      rgb(0 0 0 / 25%)
-    );
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 25%));
 }
-
 
 .public-profile-post__heart--active {
-  background:
-    rgb(17 17 17 / 72%);
+  background: rgb(17 17 17 / 72%);
 }
-
 
 /* ========================================
    Empty
@@ -574,25 +472,19 @@ svg {
 
   min-height: 330px;
 
-  padding:
-    40px
-    24px;
+  padding: 40px 24px;
 
   text-align: center;
 }
 
-
-.public-profile-empty
-strong {
+.public-profile-empty strong {
   color: #171717;
 
   font-size: 15px;
   font-weight: 700;
 }
 
-
-.public-profile-empty
-p {
+.public-profile-empty p {
   margin-top: 8px;
 
   color: #98938d;
@@ -601,7 +493,6 @@ p {
 
   line-height: 1.55;
 }
-
 
 /* ========================================
    Not Found
@@ -622,9 +513,7 @@ p {
   text-align: center;
 }
 
-
-.public-profile-not-found
-> span {
+.public-profile-not-found > span {
   color: #9e9993;
 
   font-size: 8px;
@@ -633,17 +522,13 @@ p {
   letter-spacing: 0.14em;
 }
 
-
-.public-profile-not-found
-h1 {
+.public-profile-not-found h1 {
   margin-top: 12px;
 
   font-size: 18px;
 }
 
-
-.public-profile-not-found
-p {
+.public-profile-not-found p {
   margin-top: 7px;
 
   color: #96918b;
@@ -653,16 +538,12 @@ p {
   line-height: 1.55;
 }
 
-
-.public-profile-not-found
-button {
+.public-profile-not-found button {
   min-height: 43px;
 
   margin-top: 20px;
 
-  padding:
-    0
-    17px;
+  padding: 0 17px;
 
   border: 0;
   border-radius: 999px;
@@ -674,87 +555,56 @@ button {
   font-size: 10px;
 }
 
-
 /* ========================================
    Interaction
 ======================================== */
 
-.public-profile-page
-button {
+.public-profile-page button {
   font-family: inherit;
 
   cursor: pointer;
 
-  -webkit-tap-highlight-color:
-    transparent;
+  -webkit-tap-highlight-color: transparent;
 }
 
-
-.public-profile-page
-button:focus-visible {
-  outline:
-    2px
-    solid
-    #171717;
+.public-profile-page button:focus-visible {
+  outline: 2px solid #171717;
 
   outline-offset: 2px;
 }
 
-
 @media (hover: hover) and (pointer: fine) {
-
-  .public-profile-post__photo
-  img {
-    transition:
-      transform
-      220ms
-      ease;
+  .public-profile-post__photo img {
+    transition: transform 220ms ease;
   }
 
-
-  .public-profile-post:hover
-  .public-profile-post__photo
-  img {
-    transform:
-      scale(1.02);
+  .public-profile-post:hover .public-profile-post__photo img {
+    transform: scale(1.02);
   }
 
-
-  .public-profile-identity
-  + * {
-    transition:
-      opacity
-      160ms
-      ease;
+  .public-profile-identity + * {
+    transition: opacity 160ms ease;
   }
-
 }
-
 
 /* ========================================
    Small Mobile
 ======================================== */
 
 @media (max-width: 359px) {
-
   .public-profile-hero {
     padding-right: 15px;
     padding-left: 15px;
   }
 
-
-  .public-profile-identity
-  > img {
+  .public-profile-identity > img {
     width: 70px;
     height: 70px;
   }
 
-
-  .public-profile-identity
-  h1 {
+  .public-profile-identity h1 {
     font-size: 20px;
   }
-
 
   .public-profile-post__heart {
     right: 4px;
@@ -764,4 +614,22 @@ button:focus-visible {
     height: 27px;
   }
 
+  .public-profile-identity__fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 72px;
+    height: 72px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    color: #ffffff;
+    background: #242220;
+
+    font-size: 18px;
+    font-weight: 800;
+  }
 }

@@ -2,19 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 
-import {
-  getLikedStylePostIds,
-  getStylePostLikeCount,
-  stylePosts,
-  toggleStylePostLike,
-} from "@/mocks/community";
+import { getMyProfile } from "@/api/authApi";
 
-import { getStylePostCommentCount } from "@/mocks/communityComments";
+import { getStylePosts, getUserStylePosts } from "@/api/stylePostApi";
 
 import {
-  getCommunityUserFollowerCount,
-  getFollowedUsernames,
-} from "@/mocks/communityFollow";
+  getMyStylePostLikeStatus,
+  likeStylePost,
+  unlikeStylePost,
+} from "@/api/stylePostLikeApi";
+
+import { getStylePostComments } from "@/api/stylePostCommentApi";
+
+import { getFollowing, getMyFollowStatus } from "@/api/userFollowApi";
 
 import "./DiscoverPage.css";
 
@@ -103,107 +103,21 @@ const rankingTypes = [
 
 const todayCollections = [
   {
-    id: "minimal",
-    title: "#미니멀",
-    description: "깔끔하고 담백하게 입는 데일리 스타일",
-    filter: "미니멀",
+    id: "latest",
+    title: "새로 올라온 스타일",
+    description: "최근 등록된 VESTI 스타일을 먼저 만나보세요.",
   },
   {
-    id: "casual",
-    title: "#캐주얼",
-    description: "편안하지만 센스 있는 데일리 코디",
-    filter: "캐주얼",
+    id: "popular",
+    title: "지금 반응 좋은 스타일",
+    description: "좋아요와 댓글 반응이 좋은 스타일이에요.",
   },
   {
-    id: "street",
-    title: "#스트릿",
-    description: "실루엣과 포인트가 살아있는 스타일",
-    filter: "스트릿",
+    id: "discover",
+    title: "지금 둘러보기",
+    description: "새로운 스타일과 크리에이터를 발견해보세요.",
   },
 ];
-
-const discoverMetadata = {
-  1: {
-    gender: "여성",
-    season: "여름",
-    style: ["스트릿", "데일리"],
-    tpo: ["일상", "데이트"],
-    category: ["상의", "아우터"],
-    newest: 96,
-  },
-
-  2: {
-    gender: "여성",
-    season: "여름",
-    style: ["미니멀", "데일리"],
-    tpo: ["데이트", "여행"],
-    category: ["원피스"],
-    newest: 88,
-  },
-
-  3: {
-    gender: "여성",
-    season: "가을",
-    style: ["스트릿", "블랙"],
-    tpo: ["일상", "모임"],
-    category: ["아우터"],
-    newest: 82,
-  },
-
-  4: {
-    gender: "여성",
-    season: "봄",
-    style: ["캐주얼", "데일리"],
-    tpo: ["일상", "여행"],
-    category: ["아우터"],
-    newest: 74,
-  },
-
-  5: {
-    gender: "여성",
-    season: "가을",
-    style: ["미니멀", "뉴트럴"],
-    tpo: ["데이트", "일상"],
-    category: ["아우터"],
-    newest: 66,
-  },
-
-  6: {
-    gender: "남성",
-    season: "여름",
-    style: ["미니멀", "뉴트럴"],
-    tpo: ["출근", "일상"],
-    category: ["상의", "하의"],
-    newest: 55,
-  },
-
-  7: {
-    gender: "여성",
-    season: "겨울",
-    style: ["스트릿", "블랙"],
-    tpo: ["모임", "데이트"],
-    category: ["아우터"],
-    newest: 43,
-  },
-
-  8: {
-    gender: "여성",
-    season: "여름",
-    style: ["미니멀", "뉴트럴"],
-    tpo: ["여행", "일상"],
-    category: ["상의"],
-    newest: 31,
-  },
-
-  9: {
-    gender: "여성",
-    season: "여름",
-    style: ["캐주얼", "데일리"],
-    tpo: ["일상", "여행"],
-    category: ["상의", "하의"],
-    newest: 18,
-  },
-};
 
 function SearchIcon() {
   return (
@@ -253,9 +167,11 @@ function FilterIcon() {
       <path d="M4 7h10" />
       <path d="M18 7h2" />
       <circle cx="16" cy="7" r="2" />
+
       <path d="M4 17h2" />
       <path d="M10 17h10" />
       <circle cx="8" cy="17" r="2" />
+
       <path d="M4 12h6" />
       <path d="M14 12h6" />
       <circle cx="12" cy="12" r="2" />
@@ -362,36 +278,49 @@ function ArrowIcon() {
 }
 
 function formatCount(value) {
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
+  const number = Number(value ?? 0);
+
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1).replace(".0", "")}K`;
   }
 
-  return value;
+  return number;
 }
 
-function getMeta(postId) {
-  const preset = discoverMetadata[postId];
-
-  if (preset) {
-    return preset;
+function getPostTimestamp(post) {
+  if (!post?.createdAt) {
+    return 0;
   }
 
-  const post = stylePosts.find((item) => String(item.id) === String(postId));
+  const timestamp = new Date(post.createdAt).getTime();
 
-  if (!post) {
-    return {
-      gender: "전체",
-      season: "전체",
-      style: [],
-      tpo: [],
-      category: [],
-      newest: 0,
-    };
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function isPostInRankingPeriod(post, period) {
+  const timestamp = getPostTimestamp(post);
+
+  if (!timestamp) {
+    return true;
   }
 
-  const tpoTags = Array.isArray(post.tpoTags) ? post.tpoTags : [];
+  const periodDays = {
+    day: 1,
+    week: 7,
+    month: 30,
+  };
 
-  const styleTags = (Array.isArray(post.tags) ? post.tags : []).filter(
+  const days = periodDays[period] ?? 30;
+
+  const boundary = Date.now() - days * 24 * 60 * 60 * 1000;
+
+  return timestamp >= boundary;
+}
+
+function getApiMeta(post) {
+  const tpoTags = Array.isArray(post?.tpoTags) ? post.tpoTags : [];
+
+  const styleTags = (Array.isArray(post?.tags) ? post.tags : []).filter(
     (tag) => !tpoTags.includes(tag),
   );
 
@@ -406,7 +335,7 @@ function getMeta(postId) {
 
   const categories = [
     ...new Set(
-      (Array.isArray(post.wornPieces) ? post.wornPieces : [])
+      (Array.isArray(post?.wornPieces) ? post.wornPieces : [])
         .map((piece) => categoryMap[piece.category])
         .filter(Boolean),
     ),
@@ -418,60 +347,104 @@ function getMeta(postId) {
     style: styleTags,
     tpo: tpoTags,
     category: categories,
-    newest: post.isMine ? 100 : 0,
   };
 }
 
-function getRankingScore(post, period) {
-  const meta = getMeta(post.id);
+function getRecommendationScore(post, likeState, commentCounts) {
+  const createdAt = getPostTimestamp(post);
 
-  const likes = getStylePostLikeCount(post);
+  const recencyScore = createdAt ? createdAt / 100000000 : 0;
 
-  const comments = getStylePostCommentCount(post);
+  const like = likeState[String(post.id)];
 
-  if (period === "day") {
-    return meta.newest * 12 + likes * 0.45 + comments * 8;
-  }
+  const likeCount = like?.likeCount ?? 0;
 
-  if (period === "week") {
-    return meta.newest * 5 + likes * 0.85 + comments * 6;
-  }
+  const commentCount = commentCounts[String(post.id)] ?? 0;
 
-  return meta.newest * 2 + likes + comments * 5;
+  const likedBonus = like?.liked ? 20 : 0;
+
+  return recencyScore + likeCount * 3 + commentCount * 4 + likedBonus;
 }
 
-function getRecommendationScore(post, likedIds, followedUsernames) {
-  const meta = getMeta(post.id);
+function getRankingScore(post, likeState, commentCounts) {
+  const likeCount = likeState[String(post.id)]?.likeCount ?? 0;
 
-  const likedPosts = stylePosts.filter((item) => likedIds.has(String(item.id)));
+  const commentCount = commentCounts[String(post.id)] ?? 0;
 
-  const likedTags = new Set(
-    likedPosts.flatMap((item) => (Array.isArray(item.tags) ? item.tags : [])),
-  );
+  const createdAt = getPostTimestamp(post);
 
-  const postTags = Array.isArray(post.tags) ? post.tags : [];
+  const ageHours = createdAt
+    ? Math.max(0, (Date.now() - createdAt) / (1000 * 60 * 60))
+    : 9999;
 
-  const matchedTagCount = postTags.filter((tag) => likedTags.has(tag)).length;
+  const recencyBonus = Math.max(0, 72 - ageHours);
 
-  const followedCreator = followedUsernames.has(post.author.username);
+  return likeCount * 5 + commentCount * 7 + recencyBonus * 0.15;
+}
 
-  const alreadyLiked = likedIds.has(String(post.id));
+function GalleryImage({ post }) {
+  const [failed, setFailed] = useState(false);
 
-  const likes = getStylePostLikeCount(post);
-
-  const comments = getStylePostCommentCount(post);
+  if (!post?.image || failed) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          minHeight: "170px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#f3f2f0",
+          color: "#aaa59f",
+          fontSize: "10px",
+        }}
+      >
+        이미지 준비 중
+      </div>
+    );
+  }
 
   return (
-    (followedCreator ? 500 : 0) +
-    matchedTagCount * 120 +
-    meta.newest * 3 +
-    likes * 0.12 +
-    comments * 2 +
-    (alreadyLiked ? 20 : 0)
+    <img
+      src={post.image}
+      alt={post.title}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
   );
 }
 
-function GalleryCard({ post, liked, onLike, onOpen }) {
+function Avatar({ author }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!author?.avatar || failed) {
+    const source = author?.displayName || author?.username || "V";
+
+    return (
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          height: "100%",
+          borderRadius: "50%",
+          color: "#ffffff",
+          background: "#242220",
+          fontSize: "9px",
+          fontWeight: 800,
+        }}
+      >
+        {source.charAt(0).toUpperCase()}
+      </span>
+    );
+  }
+
+  return <img src={author.avatar} alt="" onError={() => setFailed(true)} />;
+}
+
+function GalleryCard({ post, liked, likeDisabled = false, onLike, onOpen }) {
   return (
     <article className="discover-gallery-card">
       <button
@@ -479,7 +452,7 @@ function GalleryCard({ post, liked, onLike, onOpen }) {
         className="discover-gallery-card__image"
         onClick={onOpen}
       >
-        <img src={post.image} alt={post.title} loading="lazy" />
+        <GalleryImage post={post} />
       </button>
 
       <button
@@ -490,6 +463,7 @@ function GalleryCard({ post, liked, onLike, onOpen }) {
             : "discover-gallery-card__like"
         }
         onClick={onLike}
+        disabled={likeDisabled}
         aria-label={liked ? "좋아요 취소" : "좋아요"}
       >
         <HeartIcon filled={liked} />
@@ -498,16 +472,25 @@ function GalleryCard({ post, liked, onLike, onOpen }) {
   );
 }
 
-function TodayCard({ post, navigate, liked, onLike }) {
+function TodayCard({
+  post,
+  navigate,
+  liked,
+  likeCount,
+  commentCount,
+  likeDisabled,
+  onLike,
+}) {
   return (
     <article className="discover-today-card">
       <div className="discover-today-card__visual">
         <button type="button" onClick={() => navigate(`/styles/${post.id}`)}>
-          <img src={post.image} alt={post.title} />
+          <GalleryImage post={post} />
         </button>
 
         <button
           type="button"
+          disabled={likeDisabled}
           className={
             liked
               ? "discover-today-card__heart discover-today-card__heart--active"
@@ -525,7 +508,15 @@ function TodayCard({ post, navigate, liked, onLike }) {
         className="discover-today-card__creator"
         onClick={() => navigate(`/users/${post.author.username}`)}
       >
-        <img src={post.author.avatar} alt="" />
+        <div
+          style={{
+            width: "24px",
+            height: "24px",
+            flexShrink: 0,
+          }}
+        >
+          <Avatar author={post.author} />
+        </div>
 
         <strong>@{post.author.username}</strong>
       </button>
@@ -533,17 +524,15 @@ function TodayCard({ post, navigate, liked, onLike }) {
       <p>{post.title}</p>
 
       <div className="discover-today-card__engagement">
-        <span>♡ {formatCount(getStylePostLikeCount(post))}</span>
+        <span>♡ {formatCount(likeCount)}</span>
 
-        <span>댓글 {getStylePostCommentCount(post)}</span>
+        <span>댓글 {commentCount}</span>
       </div>
     </article>
   );
 }
 
 function CreatorRankingCard({ item, rank, navigate }) {
-  const followerCount = getCommunityUserFollowerCount(item.author);
-
   return (
     <article className="discover-creator-ranking">
       <div className="discover-creator-ranking__rank">
@@ -555,12 +544,20 @@ function CreatorRankingCard({ item, rank, navigate }) {
         className="discover-creator-ranking__profile"
         onClick={() => navigate(`/users/${item.author.username}`)}
       >
-        <img src={item.author.avatar} alt="" />
+        <div
+          style={{
+            width: "42px",
+            height: "42px",
+            flexShrink: 0,
+          }}
+        >
+          <Avatar author={item.author} />
+        </div>
 
         <div>
           <strong>@{item.author.username}</strong>
 
-          <span>팔로워 {formatCount(followerCount)}</span>
+          <span>팔로워 {formatCount(item.followerCount)}</span>
         </div>
       </button>
 
@@ -571,7 +568,7 @@ function CreatorRankingCard({ item, rank, navigate }) {
             type="button"
             onClick={() => navigate(`/styles/${post.id}`)}
           >
-            <img src={post.image} alt={post.title} />
+            <GalleryImage post={post} />
           </button>
         ))}
       </div>
@@ -581,6 +578,26 @@ function CreatorRankingCard({ item, rank, navigate }) {
 
 function DiscoverPage() {
   const navigate = useNavigate();
+
+  const [apiStylePosts, setApiStylePosts] = useState([]);
+
+  const [stylePostsLoading, setStylePostsLoading] = useState(true);
+
+  const [stylePostsError, setStylePostsError] = useState(false);
+
+  const [apiLikeState, setApiLikeState] = useState({});
+
+  const [apiCommentCounts, setApiCommentCounts] = useState({});
+
+  const [creatorStats, setCreatorStats] = useState({});
+
+  const [apiLikePendingIds, setApiLikePendingIds] = useState(() => new Set());
+
+  const [followingPosts, setFollowingPosts] = useState([]);
+
+  const [followingLoading, setFollowingLoading] = useState(false);
+
+  const [followingError, setFollowingError] = useState(false);
 
   const [activeTab, setActiveTab] = useState("style");
 
@@ -598,46 +615,317 @@ function DiscoverPage() {
 
   const [sortMode, setSortMode] = useState("popular");
 
-  const [likedIds, setLikedIds] = useState(
-    () => new Set(getLikedStylePostIds()),
-  );
-
-  const [followedUsernames, setFollowedUsernames] = useState(
-    () => new Set(getFollowedUsernames()),
-  );
-
   const [rankingPeriod, setRankingPeriod] = useState("day");
 
   const [rankingType, setRankingType] = useState("style");
 
   const [rankingStyle, setRankingStyle] = useState("전체");
 
+  /*
+   * ========================================
+   * Discover 공통 실제 DB 데이터
+   *
+   * Style / Today / Ranking에서 모두 사용한다.
+   * ========================================
+   */
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadDiscoverData() {
+      setStylePostsLoading(true);
+
+      setStylePostsError(false);
+
+      try {
+        const page = await getStylePosts({
+          page: 0,
+          size: 100,
+          sort: "createdAt,desc",
+        });
+
+        const posts = page.content ?? [];
+
+        if (ignore) {
+          return;
+        }
+
+        setApiStylePosts(posts);
+
+        const [likeResults, commentResults] = await Promise.all([
+          Promise.allSettled(
+            posts.map((post) => getMyStylePostLikeStatus(post.id)),
+          ),
+
+          Promise.allSettled(
+            posts.map((post) => getStylePostComments(post.id)),
+          ),
+        ]);
+
+        if (ignore) {
+          return;
+        }
+
+        const nextLikeState = {};
+
+        const nextCommentCounts = {};
+
+        posts.forEach((post, index) => {
+          const likeResult = likeResults[index];
+
+          const commentResult = commentResults[index];
+
+          nextLikeState[String(post.id)] =
+            likeResult.status === "fulfilled"
+              ? {
+                  liked: Boolean(likeResult.value?.liked),
+
+                  likeCount: likeResult.value?.likeCount ?? 0,
+                }
+              : {
+                  liked: false,
+                  likeCount: 0,
+                };
+
+          nextCommentCounts[String(post.id)] =
+            commentResult.status === "fulfilled" &&
+            Array.isArray(commentResult.value)
+              ? commentResult.value.length
+              : 0;
+        });
+
+        setApiLikeState(nextLikeState);
+
+        setApiCommentCounts(nextCommentCounts);
+
+        /*
+         * Creator Ranking의 팔로워 수
+         */
+        const usernames = [
+          ...new Set(
+            posts.map((post) => post.author?.username).filter(Boolean),
+          ),
+        ];
+
+        const creatorResults = await Promise.allSettled(
+          usernames.map((username) => getMyFollowStatus(username)),
+        );
+
+        if (ignore) {
+          return;
+        }
+
+        const nextCreatorStats = {};
+
+        usernames.forEach((username, index) => {
+          const result = creatorResults[index];
+
+          nextCreatorStats[username] =
+            result.status === "fulfilled"
+              ? {
+                  followerCount: result.value?.followerCount ?? 0,
+
+                  followingCount: result.value?.followingCount ?? 0,
+                }
+              : {
+                  followerCount: 0,
+                  followingCount: 0,
+                };
+        });
+
+        setCreatorStats(nextCreatorStats);
+      } catch (error) {
+        console.error("Discover 데이터를 불러오지 못했습니다.", error);
+
+        if (!ignore) {
+          setApiStylePosts([]);
+
+          setApiLikeState({});
+
+          setApiCommentCounts({});
+
+          setCreatorStats({});
+
+          setStylePostsError(true);
+        }
+      } finally {
+        if (!ignore) {
+          setStylePostsLoading(false);
+        }
+      }
+    }
+
+    loadDiscoverData();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  /*
+   * ========================================
+   * Following
+   * ========================================
+   */
   useEffect(() => {
     if (activeTab !== "following") {
       return;
     }
 
-    setFollowedUsernames(new Set(getFollowedUsernames()));
-  }, [activeTab]);
+    let ignore = false;
+
+    async function loadFollowingFeed() {
+      setFollowingLoading(true);
+
+      setFollowingError(false);
+
+      try {
+        const myProfile = await getMyProfile();
+
+        const followingPage = await getFollowing(myProfile.username, {
+          page: 0,
+          size: 100,
+        });
+
+        const followedUsers = followingPage.content ?? [];
+
+        if (followedUsers.length === 0) {
+          if (!ignore) {
+            setFollowingPosts([]);
+          }
+
+          return;
+        }
+
+        const postResults = await Promise.allSettled(
+          followedUsers.map((user) =>
+            getUserStylePosts(user.username, {
+              page: 0,
+              size: 30,
+              sort: "createdAt,desc",
+            }),
+          ),
+        );
+
+        const mergedPosts = postResults
+          .filter((result) => result.status === "fulfilled")
+          .flatMap((result) => result.value?.content ?? []);
+
+        const uniquePosts = Array.from(
+          new Map(mergedPosts.map((post) => [String(post.id), post])).values(),
+        ).sort((a, b) => getPostTimestamp(b) - getPostTimestamp(a));
+
+        if (ignore) {
+          return;
+        }
+
+        setFollowingPosts(uniquePosts);
+
+        const missingPosts = uniquePosts.filter(
+          (post) =>
+            !Object.prototype.hasOwnProperty.call(
+              apiLikeState,
+              String(post.id),
+            ),
+        );
+
+        if (missingPosts.length > 0) {
+          const [likeResults, commentResults] = await Promise.all([
+            Promise.allSettled(
+              missingPosts.map((post) => getMyStylePostLikeStatus(post.id)),
+            ),
+
+            Promise.allSettled(
+              missingPosts.map((post) => getStylePostComments(post.id)),
+            ),
+          ]);
+
+          if (ignore) {
+            return;
+          }
+
+          setApiLikeState((previous) => {
+            const next = {
+              ...previous,
+            };
+
+            missingPosts.forEach((post, index) => {
+              const result = likeResults[index];
+
+              if (result.status === "fulfilled") {
+                next[String(post.id)] = {
+                  liked: Boolean(result.value?.liked),
+
+                  likeCount: result.value?.likeCount ?? 0,
+                };
+              }
+            });
+
+            return next;
+          });
+
+          setApiCommentCounts((previous) => {
+            const next = {
+              ...previous,
+            };
+
+            missingPosts.forEach((post, index) => {
+              const result = commentResults[index];
+
+              next[String(post.id)] =
+                result.status === "fulfilled" && Array.isArray(result.value)
+                  ? result.value.length
+                  : 0;
+            });
+
+            return next;
+          });
+        }
+      } catch (error) {
+        console.error("팔로잉 피드를 불러오지 못했습니다.", error);
+
+        if (!ignore) {
+          setFollowingPosts([]);
+
+          setFollowingError(true);
+        }
+      } finally {
+        if (!ignore) {
+          setFollowingLoading(false);
+        }
+      }
+    }
+
+    loadFollowingFeed();
+
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, apiLikeState]);
 
   const selectedFilterCount = Object.values(filters).filter(
     (value) => value !== "전체",
   ).length;
 
-  const searchedPosts = useMemo(() => {
+  /*
+   * ========================================
+   * 공통 검색
+   * ========================================
+   */
+  const apiSearchedPosts = useMemo(() => {
     const keyword = searchTerm.trim().toLowerCase();
 
     if (!keyword) {
-      return [...stylePosts];
+      return [...apiStylePosts];
     }
 
-    return stylePosts.filter((post) => {
+    return apiStylePosts.filter((post) => {
       const text = [
         post.title,
         post.caption,
-        post.author.username,
-        post.author.displayName,
-        ...post.tags,
+        post.location,
+        post.author?.username,
+        post.author?.displayName,
+        ...(Array.isArray(post.tags) ? post.tags : []),
       ]
         .filter(Boolean)
         .join(" ")
@@ -645,11 +933,16 @@ function DiscoverPage() {
 
       return text.includes(keyword);
     });
-  }, [searchTerm]);
+  }, [apiStylePosts, searchTerm]);
 
-  const filteredPosts = useMemo(() => {
-    let posts = searchedPosts.filter((post) => {
-      const meta = getMeta(post.id);
+  /*
+   * ========================================
+   * Style 탭
+   * ========================================
+   */
+  const apiFilteredPosts = useMemo(() => {
+    const posts = apiSearchedPosts.filter((post) => {
+      const meta = getApiMeta(post);
 
       if (filters.gender !== "전체" && meta.gender !== filters.gender) {
         return false;
@@ -677,110 +970,114 @@ function DiscoverPage() {
       return true;
     });
 
-    if (activeTab === "following") {
-      posts = posts.filter((post) =>
-        followedUsernames.has(post.author.username),
+    if (sortMode === "popular") {
+      posts.sort(
+        (a, b) =>
+          getRankingScore(b, apiLikeState, apiCommentCounts) -
+          getRankingScore(a, apiLikeState, apiCommentCounts),
       );
     }
 
-    if (sortMode === "popular") {
-      posts.sort((a, b) => getStylePostLikeCount(b) - getStylePostLikeCount(a));
-    }
-
     if (sortMode === "latest") {
-      posts.sort((a, b) => {
-        const aCreatedAt = a.createdAt ? new Date(a.createdAt).getTime() : null;
-
-        const bCreatedAt = b.createdAt ? new Date(b.createdAt).getTime() : null;
-
-        if (aCreatedAt !== null && bCreatedAt !== null) {
-          return bCreatedAt - aCreatedAt;
-        }
-
-        if (bCreatedAt !== null) {
-          return 1;
-        }
-
-        if (aCreatedAt !== null) {
-          return -1;
-        }
-
-        return getMeta(b.id).newest - getMeta(a.id).newest;
-      });
+      posts.sort((a, b) => getPostTimestamp(b) - getPostTimestamp(a));
     }
 
     if (sortMode === "recommended") {
       posts.sort(
         (a, b) =>
-          getRecommendationScore(b, likedIds, followedUsernames) -
-          getRecommendationScore(a, likedIds, followedUsernames),
+          getRecommendationScore(b, apiLikeState, apiCommentCounts) -
+          getRecommendationScore(a, apiLikeState, apiCommentCounts),
       );
     }
 
     return posts;
-  }, [
-    searchedPosts,
-    filters,
-    activeTab,
-    sortMode,
-    likedIds,
-    followedUsernames,
-  ]);
+  }, [apiSearchedPosts, filters, sortMode, apiLikeState, apiCommentCounts]);
 
-  const todayData = useMemo(
-    () =>
-      todayCollections.map((collection) => {
-        const matching = searchedPosts.filter((post) => {
-          const meta = getMeta(post.id);
+  /*
+   * ========================================
+   * Today 탭 - 실제 DB
+   * ========================================
+   */
+  const todayData = useMemo(() => {
+    const latest = [...apiSearchedPosts].sort(
+      (a, b) => getPostTimestamp(b) - getPostTimestamp(a),
+    );
 
-          return (
-            meta.style.includes(collection.filter) ||
-            post.tags.includes(collection.filter)
-          );
-        });
+    const popular = [...apiSearchedPosts].sort(
+      (a, b) =>
+        getRankingScore(b, apiLikeState, apiCommentCounts) -
+        getRankingScore(a, apiLikeState, apiCommentCounts),
+    );
 
-        const fallback = searchedPosts.filter(
-          (post) => !matching.some((item) => item.id === post.id),
-        );
+    const discover = [...apiSearchedPosts].sort(
+      (a, b) =>
+        getRecommendationScore(b, apiLikeState, apiCommentCounts) -
+        getRecommendationScore(a, apiLikeState, apiCommentCounts),
+    );
 
-        return {
-          ...collection,
-          posts: [...matching, ...fallback].slice(0, 5),
-        };
-      }),
-    [searchedPosts],
-  );
+    const map = {
+      latest,
+      popular,
+      discover,
+    };
 
+    return todayCollections.map((collection) => ({
+      ...collection,
+
+      posts: map[collection.id]?.slice(0, 5) ?? [],
+    }));
+  }, [apiSearchedPosts, apiLikeState, apiCommentCounts]);
+
+  /*
+   * ========================================
+   * Ranking 탭 - 실제 DB
+   * ========================================
+   */
   const rankingPosts = useMemo(() => {
-    let posts = [...searchedPosts];
+    let posts = apiSearchedPosts.filter((post) =>
+      isPostInRankingPeriod(post, rankingPeriod),
+    );
 
     if (rankingStyle !== "전체") {
       posts = posts.filter((post) => {
-        const meta = getMeta(post.id);
+        const meta = getApiMeta(post);
 
-        return (
-          meta.style.includes(rankingStyle) || post.tags.includes(rankingStyle)
-        );
+        return meta.style.includes(rankingStyle);
       });
     }
 
     return posts.sort(
       (a, b) =>
-        getRankingScore(b, rankingPeriod) - getRankingScore(a, rankingPeriod),
+        getRankingScore(b, apiLikeState, apiCommentCounts) -
+        getRankingScore(a, apiLikeState, apiCommentCounts),
     );
-  }, [searchedPosts, rankingPeriod, rankingStyle, likedIds]);
+  }, [
+    apiSearchedPosts,
+    rankingPeriod,
+    rankingStyle,
+    apiLikeState,
+    apiCommentCounts,
+  ]);
 
   const rankingCreators = useMemo(() => {
     const creators = new Map();
 
     rankingPosts.forEach((post) => {
-      const username = post.author.username;
+      const username = post.author?.username;
+
+      if (!username) {
+        return;
+      }
 
       if (!creators.has(username)) {
         creators.set(username, {
           author: post.author,
+
           posts: [],
+
           score: 0,
+
+          followerCount: creatorStats[username]?.followerCount ?? 0,
         });
       }
 
@@ -788,16 +1085,50 @@ function DiscoverPage() {
 
       current.posts.push(post);
 
-      current.score += getRankingScore(post, rankingPeriod);
+      current.score += getRankingScore(post, apiLikeState, apiCommentCounts);
     });
 
-    return Array.from(creators.values()).sort((a, b) => b.score - a.score);
-  }, [rankingPosts, rankingPeriod]);
+    return Array.from(creators.values()).sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+
+      return b.followerCount - a.followerCount;
+    });
+  }, [rankingPosts, apiLikeState, apiCommentCounts, creatorStats]);
+
+  /*
+   * ========================================
+   * Following 검색
+   * ========================================
+   */
+  const filteredFollowingPosts = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+
+    if (!keyword) {
+      return [...followingPosts];
+    }
+
+    return followingPosts.filter((post) => {
+      const text = [
+        post.title,
+        post.caption,
+        post.location,
+        post.author?.username,
+        post.author?.displayName,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return text.includes(keyword);
+    });
+  }, [followingPosts, searchTerm]);
 
   const draftResultCount = useMemo(
     () =>
-      stylePosts.filter((post) => {
-        const meta = getMeta(post.id);
+      apiStylePosts.filter((post) => {
+        const meta = getApiMeta(post);
 
         if (
           draftFilters.gender !== "전체" &&
@@ -836,31 +1167,63 @@ function DiscoverPage() {
 
         return true;
       }).length,
-    [draftFilters],
+    [apiStylePosts, draftFilters],
   );
 
-  const toggleLike = (id) => {
-    const result = toggleStylePostLike(id);
+  /*
+   * ========================================
+   * 실제 DB Like
+   * ========================================
+   */
+  const toggleApiLike = async (stylePostId) => {
+    const key = String(stylePostId);
 
-    setLikedIds((current) => {
-      const next = new Set(current);
+    if (apiLikePendingIds.has(key)) {
+      return;
+    }
 
-      if (result.liked) {
-        next.add(String(id));
-      } else {
-        next.delete(String(id));
-      }
+    const current = apiLikeState[key] ?? {
+      liked: false,
+      likeCount: 0,
+    };
+
+    setApiLikePendingIds((previous) => {
+      const next = new Set(previous);
+
+      next.add(key);
 
       return next;
     });
+
+    try {
+      const result = current.liked
+        ? await unlikeStylePost(stylePostId)
+        : await likeStylePost(stylePostId);
+
+      setApiLikeState((previous) => ({
+        ...previous,
+
+        [key]: {
+          liked: Boolean(result.liked),
+
+          likeCount: result.likeCount ?? 0,
+        },
+      }));
+    } catch (error) {
+      console.error("좋아요 처리에 실패했습니다.", error);
+    } finally {
+      setApiLikePendingIds((previous) => {
+        const next = new Set(previous);
+
+        next.delete(key);
+
+        return next;
+      });
+    }
   };
 
   const openPostComments = (postId) => {
-    navigate(`/styles/${postId}`, {
-      state: {
-        openComments: true,
-      },
-    });
+    navigate(`/styles/${postId}`);
   };
 
   const openFilterSheet = (groupId = "gender") => {
@@ -884,10 +1247,13 @@ function DiscoverPage() {
   };
 
   const openTodayCollection = (collection) => {
-    setFilters({
-      ...defaultFilters,
-      style: collection.filter,
-    });
+    if (collection.id === "latest") {
+      setSortMode("latest");
+    } else if (collection.id === "popular") {
+      setSortMode("popular");
+    } else {
+      setSortMode("recommended");
+    }
 
     setActiveTab("style");
   };
@@ -960,7 +1326,9 @@ function DiscoverPage() {
               onChange={(event) => setSortMode(event.target.value)}
             >
               <option value="popular">인기순</option>
+
               <option value="latest">최신순</option>
+
               <option value="recommended">추천순</option>
             </select>
 
@@ -971,15 +1339,25 @@ function DiscoverPage() {
 
       {posts.length > 0 ? (
         <section className="discover-gallery-grid">
-          {posts.map((post) => (
-            <GalleryCard
-              key={post.id}
-              post={post}
-              liked={likedIds.has(String(post.id))}
-              onLike={() => toggleLike(post.id)}
-              onOpen={() => navigate(`/styles/${post.id}`)}
-            />
-          ))}
+          {posts.map((post) => {
+            const key = String(post.id);
+
+            const like = apiLikeState[key] ?? {
+              liked: false,
+              likeCount: 0,
+            };
+
+            return (
+              <GalleryCard
+                key={post.id}
+                post={post}
+                liked={like.liked}
+                likeDisabled={apiLikePendingIds.has(key)}
+                onLike={() => toggleApiLike(post.id)}
+                onOpen={() => navigate(`/styles/${post.id}`)}
+              />
+            );
+          })}
         </section>
       ) : (
         <section className="discover-empty">
@@ -1023,7 +1401,7 @@ function DiscoverPage() {
             type="search"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
-            placeholder="스타일, 사용자, 태그 검색"
+            placeholder="스타일, 사용자 검색"
             autoFocus
           />
 
@@ -1060,7 +1438,30 @@ function DiscoverPage() {
         ))}
       </nav>
 
-      {activeTab === "style" && renderStyleGrid(filteredPosts)}
+      {/* =================================
+          STYLE
+      ================================= */}
+
+      {activeTab === "style" &&
+        (stylePostsLoading ? (
+          <section className="discover-empty">
+            <strong>스타일을 불러오고 있어요.</strong>
+
+            <p>실제 VESTI 게시물을 가져오는 중입니다.</p>
+          </section>
+        ) : stylePostsError ? (
+          <section className="discover-empty">
+            <strong>스타일을 불러오지 못했어요.</strong>
+
+            <p>백엔드 서버와 로그인 상태를 확인한 뒤 새로고침해주세요.</p>
+          </section>
+        ) : (
+          renderStyleGrid(apiFilteredPosts)
+        ))}
+
+      {/* =================================
+          TODAY - 실제 DB
+      ================================= */}
 
       {activeTab === "today" && (
         <main className="discover-today">
@@ -1069,42 +1470,76 @@ function DiscoverPage() {
 
             <h1>오늘의 스타일</h1>
 
-            <p>지금 둘러보기 좋은 스타일을 주제별로 모았어요.</p>
+            <p>지금 VESTI에서 둘러보기 좋은 스타일을 모았어요.</p>
           </header>
 
-          {todayData.map((collection) => (
-            <section key={collection.id} className="discover-today-section">
-              <div className="discover-today-heading">
-                <div>
-                  <h2>{collection.title}</h2>
+          {stylePostsLoading ? (
+            <section className="discover-empty">
+              <strong>오늘의 스타일을 불러오고 있어요.</strong>
+            </section>
+          ) : stylePostsError ? (
+            <section className="discover-empty">
+              <strong>스타일을 불러오지 못했어요.</strong>
+            </section>
+          ) : apiStylePosts.length === 0 ? (
+            <section className="discover-empty">
+              <strong>아직 등록된 스타일이 없어요.</strong>
 
-                  <p>{collection.description}</p>
+              <p>첫 스타일이 올라오면 이곳에서 소개할게요.</p>
+            </section>
+          ) : (
+            todayData.map((collection) => (
+              <section key={collection.id} className="discover-today-section">
+                <div className="discover-today-heading">
+                  <div>
+                    <h2>{collection.title}</h2>
+
+                    <p>{collection.description}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => openTodayCollection(collection)}
+                  >
+                    더보기
+                    <ArrowIcon />
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openTodayCollection(collection)}
-                >
-                  더보기
-                  <ArrowIcon />
-                </button>
-              </div>
+                <div className="discover-today-rail">
+                  {collection.posts.map((post) => {
+                    const key = String(post.id);
 
-              <div className="discover-today-rail">
-                {collection.posts.map((post) => (
-                  <TodayCard
-                    key={`${collection.id}-${post.id}`}
-                    post={post}
-                    navigate={navigate}
-                    liked={likedIds.has(String(post.id))}
-                    onLike={() => toggleLike(post.id)}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+                    const like = apiLikeState[key] ?? {
+                      liked: false,
+                      likeCount: 0,
+                    };
+
+                    const commentCount = apiCommentCounts[key] ?? 0;
+
+                    return (
+                      <TodayCard
+                        key={`${collection.id}-${post.id}`}
+                        post={post}
+                        navigate={navigate}
+                        liked={like.liked}
+                        likeCount={like.likeCount}
+                        commentCount={commentCount}
+                        likeDisabled={apiLikePendingIds.has(key)}
+                        onLike={() => toggleApiLike(post.id)}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            ))
+          )}
         </main>
       )}
+
+      {/* =================================
+          RANKING - 실제 DB
+      ================================= */}
 
       {activeTab === "ranking" && (
         <main className="discover-ranking">
@@ -1144,7 +1579,7 @@ function DiscoverPage() {
 
           <div className="discover-ranking-period">
             <div>
-              <span>현재 기준</span>
+              <span>실제 반응 기준</span>
 
               <strong>
                 {rankingType === "style" ? "스타일 랭킹" : "크리에이터 랭킹"}
@@ -1167,80 +1602,102 @@ function DiscoverPage() {
             </label>
           </div>
 
-          {rankingType === "style" && (
-            <section className="discover-ranking-grid">
-              {rankingPosts.map((post, index) => (
-                <article key={post.id} className="discover-ranking-card">
-                  <div className="discover-ranking-card__visual">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/styles/${post.id}`)}
-                      aria-label={`${post.title} 상세 보기`}
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        height: "100%",
-                        padding: 0,
-                        border: 0,
-                        background: "transparent",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <img src={post.image} alt={post.title} />
-                    </button>
-
-                    <span className="discover-ranking-card__number">
-                      {index + 1}
-                    </span>
-
-                    <button
-                      type="button"
-                      className={
-                        likedIds.has(String(post.id))
-                          ? "discover-ranking-card__heart discover-ranking-card__heart--active"
-                          : "discover-ranking-card__heart"
-                      }
-                      onClick={() => toggleLike(post.id)}
-                      aria-label={
-                        likedIds.has(String(post.id)) ? "좋아요 취소" : "좋아요"
-                      }
-                    >
-                      <HeartIcon filled={likedIds.has(String(post.id))} />
-                    </button>
-                  </div>
-
-                  <div className="discover-ranking-card__content">
-                    <button
-                      type="button"
-                      className="discover-ranking-card__creator"
-                      onClick={() => navigate(`/users/${post.author.username}`)}
-                    >
-                      <img src={post.author.avatar} alt="" />
-
-                      <strong>@{post.author.username}</strong>
-                    </button>
-
-                    <p>
-                      {post.tags
-                        .slice(0, 3)
-                        .map((tag) => `#${tag}`)
-                        .join(" ")}
-                    </p>
-
-                    <div className="discover-ranking-card__engagement">
-                      <span>♡ {formatCount(getStylePostLikeCount(post))}</span>
-
-                      {getStylePostCommentCount(post) > 0 && (
-                        <span>댓글 {getStylePostCommentCount(post)}</span>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              ))}
+          {stylePostsLoading ? (
+            <section className="discover-empty">
+              <strong>랭킹을 계산하고 있어요.</strong>
             </section>
-          )}
+          ) : rankingType === "style" && rankingPosts.length > 0 ? (
+            <section className="discover-ranking-grid">
+              {rankingPosts.map((post, index) => {
+                const key = String(post.id);
 
-          {rankingType === "creator" && (
+                const like = apiLikeState[key] ?? {
+                  liked: false,
+                  likeCount: 0,
+                };
+
+                const commentCount = apiCommentCounts[key] ?? 0;
+
+                return (
+                  <article key={post.id} className="discover-ranking-card">
+                    <div className="discover-ranking-card__visual">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/styles/${post.id}`)}
+                        aria-label={`${post.title} 상세 보기`}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          height: "100%",
+                          padding: 0,
+                          border: 0,
+                          background: "transparent",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <GalleryImage post={post} />
+                      </button>
+
+                      <span className="discover-ranking-card__number">
+                        {index + 1}
+                      </span>
+
+                      <button
+                        type="button"
+                        disabled={apiLikePendingIds.has(key)}
+                        className={
+                          like.liked
+                            ? "discover-ranking-card__heart discover-ranking-card__heart--active"
+                            : "discover-ranking-card__heart"
+                        }
+                        onClick={() => toggleApiLike(post.id)}
+                        aria-label={like.liked ? "좋아요 취소" : "좋아요"}
+                      >
+                        <HeartIcon filled={like.liked} />
+                      </button>
+                    </div>
+
+                    <div className="discover-ranking-card__content">
+                      <button
+                        type="button"
+                        className="discover-ranking-card__creator"
+                        onClick={() =>
+                          navigate(`/users/${post.author.username}`)
+                        }
+                      >
+                        <div
+                          style={{
+                            width: "24px",
+                            height: "24px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Avatar author={post.author} />
+                        </div>
+
+                        <strong>@{post.author.username}</strong>
+                      </button>
+
+                      {Array.isArray(post.tags) && post.tags.length > 0 && (
+                        <p>
+                          {post.tags
+                            .slice(0, 3)
+                            .map((tag) => `#${tag}`)
+                            .join(" ")}
+                        </p>
+                      )}
+
+                      <div className="discover-ranking-card__engagement">
+                        <span>♡ {formatCount(like.likeCount)}</span>
+
+                        {commentCount > 0 && <span>댓글 {commentCount}</span>}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+          ) : rankingType === "creator" && rankingCreators.length > 0 ? (
             <section className="discover-creator-ranking-list">
               {rankingCreators.map((item, index) => (
                 <CreatorRankingCard
@@ -1251,15 +1708,50 @@ function DiscoverPage() {
                 />
               ))}
             </section>
+          ) : (
+            <section className="discover-empty">
+              <strong>이 조건의 랭킹이 아직 없어요.</strong>
+
+              <p>기간이나 스타일 조건을 바꿔보세요.</p>
+
+              {rankingStyle !== "전체" && (
+                <button type="button" onClick={() => setRankingStyle("전체")}>
+                  전체 스타일 보기
+                </button>
+              )}
+            </section>
           )}
         </main>
       )}
 
+      {/* =================================
+          FOLLOWING
+      ================================= */}
+
       {activeTab === "following" && (
         <main className="discover-following">
-          {filteredPosts.length > 0 ? (
-            filteredPosts.map((post) => {
-              const commentCount = getStylePostCommentCount(post);
+          {followingLoading ? (
+            <section className="discover-empty">
+              <strong>팔로잉 피드를 불러오고 있어요.</strong>
+
+              <p>팔로우한 크리에이터의 최신 스타일을 확인하는 중이에요.</p>
+            </section>
+          ) : followingError ? (
+            <section className="discover-empty">
+              <strong>팔로잉 피드를 불러오지 못했어요.</strong>
+
+              <p>서버와 로그인 상태를 확인해주세요.</p>
+            </section>
+          ) : filteredFollowingPosts.length > 0 ? (
+            filteredFollowingPosts.map((post) => {
+              const key = String(post.id);
+
+              const like = apiLikeState[key] ?? {
+                liked: false,
+                likeCount: 0,
+              };
+
+              const commentCount = apiCommentCounts[key] ?? 0;
 
               return (
                 <article key={post.id} className="discover-following-post">
@@ -1268,16 +1760,20 @@ function DiscoverPage() {
                       type="button"
                       onClick={() => navigate(`/users/${post.author.username}`)}
                     >
-                      <img src={post.author.avatar} alt="" />
+                      <div
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Avatar author={post.author} />
+                      </div>
 
                       <div>
                         <strong>@{post.author.username}</strong>
 
-                        <span>
-                          {post.location}
-                          {" · "}
-                          {post.timeAgo}
-                        </span>
+                        <span>{post.location || "위치 미등록"}</span>
                       </div>
                     </button>
                   </div>
@@ -1287,23 +1783,22 @@ function DiscoverPage() {
                     className="discover-following-post__photo"
                     onClick={() => navigate(`/styles/${post.id}`)}
                   >
-                    <img src={post.image} alt={post.title} />
+                    <GalleryImage post={post} />
                   </button>
 
                   <div className="discover-following-post__actions">
                     <button
                       type="button"
+                      disabled={apiLikePendingIds.has(key)}
                       className={
-                        likedIds.has(String(post.id))
+                        like.liked
                           ? "discover-following-post__like discover-following-post__like--active"
                           : "discover-following-post__like"
                       }
-                      onClick={() => toggleLike(post.id)}
-                      aria-label={
-                        likedIds.has(String(post.id)) ? "좋아요 취소" : "좋아요"
-                      }
+                      onClick={() => toggleApiLike(post.id)}
+                      aria-label={like.liked ? "좋아요 취소" : "좋아요"}
                     >
-                      <HeartIcon filled={likedIds.has(String(post.id))} />
+                      <HeartIcon filled={like.liked} />
                     </button>
 
                     <button
@@ -1317,9 +1812,7 @@ function DiscoverPage() {
 
                   <div className="discover-following-post__caption">
                     <div className="discover-following-post__engagement">
-                      <strong>
-                        좋아요 {formatCount(getStylePostLikeCount(post))}개
-                      </strong>
+                      <strong>좋아요 {formatCount(like.likeCount)}개</strong>
 
                       <button
                         type="button"
@@ -1329,22 +1822,27 @@ function DiscoverPage() {
                       </button>
                     </div>
 
-                    <p>{post.title}</p>
+                    {post.title && <p>{post.title}</p>}
 
-                    <div>
-                      {post.tags.map((tag) => (
-                        <span key={tag}>#{tag}</span>
-                      ))}
-                    </div>
+                    {Array.isArray(post.tags) && post.tags.length > 0 && (
+                      <div>
+                        {post.tags.map((tag) => (
+                          <span key={tag}>#{tag}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </article>
               );
             })
           ) : (
             <section className="discover-empty">
-              <strong>아직 팔로우한 크리에이터가 없어요.</strong>
+              <strong>팔로잉 피드가 비어 있어요.</strong>
 
-              <p>마음에 드는 스타일의 크리에이터를 팔로우해보세요.</p>
+              <p>
+                아직 아무도 팔로우하지 않았거나, 팔로우한 사용자가 아직 스타일을
+                올리지 않았어요.
+              </p>
 
               <button type="button" onClick={() => setActiveTab("style")}>
                 스타일 둘러보기
@@ -1439,6 +1937,7 @@ function DiscoverPage() {
                       onClick={() =>
                         setDraftFilters((current) => ({
                           ...current,
+
                           [activeFilterGroup]: option,
                         }))
                       }
