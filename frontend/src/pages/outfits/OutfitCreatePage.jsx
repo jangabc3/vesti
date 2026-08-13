@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { getClothes } from "@/api/clothingApi";
 
@@ -94,11 +94,19 @@ function CloseIcon() {
 function OutfitCreatePage() {
   const navigate = useNavigate();
 
+  const location = useLocation();
+
+  const initialSelectedClothingIds = Array.isArray(
+    location.state?.selectedClothingIds,
+  )
+    ? location.state.selectedClothingIds
+    : [];
+
   const [clothes, setClothes] = useState([]);
 
   const [wardrobeLoading, setWardrobeLoading] = useState(true);
 
-  const [name, setName] = useState("");
+  const [name, setName] = useState(location.state?.suggestedName ?? "");
 
   const [occasion, setOccasion] = useState("");
 
@@ -108,7 +116,9 @@ function OutfitCreatePage() {
 
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [selectedClothingIds, setSelectedClothingIds] = useState([]);
+  const [selectedClothingIds, setSelectedClothingIds] = useState(
+    initialSelectedClothingIds,
+  );
 
   const [submitting, setSubmitting] = useState(false);
 

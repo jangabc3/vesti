@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -26,6 +26,11 @@ import {
 import { getStylePostComments } from "@/api/stylePostCommentApi";
 
 import StylePostCommentsSheet from "@/components/community/StylePostCommentsSheet";
+
+import {
+  getCommerceProductRows,
+  getStyleCommerceItems,
+} from "@/mocks/styleCommerce";
 
 import "./StylePostDetailPage.css";
 import "./StylePostDetailActions.css";
@@ -125,6 +130,39 @@ function ShareIcon() {
   );
 }
 
+function ChevronDownIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m7 9 5 5 5-5" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m6 6 12 12" />
+      <path d="m18 6-12 12" />
+    </svg>
+  );
+}
+
 function EditIcon() {
   return (
     <svg
@@ -210,6 +248,14 @@ function formatCount(value) {
   return number;
 }
 
+function formatPrice(value) {
+  if (!value) {
+    return null;
+  }
+
+  return `${Number(value).toLocaleString("ko-KR")}원`;
+}
+
 function getInitials(user) {
   const source = user?.displayName || user?.username || "V";
 
@@ -277,6 +323,10 @@ function StylePostDetailPage() {
 
   const [commentsOpen, setCommentsOpen] = useState(false);
 
+  const [productsOpen, setProductsOpen] = useState(false);
+
+  const [productLikedIds, setProductLikedIds] = useState(new Set());
+
   const [actionsOpen, setActionsOpen] = useState(false);
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -288,6 +338,17 @@ function StylePostDetailPage() {
   const [creatorPosts, setCreatorPosts] = useState([]);
 
   const [otherPosts, setOtherPosts] = useState([]);
+
+  const commerceItems = useMemo(() => getStyleCommerceItems(post), [post]);
+
+  const commerceRows = useMemo(
+    () => getCommerceProductRows(commerceItems),
+    [commerceItems],
+  );
+
+  const hasSimilarProducts = commerceItems.some(
+    (item) => item.source === "similar",
+  );
 
   useEffect(() => {
     let ignore = false;
@@ -399,7 +460,8 @@ function StylePostDetailPage() {
     };
   }, [styleId]);
 
-  const modalOpen = commentsOpen || actionsOpen || deleteConfirmOpen;
+  const modalOpen =
+    productsOpen || commentsOpen || actionsOpen || deleteConfirmOpen;
 
   useEffect(() => {
     if (!modalOpen) {
@@ -537,6 +599,24 @@ function StylePostDetailPage() {
     }
   };
 
+  const toggleProductLike = (productId) => {
+    setProductLikedIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+
+      return next;
+    });
+  };
+
+  const openProduct = () => {
+    window.alert("상품 상세 또는 외부 쇼핑 링크는 다음 단계에서 연결할게요.");
+  };
+
   const handleEdit = () => {
     setActionsOpen(false);
 
@@ -645,6 +725,54 @@ function StylePostDetailPage() {
       <section className="style-post-photo">
         <StyleImage src={post.image} alt={post.title} />
       </section>
+
+      {commerceItems.length > 0 && (
+        <section className="style-post-products-preview">
+          <div className="style-post-products-preview__rail">
+            {commerceItems.slice(0, 3).map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className="style-post-product-preview-card"
+                onClick={() => setProductsOpen(true)}
+              >
+                <StyleImage
+                  src={item.product?.image}
+                  alt={item.product?.name}
+                />
+
+                <div>
+                  <span
+                    className={
+                      item.source === "tagged"
+                        ? "style-post-product-preview-card__source"
+                        : "style-post-product-preview-card__source style-post-product-preview-card__source--similar"
+                    }
+                  >
+                    {item.source === "tagged" ? "태그한 상품" : "비슷한 상품"}
+                  </span>
+
+                  <strong>{item.product?.brand}</strong>
+                  <p>{item.product?.name}</p>
+
+                  {item.product?.price && (
+                    <b>{formatPrice(item.product.price)}</b>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="style-post-products-preview__open"
+            onClick={() => setProductsOpen(true)}
+            aria-label="스타일 상품 모두 보기"
+          >
+            <ChevronDownIcon />
+          </button>
+        </section>
+      )}
 
       <section className="style-post-social">
         <div className="style-post-social__left">
@@ -794,6 +922,88 @@ function StylePostDetailPage() {
         onClose={() => setCommentsOpen(false)}
         onCountChange={setCommentCount}
       />
+
+      {productsOpen && (
+        <div
+          className="style-product-sheet-backdrop"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setProductsOpen(false);
+            }
+          }}
+        >
+          <section className="style-product-sheet">
+            <header className="style-product-sheet__header">
+              <div>
+                <h2>스타일 상품</h2>
+                <span>{commerceRows.length}개</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setProductsOpen(false)}
+                aria-label="닫기"
+              >
+                <CloseIcon />
+              </button>
+            </header>
+
+            {hasSimilarProducts && (
+              <div className="style-product-sheet__notice">
+                <strong>일부 상품은 비슷한 상품이에요.</strong>
+                <p>
+                  작성자가 정확한 상품을 태그하지 않은 아이템은 현재 사진의
+                  분위기와 카테고리를 기준으로 비슷한 상품을 보여줘요.
+                </p>
+              </div>
+            )}
+
+            <div className="style-product-sheet__list">
+              {commerceRows.map((product) => (
+                <article key={product.rowId} className="style-product-row">
+                  <button
+                    type="button"
+                    className="style-product-row__main"
+                    onClick={openProduct}
+                  >
+                    <StyleImage src={product.image} alt={product.name} />
+
+                    <div>
+                      <span
+                        className={
+                          product.source === "tagged"
+                            ? "style-product-row__source"
+                            : "style-product-row__source style-product-row__source--similar"
+                        }
+                      >
+                        {product.sourceLabel}
+                        {" · "}
+                        {product.category}
+                      </span>
+                      <strong>{product.brand}</strong>
+                      <p>{product.name}</p>
+                      {product.price && <b>{formatPrice(product.price)}</b>}
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      productLikedIds.has(product.rowId)
+                        ? "style-product-row__heart style-product-row__heart--active"
+                        : "style-product-row__heart"
+                    }
+                    onClick={() => toggleProductLike(product.rowId)}
+                    aria-label="상품 좋아요"
+                  >
+                    <HeartIcon filled={productLikedIds.has(product.rowId)} />
+                  </button>
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
 
       {actionsOpen && (
         <div

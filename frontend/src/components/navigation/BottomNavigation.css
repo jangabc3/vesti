@@ -1,67 +1,40 @@
 /* ========================================
-   VESTI 2.0
-   Main Bottom Navigation
+   VESTI 2.0 · BOTTOM NAVIGATION
 ======================================== */
 
 .bottom-nav {
   position: fixed;
   z-index: var(--z-navigation);
-
   left: 50%;
   bottom: 0;
 
   display: grid;
-
-  grid-template-columns:
-    repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 
   width: min(100%, 430px);
+  min-height: calc(70px + env(safe-area-inset-bottom));
 
-  min-height:
-    calc(
-      70px
-      + env(safe-area-inset-bottom)
-    );
+  padding: 7px 8px env(safe-area-inset-bottom);
 
-  padding:
-    7px
-    8px
-    env(safe-area-inset-bottom);
+  border-top: 1px solid #ecebe8;
 
-  border-top:
-    1px
-    solid
-    rgb(25 24 22 / 7%);
+  background: rgb(255 255 255 / 97%);
 
-  background:
-    rgb(255 255 255 / 94%);
+  box-shadow: 0 -8px 24px rgb(28 26 22 / 2.5%);
 
-  box-shadow:
-    0
-    -10px
-    30px
-    rgb(38 32 27 / 3%);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
 
-  backdrop-filter:
-    blur(24px);
-
-  -webkit-backdrop-filter:
-    blur(24px);
-
-  transform:
-    translateX(-50%);
+  transform: translateX(-50%);
 }
 
-
 /* ========================================
-   Item
+   ITEM
 ======================================== */
 
 .bottom-nav__item {
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
   justify-content: center;
 
@@ -70,85 +43,53 @@
 
   gap: 4px;
 
-  color: #a8a5a0;
+  color: #aaa7a2;
 
   text-decoration: none;
 
-  -webkit-tap-highlight-color:
-    transparent;
+  -webkit-tap-highlight-color: transparent;
 
   transition:
-    color 160ms ease,
-    transform 160ms ease;
+    color 150ms ease,
+    transform 150ms ease;
 }
-
 
 .bottom-nav__item--active {
-  color: #181714;
+  color: #171614;
 }
 
-
 /* ========================================
-   Icon Container
+   ICON
 ======================================== */
 
 .bottom-nav__icon-wrap {
-  position: relative;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
 
-  width: 36px;
-  height: 30px;
+  width: 30px;
+  height: 28px;
 
-  border-radius: 999px;
-
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    transform 160ms ease;
+  color: currentColor;
 }
-
-
-/* AI gets a slightly stronger identity */
-
-.bottom-nav__icon-wrap--ai {
-  width: 38px;
-}
-
-
-.bottom-nav__item--active
-.bottom-nav__icon-wrap--ai {
-  color: #ffffff;
-
-  background: #181714;
-}
-
-
-/* ========================================
-   Icon
-======================================== */
 
 .bottom-nav__icon {
   width: 22px;
   height: 22px;
 
+  overflow: visible;
+
   transition:
-    transform 180ms ease,
-    stroke-width 180ms ease;
+    transform 160ms ease,
+    stroke-width 160ms ease;
 }
 
-
-.bottom-nav__item--active
-.bottom-nav__icon {
-  stroke-width: 2;
+.bottom-nav__item--active .bottom-nav__icon {
+  stroke-width: 2.15;
 }
-
 
 /* ========================================
-   Label
+   LABEL
 ======================================== */
 
 .bottom-nav__label {
@@ -156,45 +97,16 @@
 
   font-size: 10px;
   font-weight: 500;
-
   line-height: 1.2;
-
   letter-spacing: -0.025em;
 }
 
-
-.bottom-nav__item--active
-.bottom-nav__label {
+.bottom-nav__item--active .bottom-nav__label {
   font-weight: 700;
 }
 
-
 /* ========================================
-   Active Detail
-======================================== */
-
-.bottom-nav__item--active:not(
-  :has(.bottom-nav__icon-wrap--ai)
-)
-.bottom-nav__icon-wrap::after {
-  position: absolute;
-
-  right: 4px;
-  bottom: -1px;
-  left: 4px;
-
-  height: 2px;
-
-  border-radius: 999px;
-
-  background: #181714;
-
-  content: '';
-}
-
-
-/* ========================================
-   Focus
+   INTERACTION
 ======================================== */
 
 .bottom-nav__item:focus,
@@ -202,47 +114,33 @@
   outline: none;
 }
 
+.bottom-nav__item:focus-visible .bottom-nav__icon-wrap {
+  border-radius: 8px;
 
-.bottom-nav__item:focus-visible
-.bottom-nav__icon-wrap {
-  outline:
-    2px
-    solid
-    #181714;
-
+  outline: 2px solid #181714;
   outline-offset: 3px;
 }
-
-
-/* ========================================
-   Touch
-======================================== */
 
 .bottom-nav__item:active {
   transform: scale(0.95);
 }
 
-
-/* ========================================
-   Pointer
-======================================== */
-
 @media (hover: hover) and (pointer: fine) {
   .bottom-nav__item:hover {
-    color: #181714;
+    color: #54514c;
   }
 
+  .bottom-nav__item--active:hover {
+    color: #171614;
+  }
 
-  .bottom-nav__item:hover
-  .bottom-nav__icon-wrap {
-    transform:
-      translateY(-1px);
+  .bottom-nav__item:hover .bottom-nav__icon {
+    transform: translateY(-1px);
   }
 }
 
-
 /* ========================================
-   Mobile
+   MOBILE
 ======================================== */
 
 @media (max-width: 430px) {
@@ -251,13 +149,16 @@
   }
 }
 
-
 @media (max-width: 359px) {
   .bottom-nav {
     padding-right: 4px;
     padding-left: 4px;
   }
 
+  .bottom-nav__icon {
+    width: 21px;
+    height: 21px;
+  }
 
   .bottom-nav__label {
     font-size: 9px;

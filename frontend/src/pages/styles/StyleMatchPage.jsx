@@ -1,32 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
-
 import { useNavigate, useParams } from "react-router-dom";
 
-import StylePostCommentsSheet from "@/components/community/StylePostCommentsSheet";
+import { getClothes } from "@/api/clothingApi";
+import { getStylePost } from "@/api/stylePostApi";
+import { getStyleCommerceItems } from "@/mocks/styleCommerce";
 
-import {
-  deleteLocalStylePost,
-  getStylePost,
-  getStylePostLikeCount,
-  isStylePostLiked,
-  isStylePostSaved,
-  stylePosts,
-  toggleStylePostLike,
-  toggleStylePostSave,
-} from "@/mocks/community";
+import "./StyleMatchPage.css";
 
-import {
-  clearLocalStylePostComments,
-  getStylePostCommentCount,
-} from "@/mocks/communityComments";
-
-import {
-  getCommerceProductRows,
-  getStyleCommerceItems,
-} from "@/mocks/styleCommerce";
-
-import "./StylePostDetailPage.css";
-import "./StylePostDetailActions.css";
+const categoryAliases = {
+  TOP: "상의",
+  BOTTOM: "하의",
+  OUTER: "아우터",
+  SHOES: "신발",
+  BAG: "가방",
+  ACCESSORY: "액세서리",
+  DRESS: "원피스",
+};
 
 function BackIcon() {
   return (
@@ -40,89 +29,6 @@ function BackIcon() {
       aria-hidden="true"
     >
       <path d="m15 18-6-6 6-6" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <circle cx="5" cy="12" r="1.4" />
-
-      <circle cx="12" cy="12" r="1.4" />
-
-      <circle cx="19" cy="12" r="1.4" />
-    </svg>
-  );
-}
-
-function HeartIcon({ filled = false }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20.8 4.7a5.3 5.3 0 0 0-7.5 0L12 6l-1.3-1.3a5.3 5.3 0 0 0-7.5 7.5L12 21l8.8-8.8a5.3 5.3 0 0 0 0-7.5Z" />
-    </svg>
-  );
-}
-
-function CommentIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8.8 8.8 0 0 1-3.3-.7L4 20l1.4-4A7.3 7.3 0 0 1 4 11.5 7.5 7.5 0 0 1 12 4a7.5 7.5 0 0 1 8 7.5Z" />
-    </svg>
-  );
-}
-
-function BookmarkIcon({ filled = false }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.8L6 21V4.5Z" />
-    </svg>
-  );
-}
-
-function ShareIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="18" cy="5" r="2.4" />
-
-      <circle cx="6" cy="12" r="2.4" />
-
-      <circle cx="18" cy="19" r="2.4" />
-
-      <path d="m8.2 10.8 7.5-4.3" />
-      <path d="m8.2 13.2 7.5 4.3" />
     </svg>
   );
 }
@@ -143,360 +49,154 @@ function ChevronRightIcon() {
   );
 }
 
-function ChevronDownIcon() {
+function CheckIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="m7 9 5 5 5-5" />
+      <path d="m5 12 4 4L19 7" />
     </svg>
   );
 }
 
-function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 6 12 12" />
-      <path d="m18 6-12 12" />
-    </svg>
-  );
+function normalizeCategory(value) {
+  return categoryAliases[value] ?? value ?? "기타";
 }
 
-function EditIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 20h9" />
+function ImageBox({ src, alt }) {
+  const [failed, setFailed] = useState(false);
 
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
-    </svg>
-  );
-}
-
-function TrashIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M4 7h16" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-      <path d="M6 7l1 14h10l1-14" />
-      <path d="M9 7V4h6v3" />
-    </svg>
-  );
-}
-
-function FlagIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M5 21V4" />
-      <path d="M5 5h11l-2 4 2 4H5" />
-    </svg>
-  );
-}
-
-function EyeOffIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m3 3 18 18" />
-
-      <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
-
-      <path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c5.5 0 9 5 9 8a9.8 9.8 0 0 1-2.1 3.8" />
-
-      <path d="M6.6 6.6C4.3 8.1 3 10.3 3 12c0 3 3.5 8 9 8a9.7 9.7 0 0 0 3.4-.6" />
-    </svg>
-  );
-}
-
-function formatCount(value) {
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
+  if (!src || failed) {
+    return <span>이미지 준비 중</span>;
   }
 
-  return value;
+  return <img src={src} alt={alt} onError={() => setFailed(true)} />;
 }
 
-function formatPrice(value) {
-  if (!value) {
-    return null;
-  }
+function buildMatches(referenceItems, clothes) {
+  const usedClothingIds = new Set();
 
-  return `${value.toLocaleString("ko-KR")}원`;
-}
+  return referenceItems.map((reference) => {
+    const category = normalizeCategory(reference.category);
+    const match = clothes.find((item) => {
+      const itemCategory = normalizeCategory(
+        item.categoryLabel || item.category,
+      );
 
-function StylePostDetailPage() {
-  const navigate = useNavigate();
+      return itemCategory === category && !usedClothingIds.has(String(item.id));
+    });
 
-  const { styleId } = useParams();
-
-  const post = getStylePost(styleId);
-
-  const [liked, setLiked] = useState(() => isStylePostLiked(styleId));
-
-  const [saved, setSaved] = useState(() => isStylePostSaved(styleId));
-
-  const [following, setFollowing] = useState(false);
-
-  const [productsOpen, setProductsOpen] = useState(false);
-
-  const [commentsOpen, setCommentsOpen] = useState(false);
-
-  const [commentCount, setCommentCount] = useState(() =>
-    getStylePostCommentCount(post ?? styleId),
-  );
-
-  const [actionsOpen, setActionsOpen] = useState(false);
-
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-
-  const [deleting, setDeleting] = useState(false);
-
-  const [productLikedIds, setProductLikedIds] = useState(new Set());
-
-  const commerceItems = useMemo(() => getStyleCommerceItems(post), [post]);
-
-  const commerceRows = useMemo(
-    () => getCommerceProductRows(commerceItems),
-    [commerceItems],
-  );
-
-  const hasSimilarProducts = commerceItems.some(
-    (item) => item.source === "similar",
-  );
-
-  const modalOpen =
-    productsOpen || commentsOpen || actionsOpen || deleteConfirmOpen;
-
-  useEffect(() => {
-    setLiked(isStylePostLiked(styleId));
-
-    setSaved(isStylePostSaved(styleId));
-
-    setCommentCount(getStylePostCommentCount(post ?? styleId));
-  }, [styleId, post]);
-
-  useEffect(() => {
-    if (!modalOpen) {
-      return undefined;
+    if (match) {
+      usedClothingIds.add(String(match.id));
     }
 
-    const previousOverflow = document.body.style.overflow;
+    return {
+      id: reference.id,
+      category,
+      reference: reference.product,
+      match: match ?? null,
+    };
+  });
+}
 
-    document.body.style.overflow = "hidden";
+function StyleMatchPage() {
+  const navigate = useNavigate();
+  const { styleId } = useParams();
+
+  const [post, setPost] = useState(null);
+  const [clothes, setClothes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadMatch() {
+      setLoading(true);
+      setLoadError(false);
+
+      try {
+        const [postData, clothesPage] = await Promise.all([
+          getStylePost(styleId),
+          getClothes({ page: 0, size: 100, sort: "createdAt,desc" }),
+        ]);
+
+        if (!ignore) {
+          setPost(postData);
+          setClothes(clothesPage.content ?? []);
+        }
+      } catch (error) {
+        console.error("내 옷장 스타일 비교에 실패했습니다.", error);
+
+        if (!ignore) {
+          setLoadError(true);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadMatch();
 
     return () => {
-      document.body.style.overflow = previousOverflow;
+      ignore = true;
     };
-  }, [modalOpen]);
+  }, [styleId]);
 
-  if (!post) {
+  const referenceItems = useMemo(
+    () => getStyleCommerceItems(post).slice(0, 5),
+    [post],
+  );
+  const matches = useMemo(
+    () => buildMatches(referenceItems, clothes),
+    [referenceItems, clothes],
+  );
+  const matchedItems = matches.filter((item) => item.match);
+  const missingItems = matches.filter((item) => !item.match);
+  const selectedClothingIds = matchedItems.map((item) => item.match.id);
+
+  if (loading) {
     return (
-      <div className="style-post-not-found">
-        <h1>게시물을 찾을 수 없어요.</h1>
+      <div className="style-match-not-found">
+        <h1>내 옷장을 비교하고 있어요.</h1>
+        <p>비슷하게 활용할 수 있는 아이템을 찾는 중이에요.</p>
+      </div>
+    );
+  }
 
-        <p>삭제되었거나 존재하지 않는 스타일이에요.</p>
-
-        <button type="button" onClick={() => navigate("/discover")}>
-          발견으로 돌아가기
+  if (loadError || !post) {
+    return (
+      <div className="style-match-not-found">
+        <h1>스타일을 비교하지 못했어요.</h1>
+        <p>게시물과 내 옷장을 다시 불러와주세요.</p>
+        <button type="button" onClick={() => navigate(-1)}>
+          돌아가기
         </button>
       </div>
     );
   }
 
-  const isMine = post.isMine === true;
-
-  const cleanTitle = post.title?.trim() ?? "";
-
-  const cleanCaption = post.caption?.trim() ?? "";
-
-  const shouldShowTitle =
-    Boolean(cleanTitle) &&
-    cleanTitle !== cleanCaption &&
-    cleanTitle !== "오늘의 스타일";
-
-  const creatorPosts = stylePosts
-    .filter(
-      (item) =>
-        item.author.username === post.author.username &&
-        String(item.id) !== String(post.id),
-    )
-    .slice(0, 6);
-
-  const otherPosts = stylePosts
-    .filter(
-      (item) =>
-        String(item.id) !== String(post.id) &&
-        item.author.username !== post.author.username,
-    )
-    .slice(0, 6);
-
-  const morePosts =
-    creatorPosts.length >= 3
-      ? creatorPosts
-      : [...creatorPosts, ...otherPosts].slice(0, 6);
-
-  const handleToggleLike = () => {
-    const result = toggleStylePostLike(post.id);
-
-    setLiked(result.liked);
-  };
-
-  const handleToggleSave = () => {
-    const nextSaved = toggleStylePostSave(post.id);
-
-    setSaved(nextSaved);
-  };
-
-  const openComments = () => {
-    setCommentsOpen(true);
-  };
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: post.title,
-
-          text: post.caption,
-
-          url: window.location.href,
-        });
-      } catch {
-        // 공유창을 닫은 경우
-      }
-
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-
-      window.alert("게시물 링크를 복사했어요.");
-    } catch {
-      window.alert("공유 기능은 추후 연결할게요.");
-    }
-  };
-
-  const toggleProductLike = (productId) => {
-    setProductLikedIds((current) => {
-      const next = new Set(current);
-
-      if (next.has(productId)) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
-
-      return next;
+  const openOutfitCreator = () => {
+    navigate("/outfits/new", {
+      state: {
+        selectedClothingIds,
+        suggestedName: `${post.title || "참고 스타일"} 코디`,
+        sourceStyleId: post.id,
+      },
     });
-  };
-
-  const openProduct = () => {
-    window.alert("상품 상세 또는 외부 쇼핑 링크는 다음 단계에서 연결할게요.");
-  };
-
-  const handleEdit = () => {
-    setActionsOpen(false);
-
-    navigate(`/posts/${post.id}/edit`);
-  };
-
-  const openDeleteConfirm = () => {
-    setActionsOpen(false);
-
-    setDeleteConfirmOpen(true);
-  };
-
-  const handleDelete = () => {
-    if (deleting) {
-      return;
-    }
-
-    setDeleting(true);
-
-    const deleted = deleteLocalStylePost(post.id);
-
-    if (!deleted) {
-      setDeleting(false);
-
-      setDeleteConfirmOpen(false);
-
-      window.alert("게시물을 삭제하지 못했어요.");
-
-      return;
-    }
-
-    clearLocalStylePostComments(post.id);
-
-    navigate("/discover", {
-      replace: true,
-    });
-  };
-
-  const handleReport = () => {
-    setActionsOpen(false);
-
-    window.alert("신고 기능은 백엔드 연결 단계에서 구현할게요.");
-  };
-
-  const handleNotInterested = () => {
-    setActionsOpen(false);
-
-    window.alert(
-      "이 스타일을 추천에서 줄이는 기능은 추천 시스템 단계에서 연결할게요.",
-    );
   };
 
   return (
-    <div className="style-post-page">
-      {/* Header */}
-
-      <header className="style-post-header">
+    <div className="style-match-page-v2">
+      <header className="style-match-v2-header">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -504,469 +204,196 @@ function StylePostDetailPage() {
         >
           <BackIcon />
         </button>
-
-        <strong>스타일</strong>
-
-        <button
-          type="button"
-          onClick={() => setActionsOpen(true)}
-          aria-label="게시물 메뉴"
-        >
-          <MoreIcon />
-        </button>
+        <strong>내 옷으로 입기</strong>
+        <span />
       </header>
 
-      {/* Creator */}
-
-      <section className="style-post-creator">
+      <section className="style-match-reference-v2">
+        <span className="style-match-reference-v2__label">REFERENCE LOOK</span>
         <button
           type="button"
-          className="style-post-creator__profile"
-          onClick={() => navigate(`/users/${post.author.username}`)}
+          className="style-match-reference-v2__content"
+          onClick={() => navigate(`/styles/${post.id}`)}
         >
-          <img
-            src={post.author.avatar}
-            alt={`${post.author.displayName} 프로필`}
-          />
-
+          <div className="style-match-reference-v2__image">
+            <ImageBox src={post.image} alt={post.title} />
+          </div>
           <div>
-            <strong>{post.author.displayName}</strong>
-
-            <span>
-              @{post.author.username}
-              {" · "}
-              {post.timeAgo}
-            </span>
+            <strong>{post.title || "VESTI 커뮤니티 스타일"}</strong>
+            <p>
+              @{post.author?.username || "vesti"} · {post.location}
+            </p>
           </div>
-        </button>
-
-        {!isMine && (
-          <button
-            type="button"
-            className={
-              following
-                ? "style-post-follow style-post-follow--active"
-                : "style-post-follow"
-            }
-            onClick={() => setFollowing((current) => !current)}
-          >
-            {following ? "팔로잉" : "팔로우"}
-          </button>
-        )}
-      </section>
-
-      {/* Main Photo */}
-
-      <section className="style-post-photo">
-        <img src={post.image} alt={post.title} />
-      </section>
-
-      {/* Product Preview */}
-
-      {commerceItems.length > 0 && (
-        <section className="style-post-products-preview">
-          <div className="style-post-products-preview__rail">
-            {commerceItems.slice(0, 3).map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className="style-post-product-preview-card"
-                onClick={openProduct}
-              >
-                <img src={item.product.image} alt={item.product.name} />
-
-                <div>
-                  <span
-                    className={
-                      item.source === "tagged"
-                        ? "style-post-product-preview-card__source"
-                        : "style-post-product-preview-card__source style-post-product-preview-card__source--similar"
-                    }
-                  >
-                    {item.source === "tagged" ? "태그한 상품" : "비슷한 상품"}
-                  </span>
-
-                  <strong>{item.product.brand}</strong>
-
-                  <p>{item.product.name}</p>
-
-                  {item.product.price && (
-                    <b>{formatPrice(item.product.price)}</b>
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="style-post-products-preview__open"
-            onClick={() => setProductsOpen(true)}
-            aria-label="스타일 상품 모두 보기"
-          >
-            <ChevronDownIcon />
-          </button>
-        </section>
-      )}
-
-      {/* Social */}
-
-      <section className="style-post-social">
-        <div className="style-post-social__left">
-          <button
-            type="button"
-            className={
-              liked
-                ? "style-post-social__button style-post-social__button--liked"
-                : "style-post-social__button"
-            }
-            onClick={handleToggleLike}
-            aria-label={liked ? "좋아요 취소" : "좋아요"}
-          >
-            <HeartIcon filled={liked} />
-          </button>
-
-          <button
-            type="button"
-            className="style-post-social__button"
-            onClick={openComments}
-            aria-label="댓글"
-          >
-            <CommentIcon />
-          </button>
-
-          <button
-            type="button"
-            className="style-post-social__button"
-            onClick={handleShare}
-            aria-label="공유"
-          >
-            <ShareIcon />
-          </button>
-        </div>
-
-        <button
-          type="button"
-          className={
-            saved
-              ? "style-post-social__button style-post-social__button--saved"
-              : "style-post-social__button"
-          }
-          onClick={handleToggleSave}
-          aria-label={saved ? "저장 취소" : "저장"}
-        >
-          <BookmarkIcon filled={saved} />
-        </button>
-      </section>
-
-      {/* Content */}
-
-      <section className="style-post-content">
-        <strong className="style-post-content__likes">
-          좋아요 {formatCount(getStylePostLikeCount(post))}
-        </strong>
-
-        {shouldShowTitle && <h1>{post.title}</h1>}
-
-        {cleanCaption && (
-          <p className="style-post-content__caption">{post.caption}</p>
-        )}
-
-        <div className="style-post-tags">
-          {post.tags.map((tag) => (
-            <button
-              key={tag}
-              type="button"
-              onClick={() => navigate("/discover")}
-            >
-              #{tag}
-            </button>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          className="style-post-comment-preview"
-          onClick={openComments}
-        >
-          <span>댓글 {commentCount}개 모두 보기</span>
-
           <ChevronRightIcon />
         </button>
-
-        <button
-          type="button"
-          className="style-post-comment-input"
-          onClick={openComments}
-        >
-          <div className="style-post-comment-input__avatar">V</div>
-
-          <span>댓글을 남겨보세요.</span>
-        </button>
       </section>
 
-      {/* Wardrobe */}
+      <section className="style-match-intro-v2">
+        <h1>
+          이 스타일을 내 옷으로
+          <br />
+          얼마나 완성할 수 있을까요?
+        </h1>
+        <p>
+          카테고리를 기준으로 내 옷장에서 활용할 수 있는 옷을 찾았어요. 현재{" "}
+          <strong>
+            {matchedItems.length}/{matches.length}개
+          </strong>
+          를 바로 활용할 수 있어요.
+        </p>
+      </section>
 
-      <section className="style-post-wardrobe">
-        <div>
-          <h2>이 스타일을 내 옷으로 입어볼까요?</h2>
-
-          <p>
-            내 옷장에 있는 아이템을 활용해 비슷한 조합을 만들어볼 수 있어요.
-          </p>
+      <section className="style-match-wardrobe">
+        <div className="style-match-section-heading">
+          <div>
+            <h2>내 옷장과 비교</h2>
+            <p>비슷한 역할의 옷을 나란히 확인해보세요.</p>
+          </div>
+          <span>
+            {matchedItems.length}/{matches.length} MATCH
+          </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => navigate(`/styles/${post.id}/match`)}
-        >
-          내 옷으로 입어보기
-        </button>
+        {matches.map((item) => (
+          <section key={item.id} className="style-match-piece">
+            <div className="style-match-piece__heading">
+              <h2>{item.category}</h2>
+              {item.match && (
+                <span>
+                  <CheckIcon /> 내 옷으로 대체 가능
+                </span>
+              )}
+            </div>
+
+            {item.match ? (
+              <div className="style-match-piece__comparison">
+                <article className="style-match-piece-card">
+                  <span>참고 스타일</span>
+                  <div className="style-match-piece-card__image">
+                    <ImageBox
+                      src={item.reference?.image}
+                      alt={item.reference?.name}
+                    />
+                  </div>
+                  <strong>{item.reference?.name}</strong>
+                  <p>{item.reference?.brand || item.category}</p>
+                </article>
+
+                <article className="style-match-piece-card style-match-piece-card--mine">
+                  <span>내 옷장</span>
+                  <div className="style-match-piece-card__image">
+                    <ImageBox src={item.match.image} alt={item.match.name} />
+                  </div>
+                  <strong>{item.match.name}</strong>
+                  <p>
+                    {[item.match.color, item.match.season]
+                      .filter(Boolean)
+                      .join(" · ") || "내 옷"}
+                  </p>
+                </article>
+              </div>
+            ) : (
+              <div className="style-match-missing">
+                <div className="style-match-missing__reference">
+                  <span>내 옷장에 없는 아이템</span>
+                  <div>
+                    <ImageBox
+                      src={item.reference?.image}
+                      alt={item.reference?.name}
+                    />
+                    <div>
+                      <strong>{item.reference?.name}</strong>
+                      <p>{item.reference?.brand || item.category}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="style-match-missing__message">
+                  <strong>
+                    {item.category} 아이템은 아직 옷장에서 찾지 못했어요.
+                  </strong>
+                  <p>
+                    지금 가진 옷으로 먼저 코디를 만들고, 필요한 아이템만 따로
+                    확인해보세요.
+                  </p>
+                  <button type="button" onClick={() => navigate("/closet")}>
+                    옷장에서 다시 찾아보기
+                    <ChevronRightIcon />
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        ))}
       </section>
 
-      {/* More Styles */}
-
-      {morePosts.length > 0 && (
-        <section className="style-post-more">
-          <div className="style-post-section-title">
-            <h2>
-              {creatorPosts.length > 0
-                ? `${post.author.displayName}의 다른 스타일`
-                : "다른 스타일"}
-            </h2>
-
-            {creatorPosts.length > 0 && (
-              <button
-                type="button"
-                onClick={() => navigate(`/users/${post.author.username}`)}
-              >
-                프로필 보기
-              </button>
-            )}
+      {missingItems.length > 0 && (
+        <section className="style-match-suggested">
+          <div className="style-match-section-heading">
+            <div>
+              <h2>있으면 더 좋은 아이템</h2>
+              <p>현재 부족한 카테고리만 모았어요.</p>
+            </div>
+            <span>{missingItems.length} ITEMS</span>
           </div>
 
-          <div className="style-post-more__grid">
-            {morePosts.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(`/styles/${item.id}`)}
+          <div className="style-match-suggested__list">
+            {missingItems.map((item) => (
+              <article
+                key={`suggested-${item.id}`}
+                className="style-match-suggested-piece"
               >
-                <img src={item.image} alt={item.title} />
-              </button>
+                <div className="style-match-suggested-piece__image">
+                  <ImageBox
+                    src={item.reference?.image}
+                    alt={item.reference?.name}
+                  />
+                </div>
+                <div className="style-match-suggested-piece__info">
+                  <span>{item.category} · 비슷한 상품</span>
+                  <strong>{item.reference?.name}</strong>
+                  <p>{item.reference?.brand}</p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.alert("상품 연결은 다음 단계에서 구현할게요.")
+                    }
+                  >
+                    비슷한 상품 보기
+                    <ChevronRightIcon />
+                  </button>
+                </div>
+              </article>
             ))}
           </div>
         </section>
       )}
 
-      {/* Product Bottom Sheet */}
+      <section className="style-match-guide">
+        <h2>완전히 똑같지 않아도 괜찮아요.</h2>
+        <p>
+          VESTI는 같은 상품을 사는 것보다, 이미 가진 옷으로 분위기와 조합을
+          재해석하는 방법을 먼저 제안해요.
+        </p>
+      </section>
 
-      {productsOpen && (
-        <div
-          className="style-product-sheet-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              setProductsOpen(false);
-            }
-          }}
-        >
-          <section className="style-product-sheet">
-            <header className="style-product-sheet__header">
-              <div>
-                <h2>스타일 상품</h2>
-
-                <span>{commerceRows.length}개</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setProductsOpen(false)}
-                aria-label="닫기"
-              >
-                <CloseIcon />
-              </button>
-            </header>
-
-            {hasSimilarProducts && (
-              <div className="style-product-sheet__notice">
-                <strong>일부 상품은 비슷한 상품이에요.</strong>
-
-                <p>
-                  작성자가 상품 정보를 태그하지 않은 아이템은 사진과 스타일을
-                  기준으로 비슷한 상품을 보여줘요.
-                </p>
-              </div>
-            )}
-
-            <div className="style-product-sheet__list">
-              {commerceRows.map((product) => (
-                <article key={product.rowId} className="style-product-row">
-                  <button
-                    type="button"
-                    className="style-product-row__main"
-                    onClick={openProduct}
-                  >
-                    <img src={product.image} alt={product.name} />
-
-                    <div>
-                      <span
-                        className={
-                          product.source === "tagged"
-                            ? "style-product-row__source"
-                            : "style-product-row__source style-product-row__source--similar"
-                        }
-                      >
-                        {product.sourceLabel}
-                        {" · "}
-                        {product.category}
-                      </span>
-
-                      <strong>{product.brand}</strong>
-
-                      <p>{product.name}</p>
-
-                      {product.price && <b>{formatPrice(product.price)}</b>}
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    className={
-                      productLikedIds.has(product.rowId)
-                        ? "style-product-row__heart style-product-row__heart--active"
-                        : "style-product-row__heart"
-                    }
-                    onClick={() => toggleProductLike(product.rowId)}
-                    aria-label="상품 좋아요"
-                  >
-                    <HeartIcon filled={productLikedIds.has(product.rowId)} />
-                  </button>
-                </article>
-              ))}
-            </div>
-          </section>
+      <footer className="style-match-bottom">
+        <div>
+          <strong>
+            {matchedItems.length}/{matches.length}
+          </strong>
+          <span>내 옷장 매치</span>
         </div>
-      )}
-
-      {/* Post Actions */}
-
-      {actionsOpen && (
-        <div
-          className="style-post-actions-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
-              setActionsOpen(false);
-            }
-          }}
+        <button
+          type="button"
+          disabled={selectedClothingIds.length === 0}
+          onClick={openOutfitCreator}
         >
-          <section className="style-post-actions-sheet">
-            <div className="style-post-actions-sheet__handle" />
-
-            {isMine ? (
-              <>
-                <button
-                  type="button"
-                  className="style-post-actions-sheet__item"
-                  onClick={handleEdit}
-                >
-                  <EditIcon />
-
-                  <span>게시물 수정</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="style-post-actions-sheet__item style-post-actions-sheet__item--danger"
-                  onClick={openDeleteConfirm}
-                >
-                  <TrashIcon />
-
-                  <span>게시물 삭제</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  className="style-post-actions-sheet__item"
-                  onClick={handleNotInterested}
-                >
-                  <EyeOffIcon />
-
-                  <span>관심 없음</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="style-post-actions-sheet__item style-post-actions-sheet__item--danger"
-                  onClick={handleReport}
-                >
-                  <FlagIcon />
-
-                  <span>신고하기</span>
-                </button>
-              </>
-            )}
-
-            <button
-              type="button"
-              className="style-post-actions-sheet__cancel"
-              onClick={() => setActionsOpen(false)}
-            >
-              취소
-            </button>
-          </section>
-        </div>
-      )}
-
-      {/* Delete Confirmation */}
-
-      {deleteConfirmOpen && (
-        <div
-          className="style-post-delete-backdrop"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget && !deleting) {
-              setDeleteConfirmOpen(false);
-            }
-          }}
-        >
-          <section className="style-post-delete-dialog">
-            <h2>게시물을 삭제할까요?</h2>
-
-            <p>삭제한 게시물은 다시 복구할 수 없어요.</p>
-
-            <div>
-              <button
-                type="button"
-                disabled={deleting}
-                onClick={() => setDeleteConfirmOpen(false)}
-              >
-                취소
-              </button>
-
-              <button
-                type="button"
-                className="style-post-delete-dialog__delete"
-                disabled={deleting}
-                onClick={handleDelete}
-              >
-                {deleting ? "삭제 중" : "삭제"}
-              </button>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {/* Comments */}
-
-      <StylePostCommentsSheet
-        post={post}
-        open={commentsOpen}
-        onClose={() => setCommentsOpen(false)}
-        onCommentCountChange={setCommentCount}
-      />
+          이 조합으로 코디 만들기
+        </button>
+      </footer>
     </div>
   );
 }
 
-export default StylePostDetailPage;
+export default StyleMatchPage;

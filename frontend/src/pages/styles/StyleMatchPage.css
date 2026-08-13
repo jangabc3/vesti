@@ -141,6 +141,22 @@
   object-fit: cover;
 }
 
+.style-match-reference-v2__image > span,
+.style-match-piece-card__image > span,
+.style-match-missing__reference > div > span,
+.style-match-suggested-piece__image > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  color: #a09b95;
+  background: #f1f0ee;
+  font-size: 8px;
+  text-align: center;
+}
+
 .style-match-reference-v2__content > div:nth-child(2) {
   min-width: 0;
 }
@@ -776,6 +792,11 @@
 
   font-size: 10px;
   font-weight: 700;
+}
+
+.style-match-bottom > button:disabled {
+  cursor: not-allowed;
+  background: #cac7c2;
 }
 
 /* ========================================
